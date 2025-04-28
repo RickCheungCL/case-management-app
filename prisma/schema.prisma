@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Case {
+  id             String   @id @default(cuid())
+  customerName   String
+  projectDetails String
+  uploadToken    String   @default(uuid())
+  status         String   @default("New")
+  photos         Photo[]
+  documents      Document[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+model Photo {
+  id          String   @id @default(cuid())
+  url         String
+  caseId      String
+  case        Case     @relation(fields: [caseId], references: [id])
+  uploadedViaLink Boolean @default(false)
+  comment     String?  // <-- New: comment under the photo
+  customName  String?  // <-- New: editable photo name
+  createdAt   DateTime @default(now())
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  url         String
+  fileName    String
+  customName  String?  // <-- New: editable document name
+  caseId      String
+  case        Case     @relation(fields: [caseId], references: [id])
+  uploadedViaLink Boolean @default(false)
+  createdAt   DateTime @default(now())
+}
+
