@@ -13,7 +13,7 @@ interface UploadItem {
 export default function CustomerUploadPage() {
   const { caseId } = useParams();
   const [uploads, setUploads] = useState<UploadItem[]>([]);
-
+  const [isUploading, setIsUploading] = useState(false);
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: 'photo' | 'document') => {
     const files = Array.from(e.target.files || []);
     const newUploads = files.map(file => ({ file, type, commentOrName: '' }));
@@ -27,18 +27,20 @@ export default function CustomerUploadPage() {
   };
 
   const handleSubmit = async () => {
+    if (isUploading) return;
     if (uploads.length === 0) {
       toast.error('No files to upload');
       return;
     }
 
     try {
+      setIsUploading(true);
       await Promise.all(
         uploads.map(async (item) => {
           const formData = new FormData();
           formData.append('file', item.file);
           formData.append('caseId', caseId as string);
-          formData.append('uploadedViaLink', 'true');
+          formData.append('uploadedViaLink', 'false');
 
           if (item.type === 'photo') {
             formData.append('comment', item.commentOrName);
@@ -64,6 +66,8 @@ export default function CustomerUploadPage() {
     } catch (error: any) {
       console.error(error);
       toast.error(error.message || 'Upload failed');
+    } finally{
+        setIsUploading(false);
     }
   };
 

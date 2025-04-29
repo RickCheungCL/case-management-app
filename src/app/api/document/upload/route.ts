@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   const file = formData.get('file') as File;
   const customName = formData.get('customName') as string || '';
   const caseId = formData.get('caseId') as string;
-  const uploadedViaLink = formData.get('uploadedViaLink') === 'true';
+  const uploadedViaLink = formData.get('uploadedViaLink') === 'false';
 
   if (!file || !caseId) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 });

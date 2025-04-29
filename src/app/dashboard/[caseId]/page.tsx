@@ -57,6 +57,9 @@ export default function CaseDetailsPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [activeTab, setActiveTab] = useState<'details' | 'viewDocs' | 'uploadDocs' | 'viewPhotos' | 'uploadPhotos' | 'contactInfo' | 'lightingDetails'>('details');
   const [isLinkExpanded, setIsLinkExpanded] = useState(false);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+  const [documentFiles, setDocumentFiles] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Document and photo state
   const [editedDocNames, setEditedDocNames] = useState<Record<string, string>>({});
@@ -130,29 +133,84 @@ export default function CaseDetailsPage() {
     fetchCase();
   }, [caseId]);
 
-  const handleUpload = async (uploadType: 'photo' | 'document') => {
-    if (!files.length) {
-      toast.error('Please select files first!');
-      return;
-    }
+  //const handleUpload = async (uploadType: 'photo' | 'document') => {
+    //
+    //if (!files.length) {
+    //  toast.error('Please select files first!');
+    //  return;
+    //}
 
-    const formData = new FormData();
-    files.forEach((file) => formData.append('files', file));
-    formData.append('caseId', caseId as string);
+    //const formData = new FormData();
+    //files.forEach((file) => formData.append('files', file));
+    //formData.append('caseId', caseId as string);
 
-    const res = await fetch(`/api/${uploadType}/upload`, {
-      method: 'POST',
-      body: formData,
-    });
+    //const res = await fetch(`/api/${uploadType}/upload`, {
+    //  method: 'POST',
+    //  body: formData,
+    //});
 
-    if (res.ok) {
-      toast.success(`${uploadType === 'photo' ? 'Photos' : 'Documents'} uploaded successfully!`);
-      setFiles([]);
-      fetchCase();
-    } else {
-      toast.error('Upload failed!');
-    }
-  };
+    const handleUpload = async (uploadType: 'photo' | 'document') => {
+        if (isUploading) return;
+        const selectedFiles = uploadType === 'photo' ? photoFiles : documentFiles;
+        
+        if (!selectedFiles.length) {
+          toast.error('Please select files first!');
+          return;
+        }
+      
+        try {
+          setIsUploading(true); // Set uploading state at the beginning
+          
+          await Promise.all(
+            selectedFiles.map(async (file) => {
+              const formData = new FormData();
+              formData.append('file', file);
+              formData.append('caseId', caseId as string);
+              formData.append('uploadedViaLink', 'true');
+      
+              if (uploadType === 'photo') {
+                formData.append('comment', ''); // Optional for now
+              } else {
+                formData.append('customName', file.name);
+              }
+      
+              const res = await fetch(`/api/${uploadType}/upload`, {
+                method: 'POST',
+                body: formData,
+              });
+      
+              if (!res.ok) {
+                throw new Error(`Failed to upload ${file.name}`);
+              }
+            })
+          );
+      
+          toast.success(`${uploadType === 'photo' ? 'Photos' : 'Documents'} uploaded successfully!`);
+          
+          // Clear files based on type (removed redundant code)
+          if (uploadType === 'photo') {
+            setPhotoFiles([]);
+          } else {
+            setDocumentFiles([]);
+          }
+      
+          fetchCase();  // Refresh
+        } catch (err: any) {
+          console.error(err);
+          toast.error(err.message || 'Upload failed');
+        } finally {
+          setIsUploading(false);
+        }
+      };
+      
+    //if (res.ok) {
+    //  toast.success(`${uploadType === 'photo' ? 'Photos' : 'Documents'} uploaded successfully!`);
+    //  setFiles([]);
+    //  fetchCase();
+    //} else {
+    //  toast.error('Upload failed!');
+    //}
+  //}}};
   
   // Function to update contact information
   const updateContactInfo = async () => {
@@ -611,7 +669,8 @@ export default function CaseDetailsPage() {
                   className="hidden"
                   multiple
                   accept="application/pdf"
-                  onChange={(e) => setFiles(Array.from(e.target.files || []))}
+                  onChange={(e) => setDocumentFiles(Array.from(e.target.files || []))}
+                    //setFiles(Array.from(e.target.files || []))}
                 />
                 <label
                   htmlFor="file-upload"
@@ -621,6 +680,24 @@ export default function CaseDetailsPage() {
                 </label>
                 <p className="mt-2 text-xs text-gray-500">PDF files only</p>
               </div>
+
+              {documentFiles.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                        <h4 className="text-sm font-semibold text-gray-600">Files Ready to Upload:</h4>
+                            {documentFiles.map((file, idx) => (
+                            <div key={idx} className="flex items-center justify-between border border-gray-200 rounded p-2 bg-gray-50">
+                                <span className="text-sm truncate">{file.name}</span>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+
+
+
+
+
+
               <button 
                 onClick={() => handleUpload('document')}
                 className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-md font-medium transition"
@@ -645,7 +722,7 @@ export default function CaseDetailsPage() {
                   className="hidden"
                   multiple
                   accept="image/*"
-                  onChange={(e) => setFiles(Array.from(e.target.files || []))}
+                  onChange={(e) => setPhotoFiles(Array.from(e.target.files || []))}//setFiles(Array.from(e.target.files || []))}
                 />
                 <label
                   htmlFor="photo-upload"
@@ -655,6 +732,17 @@ export default function CaseDetailsPage() {
                 </label>
                 <p className="mt-2 text-xs text-gray-500">JPG, PNG, GIF accepted</p>
               </div>
+
+              {photoFiles.length > 0 && (
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {photoFiles.map((file, index) => (
+                        <div key={index} className="border p-2 rounded bg-gray-50">
+                            <img src={URL.createObjectURL(file)} alt="Preview" className="w-full h-32 object-cover rounded" />
+                            <p className="text-sm mt-2 truncate">{file.name}</p>
+                        </div>
+                    ))}
+                </div>
+                )}
               <button 
                 onClick={() => handleUpload('photo')}
                 className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-md font-medium transition"
