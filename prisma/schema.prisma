@@ -14,15 +14,34 @@ datasource db {
 }
 
 model Case {
-  id             String   @id @default(cuid())
-  customerName   String
-  projectDetails String
-  uploadToken    String   @default(uuid())
-  status         String   @default("New")
-  photos         Photo[]
-  documents      Document[]
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                      String   @id @default(cuid())
+  customerName            String
+  projectDetails          String
+  uploadToken             String   @default(uuid())
+  status                  String   @default("New")
+  photos                  Photo[]
+  documents               Document[]
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  
+  // New School Info Fields
+  schoolName              String
+  contactPerson           String
+  emailAddress            String
+  phoneNumber             String
+  schoolAddress           String
+  
+  num2FtLinearHighBay     Int       @default(0)
+  num150WUFOHighBay       Int       @default(0)
+  num240WUFOHighBay       Int       @default(0)
+  num2x2LEDPanel          Int       @default(0)
+  num2x4LEDPanel          Int       @default(0)
+  num1x4LEDPanel          Int       @default(0)
+  num4FtStripLight        Int       @default(0)
+  
+  lightingPurpose         String
+  facilitiesUsedIn        String
+  installationService     String    // Yes / No / Not Sure
 }
 model Photo {
   id          String   @id @default(cuid())

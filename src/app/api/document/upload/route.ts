@@ -11,6 +11,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Helper to turn Buffer into Stream
 const bufferToStream = (buffer: Buffer) => {
   const readable = new Readable();
   readable.push(buffer);
@@ -20,51 +21,49 @@ const bufferToStream = (buffer: Buffer) => {
 
 export async function POST(request: Request) {
   const formData = await request.formData();
+  const file = formData.get('file') as File;
+  const customName = formData.get('customName') as string || '';
   const caseId = formData.get('caseId') as string;
-  const files = formData.getAll('files') as File[]; // Get all selected files
+  const uploadedViaLink = formData.get('uploadedViaLink') === 'true';
 
-  if (!files.length || !caseId) {
-    return NextResponse.json({ error: 'Missing files or caseId' }, { status: 400 });
+  if (!file || !caseId) {
+    return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
   }
 
   try {
-    const uploadedDocuments = await Promise.all(
-      files.map(async (file) => {
-        const arrayBuffer = await file.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
-        const uploadResult = await new Promise<cloudinary.UploadApiResponse>((resolve, reject) => {
-          const uploadStream = cloudinary.uploader.upload_stream(
-            {
-              folder: 'case_documents',
-              resource_type: 'raw',
-            },
-            (error, result) => {
-              if (error || !result) {
-                reject(error || new Error('Document upload failed'));
-              } else {
-                resolve(result);
-              }
-            }
-          );
+    const uploadResult = await new Promise<{ secure_url: string }>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'case_documents', // 📂 Store documents in a separate folder
+          resource_type: 'raw',      // 📄 Important: Allow uploading non-image files (PDF, DOCX)
+        },
+        (error, result) => {
+          if (error || !result) {
+            return reject(error);
+          }
+          resolve(result);
+        }
+      );
+      bufferToStream(buffer).pipe(uploadStream);
+    });
 
-          bufferToStream(buffer).pipe(uploadStream);
-        });
+    // Save to database after upload finishes
+    await prisma.document.create({
+      data: {
+        caseId,
+        url: uploadResult.secure_url,
+        fileName: file.name, // the original filename (e.g., "quotation.pdf")
+        customName,
+        uploadedViaLink,
+      },
+    });
 
-        // After successful upload, save to DB
-        return prisma.document.create({
-          data: {
-            caseId,
-            url: uploadResult.secure_url,
-            fileName: file.name,
-          },
-        });
-      })
-    );
-
-    return NextResponse.json({ message: 'Documents uploaded successfully', count: uploadedDocuments.length });
+    return NextResponse.json({ message: 'Document uploaded successfully!' });
   } catch (error) {
-    console.error('Bulk document upload error:', error);
-    return NextResponse.json({ error: 'Document bulk upload failed' }, { status: 500 });
+    console.error('Upload error:', error);
+    return NextResponse.json({ error: 'Document upload failed' }, { status: 500 });
   }
 }
