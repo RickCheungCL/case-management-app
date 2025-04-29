@@ -42,7 +42,7 @@ export default function CustomerUploadPage() {
 
           if (item.type === 'photo') {
             formData.append('comment', item.commentOrName);
-          } else if (item.type === 'document') {
+          } else {
             formData.append('customName', item.commentOrName);
           }
 
@@ -68,75 +68,101 @@ export default function CustomerUploadPage() {
   };
 
   return (
-    <div className="p-8 space-y-6">
-      <h1 className="text-2xl font-bold">Upload Your Files</h1>
-
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Upload Photos</h2>
-        <input type="file" multiple accept="image/*" onChange={(e) => handleFileSelect(e, 'photo')} className="w-full" />
-      </div>
-
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Upload Documents</h2>
-        <input type="file" multiple accept="application/pdf" onChange={(e) => handleFileSelect(e, 'document')} className="w-full" />
-      </div>
-
-      {uploads.length > 0 && (
-        <div className="space-y-6 mt-6">
-          {uploads.map((item, idx) => (
-            <div key={idx} className="border p-4 rounded relative">
-              <button
-                onClick={() => handleDelete(idx)}
-                className="absolute top-2 right-2 text-red-600 hover:text-red-800 bg-white rounded-full p-1 shadow"
-              >
-                🗑️
-              </button>
-
-              {item.type === 'photo' ? (
-                <>
-                  <img
-                    src={URL.createObjectURL(item.file)}
-                    alt="Preview"
-                    className="w-32 h-32 object-cover mb-2 rounded"
-                  />
-                  <textarea
-                    placeholder="Comment about this photo..."
-                    value={item.commentOrName}
-                    onChange={(e) => {
-                      const updated = [...uploads];
-                      updated[idx].commentOrName = e.target.value;
-                      setUploads(updated);
-                    }}
-                    className="w-full border p-2 text-sm"
-                  />
-                </>
-              ) : (
-                <>
-                  <p className="font-semibold">{item.file.name}</p>
-                  <input
-                    type="text"
-                    placeholder="Enter custom document name..."
-                    value={item.commentOrName}
-                    onChange={(e) => {
-                      const updated = [...uploads];
-                      updated[idx].commentOrName = e.target.value;
-                      setUploads(updated);
-                    }}
-                    className="w-full border p-2 text-sm"
-                  />
-                </>
-              )}
-            </div>
-          ))}
-
-          <button
-            onClick={handleSubmit}
-            className="mt-6 w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700"
-          >
-            Submit All Files
-          </button>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-indigo-700 text-white p-6 shadow-md">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold">Upload Files for Quotation</h1>
+          <p className="text-sm text-indigo-100 mt-1">Please upload relevant documents and photos for your case.</p>
         </div>
-      )}
+      </div>
+
+      {/* Content */}
+      <div className="max-w-4xl mx-auto p-6 space-y-8">
+        <div className="bg-white border border-gray-200 rounded-lg shadow-md p-6 space-y-6">
+          {/* Photo upload */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800">Upload Photos</h2>
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={(e) => handleFileSelect(e, 'photo')}
+              className="mt-2 w-full border border-gray-300 rounded p-2"
+            />
+          </div>
+
+          {/* Document upload */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800">Upload Documents</h2>
+            <input
+              type="file"
+              multiple
+              accept="application/pdf"
+              onChange={(e) => handleFileSelect(e, 'document')}
+              className="mt-2 w-full border border-gray-300 rounded p-2"
+            />
+          </div>
+
+          {/* Upload list preview */}
+          {uploads.length > 0 && (
+            <div className="space-y-4">
+              {uploads.map((item, idx) => (
+                <div key={idx} className="border p-4 rounded relative bg-gray-50">
+                  <button
+                    onClick={() => handleDelete(idx)}
+                    className="absolute top-2 right-2 text-red-600 hover:text-red-800 bg-white rounded-full p-1 shadow"
+                  >
+                    🗑️
+                  </button>
+
+                  {item.type === 'photo' ? (
+                    <>
+                      <img
+                        src={URL.createObjectURL(item.file)}
+                        alt="Preview"
+                        className="w-32 h-32 object-cover mb-2 rounded"
+                      />
+                      <textarea
+                        placeholder="Comment about this photo..."
+                        value={item.commentOrName}
+                        onChange={(e) => {
+                          const updated = [...uploads];
+                          updated[idx].commentOrName = e.target.value;
+                          setUploads(updated);
+                        }}
+                        className="w-full border p-2 text-sm rounded"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-semibold">{item.file.name}</p>
+                      <input
+                        type="text"
+                        placeholder="Enter custom document name..."
+                        value={item.commentOrName}
+                        onChange={(e) => {
+                          const updated = [...uploads];
+                          updated[idx].commentOrName = e.target.value;
+                          setUploads(updated);
+                        }}
+                        className="w-full border p-2 text-sm rounded"
+                      />
+                    </>
+                  )}
+                </div>
+              ))}
+
+              <button
+                onClick={handleSubmit}
+                className="w-full bg-indigo-600 text-white p-3 rounded hover:bg-indigo-700 font-medium"
+              >
+                Submit All Files
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
