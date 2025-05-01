@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { useSession,signOut } from 'next-auth/react';
+
 
 interface Case {
   id: string;
@@ -10,14 +12,24 @@ interface Case {
   projectDetails: string;
   status: string;
   createdAt: string;
+  user: {
+    name: string | null;
+    email: string;
+  };
 }
 
 export default function DashboardPage() {
+
+  const router = useRouter();
+  
+  
+  const { data: session, status } = useSession();
+
+
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(false);
   const [isFormExpanded, setIsFormExpanded] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
-  const router = useRouter();
 
   // Basic information
   const [customerName, setCustomerName] = useState('');
@@ -32,6 +44,24 @@ export default function DashboardPage() {
 
   // Form section visibility
   const [showContactInfo, setShowContactInfo] = useState(false);
+
+
+
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.replace('/login');
+    } else if (status === 'authenticated') {
+      fetch('/api/cases')
+        .then((res) => res.json())
+        .then(setCases)
+        .catch(console.error);
+    }
+  }, [status]);
+
+
+
+
 
   const fetchCases = async () => {
     const res = await fetch('/api/cases');
@@ -106,6 +136,21 @@ export default function DashboardPage() {
   const totalCases = cases.length;
   const activeCases = cases.filter(c => c.status.toLowerCase() === 'active').length;
   const completedCases = cases.filter(c => c.status.toLowerCase() === 'completed').length;
+
+
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p className="text-gray-600 text-lg">Checking session...</p>
+      </div>
+    );
+  }
+  
+  if (status === 'unauthenticated') {
+    // Router.replace already handles redirect, just return null
+    return null;
+  }
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -113,6 +158,7 @@ export default function DashboardPage() {
       <div className="bg-indigo-700 text-white p-6 shadow-md">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <h1 className="text-3xl font-bold">Internal Dashboard - Cases</h1>
+          <div className="flex items-center space-x-4">
           <button
             onClick={() => setIsFormExpanded(!isFormExpanded)}
             className="bg-white text-indigo-700 px-4 py-2 rounded-md shadow-sm hover:bg-indigo-50 transition-colors flex items-center"
@@ -122,6 +168,14 @@ export default function DashboardPage() {
             </svg>
             New Case
           </button>
+          <button
+            onClick={() => signOut({ callbackUrl: '/login' })}
+            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+          >
+            Logout
+          </button>
+          </div>
+          
         </div>
       </div>
 
@@ -360,6 +414,9 @@ export default function DashboardPage() {
                     <p className="text-xs text-gray-500">
                       Created: {new Date(c.createdAt).toLocaleString()}
                     </p>
+                    <p className="text-xs text-gray-500">
+                      User: {c.user?.name || 'Unknown'}
+                    </p>
                     <button
                       onClick={() => router.push(`/dashboard/${c.id}`)}
                       className="mt-2 inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition"
@@ -380,12 +437,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-// Add this to your global CSS file or add it inline in your _app.js
-// .animate-fadeIn {
-//   animation: fadeIn 0.3s ease-in-out;
-// }
-// @keyframes fadeIn {
-//   from { opacity: 0; transform: translateY(-10px); }
-//   to { opacity: 1; transform: translateY(0); }
-// }

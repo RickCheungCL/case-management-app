@@ -1,26 +1,66 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]/authOptions'; // adjust path if needed
+import { Session } from 'inspector/promises';
+
 
 const prisma = new PrismaClient();
 
 // Handle GET (fetch all cases)
 export async function GET() {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const isAdmin = session.user.role === 'ADMIN';
+
+
   try {
-    const cases = await prisma.case.findMany({
-      orderBy: {
-        createdAt: 'desc',
-      },
-      select: {
-        id: true,
-        customerName: true,
-        projectDetails: true,
-        status: true,
-        createdAt: true,
-        updatedAt: true,
-        // You can add more fields to select here if needed for the dashboard
-        // Or keep it minimal for better performance
-      }
-    });
+    let cases:any[];
+    if(isAdmin){
+      cases = await prisma.case.findMany({
+        orderBy: {
+          createdAt: 'desc',
+        },
+        select: {
+          id: true,
+          customerName: true,
+          projectDetails: true,
+          status: true,
+          createdAt: true,
+          updatedAt: true,
+          user: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
+          // You can add more fields to select here if needed for the dashboard
+          // Or keep it minimal for better performance
+        },
+      });
+    } else {
+      cases = await prisma.case.findMany({
+        where : { userId: session.user.id},
+        orderBy: {
+          createdAt: 'desc',
+        },
+        select: {
+          id: true,
+          customerName: true,
+          projectDetails: true,
+          status: true,
+          createdAt: true,
+          updatedAt: true,
+          
+          // You can add more fields to select here if needed for the dashboard
+          // Or keep it minimal for better performance
+        }
+      });
+    }
+    
     return NextResponse.json(cases);
   } catch (error) {
     console.error('Error fetching cases:', error);
@@ -30,6 +70,14 @@ export async function GET() {
 
 // Handle POST (create a new case)
 export async function POST(request: Request) {
+
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+
   try {
     const body = await request.json();
     const { 
@@ -56,6 +104,7 @@ export async function POST(request: Request) {
         projectDetails,
         status: 'New',
         // Organization information
+        userId: session.user.id!,
         schoolName,
         contactPerson,
         emailAddress,

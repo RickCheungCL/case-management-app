@@ -15,6 +15,8 @@ datasource db {
 
 model Case {
   id                      String   @id @default(cuid())
+  userId                  String
+  user                    User     @relation(fields: [userId], references: [id])
   customerName            String
   projectDetails          String
   uploadToken             String   @default(uuid())
@@ -65,3 +67,20 @@ model Document {
   createdAt   DateTime @default(now())
 }
 
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String?  // hashed
+  role      Role     @default(USER)
+  cases     Case[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+enum Role {
+  ADMIN
+  USER
+}
