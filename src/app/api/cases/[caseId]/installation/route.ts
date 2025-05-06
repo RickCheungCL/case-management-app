@@ -18,46 +18,70 @@ export async function GET(_: Request, props: { params: Promise<{ caseId: string 
 }
 
 export async function PUT(req: Request, props: { params: Promise<{ caseId: string }> }) {
-  const params = await props.params;
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  try {
+    const params = await props.params;
+    const session = await getServerSession(authOptions);
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { ceilingHeight, notes, tagIds } = await req.json(); // tagIds = array of InstallationTag.id
+    // Validate user ID exists
+    if (!session.user?.id) {
+      console.log("Warning: User session exists but user ID is missing");
+      return NextResponse.json({ error: 'User ID not found' }, { status: 401 });
+    }
+    
+    // Store user ID safely
+    const userId = session.user.id;
 
-  const installationDetail = await prisma.installationDetail.upsert({
-    where: { caseId: params.caseId },
-    update: {
-      ceilingHeight,
-      notes,
-    },
-    create: {
-      caseId: params.caseId,
-      ceilingHeight,
-      notes,
-    },
-  });
+    const { ceilingHeight, notes, tagIds } = await req.json(); // tagIds = array of InstallationTag.id
 
-  // Delete old tags & add new ones
-  await prisma.installationDetailTag.deleteMany({
-    where: { installationDetailId: installationDetail.id },
-  });
-
-  if (Array.isArray(tagIds)) {
-    await prisma.installationDetailTag.createMany({
-      data: tagIds.map((tagId: string) => ({
-        installationDetailId: installationDetail.id,
-        tagId,
-      })),
+    // First perform the installation detail update in a transaction
+    const installationDetail = await prisma.installationDetail.upsert({
+      where: { caseId: params.caseId },
+      update: {
+        ceilingHeight,
+        notes,
+      },
+      create: {
+        caseId: params.caseId,
+        ceilingHeight,
+        notes,
+      },
     });
+
+    // Delete old tags & add new ones
+    await prisma.installationDetailTag.deleteMany({
+      where: { installationDetailId: installationDetail.id },
+    });
+
+    if (Array.isArray(tagIds) && tagIds.length > 0) {
+      await prisma.installationDetailTag.createMany({
+        data: tagIds.map((tagId: string) => ({
+          installationDetailId: installationDetail.id,
+          tagId,
+        })),
+      });
+    }
+
+    // Try to create activity log separately - don't fail if this fails
+    try {
+      await prisma.activityLog.create({
+        data: {
+          caseId: params.caseId,
+          userId: userId,
+          action: `Updated installation details.`,
+        },
+      });
+    } catch (logError) {
+      console.error('Failed to create activity log:', logError);
+      // Don't fail the whole operation if activity log creation fails
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error updating installation details:', error);
+    return NextResponse.json({ 
+      error: 'Failed to update installation details', 
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
-
-  await prisma.activityLog.create({
-    data: {
-      caseId: params.caseId,
-      userId: session.user.id!,
-      action: `Updated installation details.`,
-    },
-  });
-
-  return NextResponse.json({ success: true });
 }
