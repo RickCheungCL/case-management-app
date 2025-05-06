@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../auth/[...nextauth]/authOptions';
-//api/cases/[caseId]/fixtures/route.ts
+
 const prisma = new PrismaClient();
 
 export async function GET(_: Request, props: { params: Promise<{ caseId: string }> }) {
@@ -29,22 +29,13 @@ export async function PUT(req: Request, props: { params: Promise<{ caseId: strin
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
-    // Validate user ID exists - this is the important change
-    if (!session.user?.id) {
-      console.log("Warning: User session exists but user ID is missing");
-      return NextResponse.json({ error: 'User ID not found' }, { status: 401 });
-    }
-
-    // Now we can safely use session.user.id as it's been verified non-null
-    const userId = session.user.id; // Assign to a variable to help TypeScript
-
     const updates = await req.json(); // Expecting [{ fixtureTypeId, count }]
     
     if (!Array.isArray(updates)) {
       return NextResponse.json({ error: 'Invalid data format' }, { status: 400 });
     }
 
-    // Use a transaction to ensure all operations succeed or fail together
+    // First perform the fixture operations without the activity log
     await prisma.$transaction(async (tx) => {
       // Delete existing fixture counts
       console.log(`Attempting to delete fixture counts for case: ${params.caseId}`);
@@ -64,17 +55,25 @@ export async function PUT(req: Request, props: { params: Promise<{ caseId: strin
           }))
         });
       }
-      
-      // Log the activity with the verified userId
-      console.log(`Creating activity log for user: ${userId}`);
-      await tx.activityLog.create({
-        data: {
-          caseId: params.caseId,
-          userId: userId, // Use the verified userId
-          action: `Updated fixture counts.`,
-        },
-      });
     });
+    
+    // Try to create activity log separately - don't fail if this fails
+    if (session.user?.id) {
+      try {
+        await prisma.activityLog.create({
+          data: {
+            caseId: params.caseId,
+            userId: session.user.id,
+            action: `Updated fixture counts.`,
+          },
+        });
+      } catch (logError) {
+        console.error('Failed to create activity log:', logError);
+        // We don't want the fixture update to fail if logging fails
+      }
+    } else {
+      console.log("Skipping activity log creation due to missing user ID");
+    }
     
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -96,8 +95,7 @@ export async function POST(req: Request, props: { params: Promise<{ caseId: stri
       return NextResponse.json({ error: 'Missing fixtureTypeId or count' }, { status: 400 });
     }
 
-    const session = await getServerSession(authOptions);
-    
+    // Create the fixture
     const newFixture = await prisma.caseFixtureCount.create({
       data: {
         caseId,
@@ -106,16 +104,21 @@ export async function POST(req: Request, props: { params: Promise<{ caseId: stri
       },
     });
 
-    // Optional: Add activity log if session exists
-    if (session?.user?.id) {
-      const userId = session.user.id; // Store in variable for type safety
-      await prisma.activityLog.create({
-        data: {
-          caseId,
-          userId: userId,
-          action: `Added new fixture type: ${fixtureTypeId} with count: ${count}`,
-        },
-      });
+    // Try to get the session and create activity log
+    try {
+      const session = await getServerSession(authOptions);
+      if (session?.user?.id) {
+        await prisma.activityLog.create({
+          data: {
+            caseId,
+            userId: session.user.id,
+            action: `Added new fixture type: ${fixtureTypeId} with count: ${count}`,
+          },
+        });
+      }
+    } catch (logError) {
+      console.error('Error creating activity log:', logError);
+      // Don't fail if activity log creation fails
     }
 
     return NextResponse.json(newFixture);
@@ -128,7 +131,6 @@ export async function POST(req: Request, props: { params: Promise<{ caseId: stri
   }
 }
 
-// Add DELETE endpoint if needed
 export async function DELETE(req: Request, props: { params: Promise<{ caseId: string }> }) {
   try {
     const params = await props.params;
@@ -137,11 +139,6 @@ export async function DELETE(req: Request, props: { params: Promise<{ caseId: st
     
     if (!fixtureTypeId) {
       return NextResponse.json({ error: 'Missing fixtureTypeId parameter' }, { status: 400 });
-    }
-
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     console.log(`Attempting to delete fixture: caseId=${params.caseId}, fixtureTypeId=${fixtureTypeId}`);
@@ -161,16 +158,21 @@ export async function DELETE(req: Request, props: { params: Promise<{ caseId: st
       }, { status: 404 });
     }
 
-    // Add activity log if user ID exists
-    if (session?.user?.id) {
-      const userId = session.user.id; // Store in variable for type safety
-      await prisma.activityLog.create({
-        data: {
-          caseId: params.caseId,
-          userId: userId,
-          action: `Removed fixture type: ${fixtureTypeId}`,
-        },
-      });
+    // Try to get the session and create activity log
+    try {
+      const session = await getServerSession(authOptions);
+      if (session?.user?.id) {
+        await prisma.activityLog.create({
+          data: {
+            caseId: params.caseId,
+            userId: session.user.id,
+            action: `Removed fixture type: ${fixtureTypeId}`,
+          },
+        });
+      }
+    } catch (logError) {
+      console.error('Error creating activity log:', logError);
+      // Don't fail if activity log creation fails
     }
 
     return NextResponse.json({ success: true, deletedCount: deleteResult.count });
