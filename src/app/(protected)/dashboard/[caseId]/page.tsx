@@ -206,7 +206,9 @@ export default function CaseDetailsPage() {
   
     try {
       setAdding(true);
+  
       console.log("Adding fixture:", { fixtureTypeId: newFixtureTypeId, count: newFixtureCount });
+  
       const res = await fetch(`/api/cases/${caseId}/fixtures`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -228,7 +230,8 @@ export default function CaseDetailsPage() {
       fetchFixtures(); // Refresh the fixture list
     } catch (err) {
       console.error('Add error:', err);
-      toast.error(`Error adding fixture: ${err.message}`);
+      // Fix the TypeScript error by safely accessing the message property
+      toast.error(`Error adding fixture: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setAdding(false);
     }
@@ -1117,9 +1120,9 @@ export default function CaseDetailsPage() {
                                 try {
                                   // Get all current fixtures
                                   const updatedFixtureCounts = fixtureCounts
-                                    .filter(f => f.fixtureTypeId !== fixture.fixtureTypeId) // Changed to use fixtureTypeId directly
+                                    .filter(f => f.fixtureType.id !== fixture.fixtureType.id)
                                     .map(f => ({
-                                      fixtureTypeId: f.fixtureTypeId, 
+                                      fixtureTypeId: f.fixtureType.id, 
                                       count: f.count
                                     }));
                                   
@@ -1151,7 +1154,7 @@ export default function CaseDetailsPage() {
                                   fetchFixtures(); // Refresh the list
                                 } catch (err) {
                                   console.error('Delete error:', err);
-                                  toast.error(`Error removing fixture: ${err.message}`);
+                                  toast.error(`Error removing fixture: ${err instanceof Error ? err.message : 'Unknown error'}`);
                                 }
                               }}
                               className="text-gray-400 hover:text-red-600 transition"
