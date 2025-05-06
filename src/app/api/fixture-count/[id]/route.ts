@@ -6,10 +6,8 @@ import { authOptions } from '../../auth/[...nextauth]/authOptions';
 
 const prisma = new PrismaClient();
 
-export async function DELETE(
-  _: Request, 
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(_: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -28,7 +26,7 @@ export async function DELETE(
           where: { id: params.id },
           select: { caseId: true },
         }))?.caseId || '',
-        userId: session.user.id,
+        userId: session.user.id!,
         action: 'Removed fixture from case',
       },
     });

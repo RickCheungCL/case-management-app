@@ -113,7 +113,7 @@ export default function CaseDetailsPage() {
   const { caseId } = useParams();
   const [caseData, setCaseData] = useState<Case | null>(null);
   const [files, setFiles] = useState<File[]>([]);
-  const [activeTab, setActiveTab] = useState<'details' | 'viewDocs' | 'uploadDocs' | 'viewPhotos' | 'uploadPhotos' | 'contactInfo' | 'lightingDetails'| 'Lighting & Service Requirement'>('details');
+  const [activeTab, setActiveTab] = useState<'details' | 'viewDocs' | 'uploadDocs' | 'viewPhotos' | 'uploadPhotos' | 'contactInfo' | 'lightingDetails'| 'lightingService'>('details');
   const [isLinkExpanded, setIsLinkExpanded] = useState(false);
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [documentFiles, setDocumentFiles] = useState<File[]>([]);
@@ -155,11 +155,16 @@ export default function CaseDetailsPage() {
   });
 
   const [isEditingInstallation, setIsEditingInstallation] = useState(false);
-  const [editedInstallationDetail, setEditedInstallationDetail] = useState({
-    ceilingHeight: '',
-    notes: '',
-    tagIds: []
+  const [editedInstallationDetail, setEditedInstallationDetail] = useState<{
+      ceilingHeight: string;
+      notes: string;
+      tagIds: string[];
+  }>({
+      ceilingHeight: '',
+      notes: '',
+      tagIds: []
   });
+
 
   // Tags editing state
   const [newTagId, setNewTagId] = useState('');
@@ -168,7 +173,8 @@ export default function CaseDetailsPage() {
   const [fixtureCounts, setFixtureCounts] = useState<FixtureCount[]>([]);
   const [fixtureTypes, setFixtureTypes] = useState<FixtureType[]>([]);
 
-  const [installationTags, setInstallationTags] = useState([]);
+  const [installationTags, setInstallationTags] = useState<InstallationTag[]>([]);
+
 
   const fetchFixtures = async () => {
     const res = await fetch(`/api/cases/${caseId}/fixtures`);
@@ -291,9 +297,11 @@ export default function CaseDetailsPage() {
   useEffect(() => {
     if (caseData?.installationDetail) {
       setEditedInstallationDetail({
-        ceilingHeight: caseData.installationDetail.ceilingHeight || '',
+        ceilingHeight: caseData.installationDetail.ceilingHeight?.toString() || '',
         notes: caseData.installationDetail.notes || '',
-        tagIds: caseData.installationDetail.tags?.map((tagWrapper) => tagWrapper.tag.id) || []
+        tagIds: (caseData.installationDetail.tags?.map((tagWrapper) => 
+          tagWrapper.tag.id.toString()
+        ) || []) as string[]
       });
     }
   }, [caseData?.installationDetail]);
@@ -1089,7 +1097,7 @@ export default function CaseDetailsPage() {
                   <div className="bg-gray-50 rounded-lg border border-gray-200 p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {fixtureCounts.map((fixture) => (
-                        <div key={fixture.id} className="flex justify-between items-center p-3 bg-white rounded border border-gray-200">
+                        <div key={fixture.fixtureType?.id} className="flex justify-between items-center p-3 bg-white rounded border border-gray-200">
                           <span className="text-gray-700">{fixture.fixtureType?.name}</span>
                           <div className="flex items-center gap-2">
                             <span className="font-bold text-indigo-600">{fixture.count}</span>
@@ -1098,7 +1106,7 @@ export default function CaseDetailsPage() {
                                 try {
                                   // Get all current fixtures
                                   const updatedFixtureCounts = fixtureCounts
-                                    .filter(f => f.id !== fixture.id) // Remove the one we want to delete
+                                    .filter(f => f.fixtureType?.id !== fixture.fixtureType?.id) // Remove the one we want to delete
                                     .map(f => ({
                                       fixtureTypeId: f.fixtureType.id, 
                                       count: f.count
@@ -1241,7 +1249,7 @@ export default function CaseDetailsPage() {
                           // Reset to original values
                           if (caseData.installationDetail) {
                             setEditedInstallationDetail({
-                              ceilingHeight: caseData.installationDetail.ceilingHeight || '',
+                              ceilingHeight: caseData.installationDetail.ceilingHeight?.toString() || '',
                               notes: caseData.installationDetail.notes || '',
                               tagIds: caseData.installationDetail.tags?.map((tagWrapper) => tagWrapper.tag.id) || []
                             });

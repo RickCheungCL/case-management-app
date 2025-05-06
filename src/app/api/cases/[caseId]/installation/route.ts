@@ -5,7 +5,8 @@ import { authOptions } from '../../../auth/[...nextauth]/authOptions';
 //api/cases/[caseId]/installation/route.ts
 const prisma = new PrismaClient();
 
-export async function GET(_: Request, { params }: { params: { caseId: string } }) {
+export async function GET(_: Request, props: { params: Promise<{ caseId: string }> }) {
+  const params = await props.params;
   const detail = await prisma.installationDetail.findUnique({
     where: { caseId: params.caseId },
     include: {
@@ -16,7 +17,8 @@ export async function GET(_: Request, { params }: { params: { caseId: string } }
   return NextResponse.json(detail);
 }
 
-export async function PUT(req: Request, { params }: { params: { caseId: string } }) {
+export async function PUT(req: Request, props: { params: Promise<{ caseId: string }> }) {
+  const params = await props.params;
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -52,7 +54,7 @@ export async function PUT(req: Request, { params }: { params: { caseId: string }
   await prisma.activityLog.create({
     data: {
       caseId: params.caseId,
-      userId: session.user.id,
+      userId: session.user.id!,
       action: `Updated installation details.`,
     },
   });
