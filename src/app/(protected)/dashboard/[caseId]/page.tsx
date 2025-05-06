@@ -177,9 +177,18 @@ export default function CaseDetailsPage() {
 
 
   const fetchFixtures = async () => {
-    const res = await fetch(`/api/cases/${caseId}/fixtures`);
-    const data = await res.json();
-    setFixtureCounts(data);
+    try {
+      const res = await fetch(`/api/cases/${caseId}/fixtures`);
+      if (!res.ok) {
+        throw new Error('Failed to fetch fixtures');
+      }
+      const data = await res.json();
+      console.log("Fetched fixtures:", data); // Log the structure
+      setFixtureCounts(data);
+    } catch (error) {
+      console.error('Error fetching fixtures:', error);
+      toast.error('Failed to load fixtures');
+    }
   };
 
   const fetchFixtureTypes = async () => {
@@ -197,7 +206,7 @@ export default function CaseDetailsPage() {
   
     try {
       setAdding(true);
-  
+      console.log("Adding fixture:", { fixtureTypeId: newFixtureTypeId, count: newFixtureCount });
       const res = await fetch(`/api/cases/${caseId}/fixtures`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -207,17 +216,19 @@ export default function CaseDetailsPage() {
         }),
       });
   
-      if (res.ok) {
-        toast.success('Fixture added!');
-        setNewFixtureTypeId('');
-        setNewFixtureCount(1);
-        fetchFixtures(); // Refresh the fixture list
-      } else {
-        toast.error('Failed to add fixture');
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Error response:', errorText);
+        throw new Error(errorText || 'Failed to add fixture');
       }
+  
+      toast.success('Fixture added!');
+      setNewFixtureTypeId('');
+      setNewFixtureCount(1);
+      fetchFixtures(); // Refresh the fixture list
     } catch (err) {
-      console.error(err);
-      toast.error('Error adding fixture');
+      console.error('Add error:', err);
+      toast.error(`Error adding fixture: ${err.message}`);
     } finally {
       setAdding(false);
     }
@@ -1106,9 +1117,9 @@ export default function CaseDetailsPage() {
                                 try {
                                   // Get all current fixtures
                                   const updatedFixtureCounts = fixtureCounts
-                                    .filter(f => f.fixtureType?.id !== fixture.fixtureType?.id) // Remove the one we want to delete
+                                    .filter(f => f.fixtureTypeId !== fixture.fixtureTypeId) // Changed to use fixtureTypeId directly
                                     .map(f => ({
-                                      fixtureTypeId: f.fixtureType.id, 
+                                      fixtureTypeId: f.fixtureTypeId, 
                                       count: f.count
                                     }));
                                   
@@ -1123,17 +1134,24 @@ export default function CaseDetailsPage() {
                                     body: JSON.stringify(updatedFixtureCounts),
                                   });
                                   
-                                  if (res.ok) {
-                                    toast.success('Fixture removed successfully');
-                                    fetchFixtures(); // Refresh the list
-                                  } else {
-                                    const errorData = await res.json();
-                                    console.error('Error response:', errorData);
-                                    toast.error(`Failed to remove fixture: ${errorData.error || 'Unknown error'}`);
+                                  if (!res.ok) {
+                                    const errorText = await res.text();
+                                    console.error('Error response:', errorText);
+                                    let errorData;
+                                    try {
+                                      errorData = JSON.parse(errorText);
+                                    } catch (e) {
+                                      // If not valid JSON, use the raw text
+                                      errorData = { error: errorText };
+                                    }
+                                    throw new Error(errorData.error || 'Failed to remove fixture');
                                   }
+                                  
+                                  toast.success('Fixture removed successfully');
+                                  fetchFixtures(); // Refresh the list
                                 } catch (err) {
                                   console.error('Delete error:', err);
-                                  toast.error('Error removing fixture');
+                                  toast.error(`Error removing fixture: ${err.message}`);
                                 }
                               }}
                               className="text-gray-400 hover:text-red-600 transition"
