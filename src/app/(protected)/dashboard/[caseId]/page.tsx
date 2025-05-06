@@ -12,6 +12,35 @@ interface Photo {
   uploadedViaLink?: boolean;
 }
 
+interface FixtureType {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+interface CaseFixtureCount {
+  id: string;
+  count: number;
+  fixtureType: FixtureType;
+}
+
+interface InstallationTag {
+  id: string;
+  name: string;
+}
+
+interface InstallationDetailTag {
+  id: string;
+  tag: InstallationTag;
+}
+
+interface InstallationDetail {
+  id: string;
+  ceilingHeight?: number;
+  notes?: string;
+  tags: InstallationDetailTag[];
+}
+
 interface Document {
   id: string;
   url: string;
@@ -49,13 +78,42 @@ interface Case {
   lightingPurpose: string;
   facilitiesUsedIn: string;
   installationService: string;
+
+
+  fixtureCounts: {
+    id: string;
+    count: number;
+    fixtureType: {
+      id: string;
+      name: string;
+      description?: string;
+    };
+  }[];
+  installationDetail?: {
+    id: string;
+    ceilingHeight?: number;
+    notes?: string;
+    tags: {
+      id: string;
+      tag: {
+        id: string;
+        name: string;
+      };
+    }[];
+  };
+}
+
+interface FixtureCount {
+  fixtureType: { id: string; name: string };
+  fixtureTypeId: string;
+  count: number;
 }
 
 export default function CaseDetailsPage() {
   const { caseId } = useParams();
   const [caseData, setCaseData] = useState<Case | null>(null);
   const [files, setFiles] = useState<File[]>([]);
-  const [activeTab, setActiveTab] = useState<'details' | 'viewDocs' | 'uploadDocs' | 'viewPhotos' | 'uploadPhotos' | 'contactInfo' | 'lightingDetails'>('details');
+  const [activeTab, setActiveTab] = useState<'details' | 'viewDocs' | 'uploadDocs' | 'viewPhotos' | 'uploadPhotos' | 'contactInfo' | 'lightingDetails'| 'Lighting & Service Requirement'>('details');
   const [isLinkExpanded, setIsLinkExpanded] = useState(false);
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [documentFiles, setDocumentFiles] = useState<File[]>([]);
@@ -76,7 +134,9 @@ export default function CaseDetailsPage() {
     phoneNumber: '',
     schoolAddress: ''
   });
-  
+  const [newFixtureTypeId, setNewFixtureTypeId] = useState<string>('');
+  const [newFixtureCount, setNewFixtureCount] = useState<number>(0);
+  const [adding, setAdding] = useState(false);
   // Lighting details editing state
   const [isEditingLighting, setIsEditingLighting] = useState(false);
   const [editedFixtureCounts, setEditedFixtureCounts] = useState({
@@ -94,6 +154,70 @@ export default function CaseDetailsPage() {
     installationService: 'Not Sure'
   });
 
+  const [isEditingInstallation, setIsEditingInstallation] = useState(false);
+  const [editedInstallationDetail, setEditedInstallationDetail] = useState({
+    ceilingHeight: '',
+    notes: '',
+    tagIds: []
+  });
+
+  // Tags editing state
+  const [newTagId, setNewTagId] = useState('');
+  const [availableTags, setAvailableTags] = useState<{ id: string; name: string }[]>([]);
+
+  const [fixtureCounts, setFixtureCounts] = useState<FixtureCount[]>([]);
+  const [fixtureTypes, setFixtureTypes] = useState<FixtureType[]>([]);
+
+  const [installationTags, setInstallationTags] = useState([]);
+
+  const fetchFixtures = async () => {
+    const res = await fetch(`/api/cases/${caseId}/fixtures`);
+    const data = await res.json();
+    setFixtureCounts(data);
+  };
+
+  const fetchFixtureTypes = async () => {
+    const res = await fetch('/api/fixture-types'); // Path may need adjustment
+    const data = await res.json();
+    setFixtureTypes(data);
+  };
+
+  
+  const addFixture = async () => {
+    if (!newFixtureTypeId || newFixtureCount <= 0) {
+      toast.error('Please select a fixture type and enter a valid count');
+      return;
+    }
+  
+    try {
+      setAdding(true);
+  
+      const res = await fetch(`/api/cases/${caseId}/fixtures`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fixtureTypeId: newFixtureTypeId,
+          count: newFixtureCount,
+        }),
+      });
+  
+      if (res.ok) {
+        toast.success('Fixture added!');
+        setNewFixtureTypeId('');
+        setNewFixtureCount(1);
+        fetchFixtures(); // Refresh the fixture list
+      } else {
+        toast.error('Failed to add fixture');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Error adding fixture');
+    } finally {
+      setAdding(false);
+    }
+  };
+  const [newTagName, setNewTagName] = useState('');
+  const [isCreatingTag, setIsCreatingTag] = useState(false);
   const fetchCase = async () => {
     const res = await fetch(`/api/cases/${caseId}`);
     const data = await res.json();
@@ -127,12 +251,52 @@ export default function CaseDetailsPage() {
     }
   };
 
+  // Add this with your other fetch functions
+  const fetchInstallationTags = async () => {
+    try {
+      const res = await fetch('/api/tags');
+      if (res.ok) {
+        const data = await res.json();
+        setInstallationTags(data);
+      }
+    } catch (error) {
+      console.error('Error fetching tags:', error);
+    }
+  };
+
+
+  const fetchAvailableTags = async () => {
+    try {
+      const res = await fetch('/api/tags');
+      if (res.ok) {
+        const data = await res.json();
+        setAvailableTags(data);
+      }
+    } catch (error) {
+      console.error('Error fetching tags:', error);
+    }
+  };
   const uploadUrl = `${process.env.NEXT_PUBLIC_APP_URL}/upload/${caseId}`;
 
   useEffect(() => {
+
     fetchCase();
+    fetchFixtures();
+    fetchFixtureTypes();
+    fetchAvailableTags();
+    fetchInstallationTags();
   }, [caseId]);
 
+
+  useEffect(() => {
+    if (caseData?.installationDetail) {
+      setEditedInstallationDetail({
+        ceilingHeight: caseData.installationDetail.ceilingHeight || '',
+        notes: caseData.installationDetail.notes || '',
+        tagIds: caseData.installationDetail.tags?.map((tagWrapper) => tagWrapper.tag.id) || []
+      });
+    }
+  }, [caseData?.installationDetail]);
   //const handleUpload = async (uploadType: 'photo' | 'document') => {
     //
     //if (!files.length) {
@@ -271,6 +435,8 @@ export default function CaseDetailsPage() {
 
   if (!caseData) return <div className="p-8">Loading...</div>;
 
+
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header with Close Button */}
@@ -349,7 +515,8 @@ export default function CaseDetailsPage() {
               { id: 'viewPhotos', label: 'View Photos' },
               { id: 'uploadPhotos', label: 'Upload Photos' },
               { id: 'contactInfo', label: 'Contact Information' },
-              { id: 'lightingDetails', label: 'Lighting Details' }
+              { id: 'lightingDetails', label: 'Lighting Details' },
+              { id: 'lightingService', label: 'Lighting & Service Requirement' } 
             ].map(tab => (
               <button
                 key={tab.id}
@@ -906,6 +1073,436 @@ export default function CaseDetailsPage() {
             </div>
           )}
           
+         {/* Lighting & Service Requirement Tab */}
+
+          {activeTab === 'lightingService' && (
+            <div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-6">Lighting & Service Requirement</h3>
+
+              {/* Lighting Fixtures */}
+              <div className="mb-8">
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="text-lg font-medium text-gray-700">Lighting Fixtures</h4>
+                </div>
+                
+                {fixtureCounts && fixtureCounts.length > 0 ? (
+                  <div className="bg-gray-50 rounded-lg border border-gray-200 p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {fixtureCounts.map((fixture) => (
+                        <div key={fixture.id} className="flex justify-between items-center p-3 bg-white rounded border border-gray-200">
+                          <span className="text-gray-700">{fixture.fixtureType?.name}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-indigo-600">{fixture.count}</span>
+                            <button
+                              onClick={async () => {
+                                try {
+                                  // Get all current fixtures
+                                  const updatedFixtureCounts = fixtureCounts
+                                    .filter(f => f.id !== fixture.id) // Remove the one we want to delete
+                                    .map(f => ({
+                                      fixtureTypeId: f.fixtureType.id, 
+                                      count: f.count
+                                    }));
+                                  
+                                  console.log("Sending these fixtures after deletion:", updatedFixtureCounts);
+                                  
+                                  // Use the PUT endpoint to replace all fixtures
+                                  const res = await fetch(`/api/cases/${caseId}/fixtures`, {
+                                    method: 'PUT',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify(updatedFixtureCounts),
+                                  });
+                                  
+                                  if (res.ok) {
+                                    toast.success('Fixture removed successfully');
+                                    fetchFixtures(); // Refresh the list
+                                  } else {
+                                    const errorData = await res.json();
+                                    console.error('Error response:', errorData);
+                                    toast.error(`Failed to remove fixture: ${errorData.error || 'Unknown error'}`);
+                                  }
+                                } catch (err) {
+                                  console.error('Delete error:', err);
+                                  toast.error('Error removing fixture');
+                                }
+                              }}
+                              className="text-gray-400 hover:text-red-600 transition"
+                              aria-label="Delete fixture"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-gray-500">No fixtures added yet.</p>
+                )}
+              </div>
+
+              {/* Add New Fixture Section */}
+              <div className="mt-6 bg-gray-50 rounded-lg border border-gray-200 p-6">
+                <h4 className="text-lg font-medium text-gray-700 mb-4">Add New Fixture</h4>
+                <div className="flex flex-col md:flex-row items-center gap-4">
+                  <select
+                    value={newFixtureTypeId}
+                    onChange={(e) => setNewFixtureTypeId(e.target.value)}
+                    className="border p-2 rounded-md w-full md:w-auto"
+                  >
+                    <option value="">Select Fixture Type</option>
+                    {fixtureTypes
+                      .filter(ft => !fixtureCounts.some(fc => fc.fixtureType.id === ft.id)) // Filter out already selected fixture types
+                      .map((ft) => (
+                        <option key={ft.id} value={ft.id}>
+                          {ft.name}
+                        </option>
+                      ))}
+                  </select>
+                  <input
+                    type="number"
+                    min="1"
+                    value={newFixtureCount}
+                    onChange={(e) => setNewFixtureCount(parseInt(e.target.value) || 1)}
+                    className="border p-2 rounded-md w-full md:w-24 text-center"
+                    placeholder="Count"
+                  />
+                  <button
+                    onClick={addFixture}
+                    disabled={adding || !newFixtureTypeId}
+                    className={`${
+                      !newFixtureTypeId ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
+                    } text-white px-4 py-2 rounded-md transition w-full md:w-auto`}
+                  >
+                    {adding ? 'Adding...' : 'Add Fixture'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Installation Details */}
+              <div className="mt-8 mb-8">
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="text-lg font-medium text-gray-700">Installation Details</h4>
+                  {!isEditingInstallation ? (
+                    <button 
+                      onClick={() => setIsEditingInstallation(true)} 
+                      className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-indigo-700 bg-white hover:bg-indigo-50"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                      Edit Details
+                    </button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={async () => {
+                          try {
+                            // Using installation-details API endpoint
+                            const res = await fetch(`/api/cases/${caseId}/installation`, {
+                              method: 'PUT',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({
+                                ceilingHeight: editedInstallationDetail.ceilingHeight ? parseFloat(editedInstallationDetail.ceilingHeight.toString()) : null,
+                                notes: editedInstallationDetail.notes,
+                                tagIds: editedInstallationDetail.tagIds
+                              }),
+                            });
+                            
+                            if (res.ok) {
+                              toast.success('Installation details updated successfully!');
+                              setIsEditingInstallation(false);
+                              fetchCase(); // Refresh the case data
+                            } else {
+                              const errorData = await res.json();
+                              toast.error(`Failed to update installation details: ${errorData.error || 'Unknown error'}`);
+                            }
+                          } catch (error) {
+                            console.error('Error updating installation details:', error);
+                            toast.error('An error occurred while updating installation details');
+                          }
+                        }} 
+                        className="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Save Changes
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setIsEditingInstallation(false);
+                          // Reset to original values
+                          if (caseData.installationDetail) {
+                            setEditedInstallationDetail({
+                              ceilingHeight: caseData.installationDetail.ceilingHeight || '',
+                              notes: caseData.installationDetail.notes || '',
+                              tagIds: caseData.installationDetail.tags?.map((tagWrapper) => tagWrapper.tag.id) || []
+                            });
+                          } else {
+                            setEditedInstallationDetail({
+                              ceilingHeight: '',
+                              notes: '',
+                              tagIds: []
+                            });
+                          }
+                        }} 
+                        className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="bg-gray-50 rounded-lg border border-gray-200 p-6">
+                  {isEditingInstallation ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 mb-1 block">Ceiling Height (in meters)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={editedInstallationDetail.ceilingHeight}
+                          onChange={(e) => setEditedInstallationDetail({
+                            ...editedInstallationDetail,
+                            ceilingHeight: e.target.value
+                          })}
+                          className="w-full border border-gray-300 rounded-md p-2 text-gray-700"
+                          placeholder="Enter ceiling height"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500 mb-1 block">Notes</label>
+                        <textarea
+                          value={editedInstallationDetail.notes}
+                          onChange={(e) => setEditedInstallationDetail({
+                            ...editedInstallationDetail,
+                            notes: e.target.value
+                          })}
+                          className="w-full border border-gray-300 rounded-md p-2 text-gray-700"
+                          rows={3}
+                          placeholder="Enter installation notes"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <h5 className="text-sm font-medium text-gray-500 mb-1">Ceiling Height</h5>
+                        <p className="text-gray-800 font-medium">
+                          {caseData.installationDetail?.ceilingHeight
+                            ? `${caseData.installationDetail?.ceilingHeight} meters`
+                            : '—'}
+                        </p>
+                      </div>
+                      <div>
+                        <h5 className="text-sm font-medium text-gray-500 mb-1">Notes</h5>
+                        <p className="text-gray-800 font-medium whitespace-pre-line">
+                          {caseData.installationDetail?.notes || '—'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Tags */}
+              {/* Tags Section with Create New Tag Functionality */}
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="text-lg font-medium text-gray-700">Service Requirement Tags</h4>
+                </div>
+                
+                <div className="bg-gray-50 rounded-lg border border-gray-200 p-6">
+                  {isEditingInstallation ? (
+                    <>
+                      <div className="mb-4">
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {editedInstallationDetail.tagIds.length > 0 ? (
+                            editedInstallationDetail.tagIds.map((tagId) => {
+                              const tag = installationTags.find(t => t.id === tagId);
+                              return (
+                                <div key={tagId} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 group">
+                                  {tag?.name}
+                                  <button
+                                    onClick={() => {
+                                      setEditedInstallationDetail({
+                                        ...editedInstallationDetail,
+                                        tagIds: editedInstallationDetail.tagIds.filter(id => id !== tagId)
+                                      });
+                                    }}
+                                    className="ml-1.5 text-indigo-500 hover:text-indigo-800"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              );
+                            })
+                          ) : (
+                            <p className="text-gray-500 text-sm">No tags selected</p>
+                          )}
+                        </div>
+                        
+                        {/* Tag Management Section */}
+                        <div className="space-y-3">
+                          {/* Select from existing tags */}
+                          {installationTags && installationTags.length > 0 && (
+                            <div className="flex flex-col sm:flex-row gap-2">
+                              <select
+                                value={newTagId}
+                                onChange={(e) => setNewTagId(e.target.value)}
+                                className="border border-gray-300 rounded-md p-2 text-gray-700 w-full sm:w-auto"
+                              >
+                                <option value="">Select a tag ({installationTags.filter(tag => !editedInstallationDetail.tagIds.includes(tag.id)).length} available)</option>
+                                {installationTags
+                                  .filter(tag => !editedInstallationDetail.tagIds.includes(tag.id))
+                                  .map(tag => (
+                                    <option key={tag.id} value={tag.id}>{tag.name}</option>
+                                  ))
+                                }
+                              </select>
+                              <button
+                                onClick={() => {
+                                  if (newTagId) {
+                                    setEditedInstallationDetail({
+                                      ...editedInstallationDetail,
+                                      tagIds: [...editedInstallationDetail.tagIds, newTagId]
+                                    });
+                                    setNewTagId('');
+                                  }
+                                }}
+                                disabled={!newTagId}
+                                className={`${
+                                  !newTagId ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
+                                } text-white px-4 py-2 rounded-md transition`}
+                              >
+                                Add Tag
+                              </button>
+                            </div>
+                          )}
+                          
+                          {/* Create new tag */}
+                          <div className="pt-2">
+                            <h5 className="text-sm font-medium text-gray-700 mb-2">Create New Tag</h5>
+                            <div className="flex flex-col sm:flex-row gap-2">
+                              <input
+                                type="text"
+                                value={newTagName || ''}
+                                onChange={(e) => setNewTagName(e.target.value)}
+                                placeholder="Enter new tag name"
+                                className="border border-gray-300 rounded-md p-2 text-gray-700 w-full sm:w-auto"
+                              />
+                              <button
+                                onClick={async () => {
+                                  if (newTagName && newTagName.trim()) {
+                                    try {
+                                      setIsCreatingTag(true);
+                                      // Create new tag via API
+                                      const res = await fetch('/api/tags', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ name: newTagName.trim() })
+                                      });
+                                      
+                                      if (res.ok) {
+                                        const newTag = await res.json();
+                                        // Add new tag to available tags
+                                        setInstallationTags([...installationTags, newTag]);
+                                        // Add new tag to selected tags
+                                        setEditedInstallationDetail({
+                                          ...editedInstallationDetail,
+                                          tagIds: [...editedInstallationDetail.tagIds, newTag.id]
+                                        });
+                                        setNewTagName('');
+                                        toast.success('New tag created successfully');
+                                      } else {
+                                        const error = await res.json();
+                                        // If tag already exists and was returned, let's add it
+                                        if (error.tag && error.error === 'Tag already exists') {
+                                          const existingTag = error.tag;
+                                          // Only add if not already in the array
+                                          if (!installationTags.some(t => t.id === existingTag.id)) {
+                                            setInstallationTags([...installationTags, existingTag]);
+                                          }
+                                          // Add to selected tags if not already selected
+                                          if (!editedInstallationDetail.tagIds.includes(existingTag.id)) {
+                                            setEditedInstallationDetail({
+                                              ...editedInstallationDetail,
+                                              tagIds: [...editedInstallationDetail.tagIds, existingTag.id]
+                                            });
+                                          }
+                                          setNewTagName('');
+                                          toast.success('Tag already exists and has been added');
+                                        } else {
+                                          toast.error(`Failed to create tag: ${error.error || 'Unknown error'}`);
+                                        }
+                                      }
+                                    } catch (error) {
+                                      console.error('Error creating tag:', error);
+                                      toast.error('An error occurred while creating the tag');
+                                    } finally {
+                                      setIsCreatingTag(false);
+                                    }
+                                  }
+                                }}
+                                disabled={!newTagName || isCreatingTag}
+                                className={`${
+                                  !newTagName || isCreatingTag ? 'bg-gray-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'
+                                } text-white px-4 py-2 rounded-md transition`}
+                              >
+                                {isCreatingTag ? 'Creating...' : 'Create & Add Tag'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {caseData.installationDetail?.tags && caseData.installationDetail?.tags.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {caseData.installationDetail?.tags.map((tagWrapper) => (
+                            <span
+                              key={tagWrapper.id}
+                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                            >
+                              {tagWrapper.tag.name}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-gray-500">No tags added yet.</p>
+                      )}
+                      {!isEditingInstallation && (
+                        <button 
+                          onClick={() => setIsEditingInstallation(true)} 
+                          className="mt-4 inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-indigo-700 bg-white hover:bg-indigo-50"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                          Add/Edit Tags
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Lighting Details - Enhanced with editing capability */}
           {activeTab === 'lightingDetails' && (
             <div>
@@ -1000,6 +1597,9 @@ export default function CaseDetailsPage() {
                   </div>
                 </div>
               </div>
+
+
+              
               
               {/* Project Specifications */}
               <h4 className="text-lg font-medium text-gray-700 mb-4">Project Specifications</h4>

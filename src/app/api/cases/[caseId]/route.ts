@@ -27,6 +27,20 @@ export async function GET(
             createdAt: 'desc',
           },
         },
+        fixtureCounts: { // ✅ Now works
+          include: {
+            fixtureType: true, // Get fixture type info
+          },
+        },
+        installationDetail: { // ✅ Now works
+          include: {
+            tags: {
+              include: {
+                tag: true, // Get tag name
+              },
+            },
+          },
+        },
       },
     });
 

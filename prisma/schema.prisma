@@ -14,71 +14,134 @@ datasource db {
 }
 
 model Case {
-  id                      String   @id @default(cuid())
-  userId                  String
-  user                    User     @relation(fields: [userId], references: [id])
-  customerName            String
-  projectDetails          String
-  uploadToken             String   @default(uuid())
-  status                  String   @default("New")
-  photos                  Photo[]
-  documents               Document[]
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
-  
+  id             String     @id @default(cuid())
+  userId         String
+  user           User       @relation(fields: [userId], references: [id])
+  customerName   String
+  projectDetails String
+  uploadToken    String     @default(uuid())
+  status         String     @default("New")
+  photos         Photo[]
+  documents      Document[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  // NEW: Back relation for ActivityLog
+  activityLogs ActivityLog[]
+
+  // NEW: Back relation for CaseFixtureCount
+  fixtureCounts CaseFixtureCount[]
+
+  // NEW: Back relation for InstallationDetail (1:1)
+  installationDetail InstallationDetail?
+
   // New School Info Fields
-  schoolName              String
-  contactPerson           String
-  emailAddress            String
-  phoneNumber             String
-  schoolAddress           String
-  
-  num2FtLinearHighBay     Int       @default(0)
-  num150WUFOHighBay       Int       @default(0)
-  num240WUFOHighBay       Int       @default(0)
-  num2x2LEDPanel          Int       @default(0)
-  num2x4LEDPanel          Int       @default(0)
-  num1x4LEDPanel          Int       @default(0)
-  num4FtStripLight        Int       @default(0)
-  
-  lightingPurpose         String
-  facilitiesUsedIn        String
-  installationService     String    // Yes / No / Not Sure
+  schoolName    String
+  contactPerson String
+  emailAddress  String
+  phoneNumber   String
+  schoolAddress String
+
+  num2FtLinearHighBay Int @default(0)
+  num150WUFOHighBay   Int @default(0)
+  num240WUFOHighBay   Int @default(0)
+  num2x2LEDPanel      Int @default(0)
+  num2x4LEDPanel      Int @default(0)
+  num1x4LEDPanel      Int @default(0)
+  num4FtStripLight    Int @default(0)
+
+  lightingPurpose     String
+  facilitiesUsedIn    String
+  installationService String // Yes / No / Not Sure
 }
+
 model Photo {
-  id          String   @id @default(cuid())
-  url         String
-  caseId      String
-  case        Case     @relation(fields: [caseId], references: [id])
-  uploadedViaLink Boolean @default(false)
-  comment     String?  // <-- New: comment under the photo
-  customName  String?  // <-- New: editable photo name
-  createdAt   DateTime @default(now())
+  id              String   @id @default(cuid())
+  url             String
+  caseId          String
+  case            Case     @relation(fields: [caseId], references: [id])
+  uploadedViaLink Boolean  @default(false)
+  comment         String? // <-- New: comment under the photo
+  customName      String? // <-- New: editable photo name
+  createdAt       DateTime @default(now())
 }
 
 model Document {
-  id          String   @id @default(cuid())
-  url         String
-  fileName    String
-  customName  String?  // <-- New: editable document name
-  caseId      String
-  case        Case     @relation(fields: [caseId], references: [id])
-  uploadedViaLink Boolean @default(false)
-  createdAt   DateTime @default(now())
+  id              String   @id @default(cuid())
+  url             String
+  fileName        String
+  customName      String? // <-- New: editable document name
+  caseId          String
+  case            Case     @relation(fields: [caseId], references: [id])
+  uploadedViaLink Boolean  @default(false)
+  createdAt       DateTime @default(now())
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  password  String?  // hashed
-  role      Role     @default(USER)
-  cases     Case[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String        @id @default(cuid())
+  email        String        @unique
+  name         String?
+  password     String? // hashed
+  role         Role          @default(USER)
+  cases        Case[]
+  activityLogs ActivityLog[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
+model ActivityLog {
+  id        String   @id @default(cuid())
+  caseId    String
+  case      Case     @relation(fields: [caseId], references: [id])
+  action    String
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model LightFixtureType {
+  id            String             @id @default(cuid())
+  name          String             @unique
+  description   String?
+  createdAt     DateTime           @default(now())
+  fixtureCounts CaseFixtureCount[]
+}
+
+model CaseFixtureCount {
+  id            String           @id @default(cuid())
+  caseId        String
+  case          Case             @relation(fields: [caseId], references: [id])
+  fixtureTypeId String
+  fixtureType   LightFixtureType @relation(fields: [fixtureTypeId], references: [id])
+  count         Int              @default(0)
+}
+
+model InstallationDetail {
+  id            String   @id @default(cuid())
+  caseId        String   @unique
+  case          Case     @relation(fields: [caseId], references: [id])
+  ceilingHeight Float?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tags InstallationDetailTag[]
+}
+
+model InstallationTag {
+  id                     String                  @id @default(cuid())
+  name                   String                  @unique
+  createdAt              DateTime                @default(now())
+  installationDetailTags InstallationDetailTag[]
+}
+
+model InstallationDetailTag {
+  id                   String             @id @default(cuid())
+  installationDetailId String
+  installationDetail   InstallationDetail @relation(fields: [installationDetailId], references: [id])
+  tagId                String
+  tag                  InstallationTag    @relation(fields: [tagId], references: [id])
+}
 
 enum Role {
   ADMIN
