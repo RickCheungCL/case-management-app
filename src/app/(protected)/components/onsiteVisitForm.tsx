@@ -268,7 +268,14 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           } sm:static sm:translate-x-0 sm:w-64 sm:min-w-[12rem] sm:max-w-[15rem] overflow-y-auto`}
         >
-          <div className="p-4 border-b font-semibold sticky top-0 bg-gray-100 z-10">Rooms</div>
+          <div className="p-4 border-b font-semibold sticky top-0 bg-gray-100 z-10">Rooms 
+            <button
+                className="sm:hidden p-1 rounded hover:bg-gray-200"
+                aria-label="Close Sidebar"
+                onClick={() => setSidebarOpen(false)}
+            >
+                ✕
+            </button></div>
           <div className="flex-1 overflow-y-auto">
             {rooms.map((room, index) => {
               const tagName = LOCATION_TAGS.find((tag) => tag.id === room.locationTagId)?.name;
