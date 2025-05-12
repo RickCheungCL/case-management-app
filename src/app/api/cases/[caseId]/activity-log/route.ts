@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ caseId: string }> }
+  { params }: { params: Promise<{ caseId: string }> },
 ) {
   const { caseId } = await params;
 

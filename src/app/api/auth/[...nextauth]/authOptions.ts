@@ -22,8 +22,8 @@ export const authOptions: AuthOptions = {
           where: { email: credentials?.email },
         });
         if (!credentials || !credentials.password) {
-            return null;
-          }
+          return null;
+        }
         if (!user || !user.password) return null;
 
         const isValid = await compare(credentials.password, user.password);

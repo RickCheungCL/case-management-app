@@ -19,7 +19,7 @@ export default function AdminPortalPage() {
   const [newUser, setNewUser] = useState({ email: '', name: '', password: '', role: 'USER' });
 
   useEffect(() => {
-    if ((session?.user as { role?: string })?.role !== 'ADMIN'){
+    if ((session?.user as { role?: string })?.role !== 'ADMIN') {
       toast.error('Access denied.');
       router.replace('/');
       return;

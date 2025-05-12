@@ -22,7 +22,7 @@ const bufferToStream = (buffer: Buffer) => {
 export async function POST(request: Request) {
   const formData = await request.formData();
   const file = formData.get('file') as File;
-  const customName = formData.get('customName') as string || '';
+  const customName = (formData.get('customName') as string) || '';
   const caseId = formData.get('caseId') as string;
   const uploadedViaLink = formData.get('uploadedViaLink') === 'false';
 
@@ -38,14 +38,14 @@ export async function POST(request: Request) {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder: 'case_documents', // 📂 Store documents in a separate folder
-          resource_type: 'raw',      // 📄 Important: Allow uploading non-image files (PDF, DOCX)
+          resource_type: 'raw', // 📄 Important: Allow uploading non-image files (PDF, DOCX)
         },
         (error, result) => {
           if (error || !result) {
             return reject(error);
           }
           resolve(result);
-        }
+        },
       );
       bufferToStream(buffer).pipe(uploadStream);
     });

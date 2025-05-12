@@ -22,7 +22,7 @@ const bufferToStream = (buffer: Buffer) => {
 export async function POST(request: Request) {
   const formData = await request.formData();
   const file = formData.get('file') as File;
-  const comment = formData.get('comment') as string || '';
+  const comment = (formData.get('comment') as string) || '';
   const caseId = formData.get('caseId') as string;
   const uploadedViaLink = formData.get('uploadedViaLink') === 'false';
 
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
             return reject(error);
           }
           resolve(result);
-        }
+        },
       );
       bufferToStream(buffer).pipe(uploadStream);
     });

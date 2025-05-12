@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession,signOut  } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 export default function PostLoginPage() {
@@ -13,8 +13,7 @@ export default function PostLoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-
-        <button
+      <button
         onClick={handleSignOut}
         className="absolute top-4 right-4 bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700"
       >

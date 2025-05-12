@@ -56,7 +56,7 @@ export async function POST(request: Request) {
             },
           });
         }
-      }
+      },
     );
 
     bufferToStream(buffer).pipe(uploadStream);

@@ -12,7 +12,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-
   useEffect(() => {
     if (status === 'authenticated') {
       router.push('/post-login');

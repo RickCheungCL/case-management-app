@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 export async function GET() {
   try {
     const tags = await prisma.installationTag.findMany({
-      orderBy: { name: 'asc' }
+      orderBy: { name: 'asc' },
     });
     return NextResponse.json(tags);
   } catch (error) {
@@ -17,35 +17,35 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-    try {
-      const { name } = await req.json();
-      
-      if (!name || name.trim() === '') {
-        return NextResponse.json({ error: 'Tag name is required' }, { status: 400 });
-      }
-  
-      // Check if tag already exists (case insensitive)
-      const existingTag = await prisma.installationTag.findFirst({
-        where: {
-          name: {
-            equals: name,
-            mode: 'insensitive'
-          }
-        }
-      });
-  
-      if (existingTag) {
-        return NextResponse.json({ error: 'Tag already exists', tag: existingTag }, { status: 400 });
-      }
-  
-      // Create new tag
-      const newTag = await prisma.installationTag.create({
-        data: { name }
-      });
-  
-      return NextResponse.json(newTag);
-    } catch (error) {
-      console.error('Error creating tag:', error);
-      return NextResponse.json({ error: 'Failed to create tag' }, { status: 500 });
+  try {
+    const { name } = await req.json();
+
+    if (!name || name.trim() === '') {
+      return NextResponse.json({ error: 'Tag name is required' }, { status: 400 });
     }
+
+    // Check if tag already exists (case insensitive)
+    const existingTag = await prisma.installationTag.findFirst({
+      where: {
+        name: {
+          equals: name,
+          mode: 'insensitive',
+        },
+      },
+    });
+
+    if (existingTag) {
+      return NextResponse.json({ error: 'Tag already exists', tag: existingTag }, { status: 400 });
+    }
+
+    // Create new tag
+    const newTag = await prisma.installationTag.create({
+      data: { name },
+    });
+
+    return NextResponse.json(newTag);
+  } catch (error) {
+    console.error('Error creating tag:', error);
+    return NextResponse.json({ error: 'Failed to create tag' }, { status: 500 });
   }
+}

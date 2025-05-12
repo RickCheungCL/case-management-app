@@ -25,10 +25,10 @@ export async function PUT(req: Request, props: { params: Promise<{ caseId: strin
 
     // Validate user ID exists
     if (!session.user?.id) {
-      console.log("Warning: User session exists but user ID is missing");
+      console.log('Warning: User session exists but user ID is missing');
       return NextResponse.json({ error: 'User ID not found' }, { status: 401 });
     }
-    
+
     // Store user ID safely
     const userId = session.user.id;
 
@@ -79,9 +79,12 @@ export async function PUT(req: Request, props: { params: Promise<{ caseId: strin
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error updating installation details:', error);
-    return NextResponse.json({ 
-      error: 'Failed to update installation details', 
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Failed to update installation details',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 },
+    );
   }
 }

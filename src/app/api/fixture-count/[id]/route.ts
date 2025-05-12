@@ -22,10 +22,13 @@ export async function DELETE(_: Request, props: { params: Promise<{ id: string }
     // Log the activity
     await prisma.activityLog.create({
       data: {
-        caseId: (await prisma.caseFixtureCount.findUnique({
-          where: { id: params.id },
-          select: { caseId: true },
-        }))?.caseId || '',
+        caseId:
+          (
+            await prisma.caseFixtureCount.findUnique({
+              where: { id: params.id },
+              select: { caseId: true },
+            })
+          )?.caseId || '',
         userId: session.user.id!,
         action: 'Removed fixture from case',
       },

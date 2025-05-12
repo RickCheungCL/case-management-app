@@ -10,7 +10,7 @@ export async function GET() {
     const fixtureTypes = await prisma.lightFixtureType.findMany({
       orderBy: { name: 'asc' },
     });
-    
+
     return NextResponse.json(fixtureTypes);
   } catch (error) {
     console.error('Error fetching fixture types:', error);

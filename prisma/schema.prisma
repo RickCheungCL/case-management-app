@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,88 +8,79 @@ datasource db {
 }
 
 model Case {
-  id             String     @id @default(cuid())
-  userId         String
-  user           User       @relation(fields: [userId], references: [id])
-  customerName   String
-  projectDetails String
-  uploadToken    String     @default(uuid())
-  status         String     @default("New")
-  photos         Photo[]
-  documents      Document[]
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-
-  // NEW: Back relation for ActivityLog
-  activityLogs ActivityLog[]
-
-  // NEW: Back relation for CaseFixtureCount
-  fixtureCounts CaseFixtureCount[]
-
-  // NEW: Back relation for InstallationDetail (1:1)
-  installationDetail InstallationDetail?
-
-  // New School Info Fields
-  schoolName    String
-  contactPerson String
-  emailAddress  String
-  phoneNumber   String
-  schoolAddress String
-
-  num2FtLinearHighBay Int @default(0)
-  num150WUFOHighBay   Int @default(0)
-  num240WUFOHighBay   Int @default(0)
-  num2x2LEDPanel      Int @default(0)
-  num2x4LEDPanel      Int @default(0)
-  num1x4LEDPanel      Int @default(0)
-  num4FtStripLight    Int @default(0)
-
+  id                  String              @id @default(cuid())
+  userId              String
+  customerName        String
+  projectDetails      String
+  uploadToken         String              @default(uuid())
+  status              String              @default("New")
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  schoolName          String
+  contactPerson       String
+  emailAddress        String
+  phoneNumber         String
+  schoolAddress       String
+  num2FtLinearHighBay Int                 @default(0)
+  num150WUFOHighBay   Int                 @default(0)
+  num240WUFOHighBay   Int                 @default(0)
+  num2x2LEDPanel      Int                 @default(0)
+  num2x4LEDPanel      Int                 @default(0)
+  num1x4LEDPanel      Int                 @default(0)
+  num4FtStripLight    Int                 @default(0)
   lightingPurpose     String
   facilitiesUsedIn    String
-  installationService String // Yes / No / Not Sure
+  installationService String
+  activityLogs        ActivityLog[]
+  user                User                @relation(fields: [userId], references: [id])
+  fixtureCounts       CaseFixtureCount[]
+  documents           Document[]
+  installationDetail  InstallationDetail?
+  onSiteVisit         OnSiteVisit?
+  photos              Photo[]
 }
 
 model Photo {
   id              String   @id @default(cuid())
   url             String
   caseId          String
-  case            Case     @relation(fields: [caseId], references: [id])
   uploadedViaLink Boolean  @default(false)
-  comment         String? // <-- New: comment under the photo
-  customName      String? // <-- New: editable photo name
+  comment         String?
+  customName      String?
   createdAt       DateTime @default(now())
+  case            Case     @relation(fields: [caseId], references: [id])
 }
 
 model Document {
   id              String   @id @default(cuid())
   url             String
   fileName        String
-  customName      String? // <-- New: editable document name
+  customName      String?
   caseId          String
-  case            Case     @relation(fields: [caseId], references: [id])
   uploadedViaLink Boolean  @default(false)
   createdAt       DateTime @default(now())
+  case            Case     @relation(fields: [caseId], references: [id])
 }
 
 model User {
   id           String        @id @default(cuid())
   email        String        @unique
   name         String?
-  password     String? // hashed
+  password     String?
   role         Role          @default(USER)
-  cases        Case[]
-  activityLogs ActivityLog[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  activityLogs ActivityLog[]
+  cases        Case[]
 }
 
 model ActivityLog {
   id        String   @id @default(cuid())
   caseId    String
-  case      Case     @relation(fields: [caseId], references: [id])
   action    String
   createdAt DateTime @default(now())
   userId    String
+  case      Case     @relation(fields: [caseId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
 }
 
@@ -110,22 +95,21 @@ model LightFixtureType {
 model CaseFixtureCount {
   id            String           @id @default(cuid())
   caseId        String
-  case          Case             @relation(fields: [caseId], references: [id])
   fixtureTypeId String
-  fixtureType   LightFixtureType @relation(fields: [fixtureTypeId], references: [id])
   count         Int              @default(0)
+  case          Case             @relation(fields: [caseId], references: [id])
+  fixtureType   LightFixtureType @relation(fields: [fixtureTypeId], references: [id])
 }
 
 model InstallationDetail {
-  id            String   @id @default(cuid())
-  caseId        String   @unique
-  case          Case     @relation(fields: [caseId], references: [id])
+  id            String                  @id @default(cuid())
+  caseId        String                  @unique
   ceilingHeight Float?
   notes         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  tags InstallationDetailTag[]
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+  case          Case                    @relation(fields: [caseId], references: [id])
+  tags          InstallationDetailTag[]
 }
 
 model InstallationTag {
@@ -138,9 +122,73 @@ model InstallationTag {
 model InstallationDetailTag {
   id                   String             @id @default(cuid())
   installationDetailId String
-  installationDetail   InstallationDetail @relation(fields: [installationDetailId], references: [id])
   tagId                String
+  installationDetail   InstallationDetail @relation(fields: [installationDetailId], references: [id])
   tag                  InstallationTag    @relation(fields: [tagId], references: [id])
+}
+
+model OnSiteVisit {
+  id        String            @id @default(cuid())
+  caseId    String            @unique
+  createdAt DateTime          @default(now())
+  case      Case              @relation(fields: [caseId], references: [id])
+  rooms     OnSiteVisitRoom[]
+}
+
+model OnSiteVisitRoom {
+  id              String                   @id @default(cuid())
+  onSiteVisitId   String
+  location        String
+  locationTagId   String?
+  lightingIssue   String
+  customerRequest String
+  mountingKitQty  Int
+  motionSensorQty Int
+  createdAt       DateTime                 @default(now())
+  suggestedLights OnSiteSuggestedProduct[]
+  photos          OnSiteVisitPhoto[]
+  locationTag     OnSiteLocationTag?       @relation(fields: [locationTagId], references: [id])
+  onSiteVisit     OnSiteVisit              @relation(fields: [onSiteVisitId], references: [id])
+}
+
+model OnSiteVisitPhoto {
+  id        String                     @id @default(cuid())
+  roomId    String
+  url       String
+  comment   String
+  createdAt DateTime                   @default(now())
+  room      OnSiteVisitRoom            @relation(fields: [roomId], references: [id])
+  tags      OnSiteVisitPhotoTagPivot[]
+}
+
+model OnSiteVisitPhotoTagPivot {
+  id      String           @id @default(cuid())
+  photoId String
+  tagId   String
+  photo   OnSiteVisitPhoto @relation(fields: [photoId], references: [id])
+  tag     OnSitePhotoTag   @relation(fields: [tagId], references: [id])
+}
+
+model OnSiteSuggestedProduct {
+  id        String          @id @default(cuid())
+  roomId    String
+  productId String
+  quantity  Int
+  room      OnSiteVisitRoom @relation(fields: [roomId], references: [id])
+}
+
+model OnSiteLocationTag {
+  id        String            @id @default(cuid())
+  name      String            @unique
+  createdAt DateTime          @default(now())
+  rooms     OnSiteVisitRoom[]
+}
+
+model OnSitePhotoTag {
+  id           String                     @id @default(cuid())
+  name         String                     @unique
+  createdAt    DateTime                   @default(now())
+  taggedPhotos OnSiteVisitPhotoTagPivot[]
 }
 
 enum Role {

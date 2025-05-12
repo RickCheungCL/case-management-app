@@ -16,8 +16,8 @@ export default function CustomerUploadPage() {
   const [isUploading, setIsUploading] = useState(false);
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: 'photo' | 'document') => {
     const files = Array.from(e.target.files || []);
-    const newUploads = files.map(file => ({ file, type, commentOrName: '' }));
-    setUploads(prev => [...prev, ...newUploads]);
+    const newUploads = files.map((file) => ({ file, type, commentOrName: '' }));
+    setUploads((prev) => [...prev, ...newUploads]);
   };
 
   const handleDelete = (index: number) => {
@@ -58,7 +58,7 @@ export default function CustomerUploadPage() {
           if (!res.ok) {
             throw new Error(`Failed to upload ${item.file.name}`);
           }
-        })
+        }),
       );
 
       toast.success('All files uploaded successfully!');
@@ -66,8 +66,8 @@ export default function CustomerUploadPage() {
     } catch (error: any) {
       console.error(error);
       toast.error(error.message || 'Upload failed');
-    } finally{
-        setIsUploading(false);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -77,7 +77,9 @@ export default function CustomerUploadPage() {
       <div className="bg-indigo-700 text-white p-6 shadow-md">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold">Upload Files for Quotation</h1>
-          <p className="text-sm text-indigo-100 mt-1">Please upload relevant documents and photos for your case.</p>
+          <p className="text-sm text-indigo-100 mt-1">
+            Please upload relevant documents and photos for your case.
+          </p>
         </div>
       </div>
 
