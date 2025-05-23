@@ -59,7 +59,7 @@ export async function GET(
       return {
         id: fixture?.id || entry.fixtureTypeId,
         name: fixture?.name || 'Unknown',
-        sku: fixture?.sku || '',
+        sku: fixture?.SKU || '',
         wattage: fixture?.description || '',
         qty: entry.qty,
       };

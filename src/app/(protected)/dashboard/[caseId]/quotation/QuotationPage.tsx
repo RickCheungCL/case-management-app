@@ -405,11 +405,11 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                     return (
                       <React.Fragment key={`prod-${pageIndex}-${i}`}>
                         <tr className="no-break">
-                          <td className="p-1 border text-center">{prod.sku}</td>
-                          <td className="p-1 border text-left">{prod.name}</td>
-                          <td className="p-1 border text-center">{prod.quantity}</td>
-                          <td className="p-1 border text-center">${prod.unitPrice.toFixed(2)}</td>
-                          <td className="p-1 border text-center">${final.toFixed(2)}</td>
+                          <td className="p-1 border-r  text-center">{prod.sku}</td>
+                          <td className="p-1 border-r  text-left">{prod.name}</td>
+                          <td className="p-1 border-r  text-center">{prod.quantity}</td>
+                          <td className="p-1 border-r  text-center">${prod.unitPrice.toFixed(2)}</td>
+                          <td className="p-1 border-r  text-center">${final.toFixed(2)}</td>
                         </tr>
                         {discount && (
                           <tr className="bg-gray-50 no-break">
