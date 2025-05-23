@@ -14,17 +14,23 @@ interface ProductSelection {
   productId: string;
   qty: number;
 }
-
+interface ExistingProduct {
+  productId: string;
+  wattage: number;
+  qty: number;
+}
 interface RoomData {
   id: string;
   location: string;
   locationTagId: string | null;
   photos: OnSiteVisitPhoto[];
   suggestedProducts: ProductSelection[];
+  existingLights: ExistingProduct[]  // Changed from existingLighting to existingLights to match Prisma
   lightingIssue: string;
   customerRequest: string;
   mountingKitQty: number;
   motionSensorQty: number;
+  ceilingHeight: number | null;
 }
 
 const LOCATION_TAGS = [
@@ -38,7 +44,11 @@ const photoTags = [
 ];
 
 export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
-  const [products, setProducts] = useState<{ id: string; name: string }[]>([]);
+  
+  
+  const [existingProducts, setExistingProducts] = useState<{ id: string; name: string; wattage: number }[]>([]);
+  const [suggestedProducts, setSuggestedProducts] = useState<{ id: string; name: string }[]>([]);
+
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
@@ -53,8 +63,15 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
   const [newPhotoTagInput, setNewPhotoTagInput] = useState('');
   const [locationTags, setLocationTags] = useState<{ id: string; name: string }[]>([]);
   // 🚀 Fetch initial OnSiteVisit data (rooms, photos, tags, products)
+
+  const [operationHoursPerDay, setOperationHoursPerDay] = useState<number>(0);
+  const [operationDaysPerYear, setOperationDaysPerYear] = useState<number>(0);
+
+
+
   useEffect(() => {
     const fetchInit = async () => {
+      try{
       const res = await axios.get(`/api/onsitevisit/form/init?caseId=${caseId}`);
       const data = res.data;
       console.log('Loaded OnSiteVisit:', data);
@@ -67,22 +84,52 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
         customerRequest: room.customerRequest,
         mountingKitQty: room.mountingKitQty,
         motionSensorQty: room.motionSensorQty,
+        ceilingHeight: room.ceilingHeight || null,
         photos: room.photos.map((photo: any) => ({
           id: photo.id,
           url: photo.url,
-          comment: photo.comment,
-          tags: photo.tags.map((pivot: any) => pivot.tag.id), // flatten tag ids
+          comment: photo.comment ?? '',
+          tags: photo.tags.map((pivot: any) => pivot.tag.id),
         })),
         suggestedProducts: room.suggestedLights.map((light: any) => ({
           productId: light.productId,
           qty: light.quantity,
         })),
+        existingLights: room.existingLights.map((light: any) => ({  // Changed from existingProducts to existingLights to match Prisma schema
+          productId: light.productId,
+          qty: light.quantity,
+          wattage: light.product?.wattage || 0,
+        })),
       }));
-      const fetchProducts = async () => {
-        const res = await fetch('/api/products');
+      
+      const fetchExistingProducts = async () => {
+        const res = await fetch('/api/products/existing');
         const data = await res.json();
-        setProducts(data);
+        setExistingProducts(data);
       };
+      
+      const fetchSuggestedProducts = async () => {
+        const res = await fetch('/api/fixture-types');
+        const data = await res.json();
+        setSuggestedProducts(data);
+      };
+      
+      fetchExistingProducts();
+      fetchSuggestedProducts();
+      
+      
+      const fetchProducts = async () => {
+        const [suggestedRes, existingRes] = await Promise.all([
+          fetch('/api/products/suggested'),
+          fetch('/api/products/existing'),
+        ]);
+        const suggested = await suggestedRes.json();
+        const existing = await existingRes.json();
+      
+        setSuggestedProducts(suggested);
+        setExistingProducts(existing);
+      };
+      
       fetchProducts();
       const loadTags = async () => {
         const res = await fetch(`/api/onsitevisit/photo/tag`);
@@ -99,8 +146,11 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
       if (loadedRooms.length > 0) {
         setSelectedRoomId(loadedRooms[0].id);
       }
+      } catch (error){
+        console.error('Error fetching onsite visit data:', error);
+      }
     };
-
+    
     fetchInit();
   }, [caseId]);
   const handleDeleteRoom = async (roomIdToDelete: string) => {
@@ -148,7 +198,20 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
       suggestedProducts: newProducts,
     });
   };
-
+  const updateExistingProductsInDB = async (existingLights: { productId: string; qty: number; wattage: number }[]) => {
+    if (!selectedRoom) return;
+    
+    try {
+      await fetch(`/api/onsitevisit/room/${selectedRoom.id}/existingLights`, {  // Changed endpoint to match backend
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ existingLights }),  // Consistent naming
+      });
+    } catch (error) {
+      console.error('Failed to update existing lighting:', error);
+    }
+  };
+  
   // ✅ Add new room (via API)
   const addRoom = async () => {
     try {
@@ -160,9 +223,9 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
         mountingKitQty: 0,
         motionSensorQty: 0,
       });
-
+  
       const newRoom = res.data;
-
+  
       setRooms((prev) => [
         ...prev,
         {
@@ -170,13 +233,17 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
           location: newRoom.location,
           locationTagId: newRoom.locationTagId,
           photos: [],
+          existingLights: [],  // Changed from existingLights to existingLights
           suggestedProducts: [],
           lightingIssue: newRoom.lightingIssue,
           customerRequest: newRoom.customerRequest,
           mountingKitQty: newRoom.mountingKitQty,
           motionSensorQty: newRoom.motionSensorQty,
+          ceilingHeight: null,
         },
       ]);
+  
+     
 
       setSelectedRoomId(newRoom.id);
     } catch (error) {
@@ -322,6 +389,8 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
 
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto p-6">
+        
+
           {!selectedRoom ? (
             <div>Select a room</div>
           ) : (
@@ -403,7 +472,7 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                   Add
                 </button>
               </div>
-
+                  
               {/* PHOTO UPLOAD */}
               <div className="mb-4">
                 <label>Upload Photos (multiple):</label>
@@ -539,7 +608,84 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                   </div>
                 )}
               </div>
+              {/* Existing Lighting */}
+              <div className="mb-4">
+                <label className="block font-semibold mb-1">Existing Lighting:</label>
+                {selectedRoom.existingLights.map((prod, idx) => (  // Changed from existingLights to existingLights
+                  <div key={idx} className="flex items-center gap-2 mb-1">
+                    <select
+                      value={prod.productId}
+                      onChange={(e) => {
+                        const prods = [...selectedRoom.existingLights];  // Changed from existingLighting to existingLights
+                        prods[idx].productId = e.target.value;
+                        updateRoom({ existingLights: prods });  // Changed from existingLighting to existingLights
+                        updateExistingProductsInDB(prods); // sync to DB
+                      }}
+                      className="border rounded p-1 flex-1"
+                    >
+                      <option value="">Select Product</option>
+                      {existingProducts.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} ({p.wattage}W)
+                        </option>
+                      ))}
 
+                    </select>
+
+                    <input
+                      type="number"
+                      min="1"
+                      value={prod.qty}
+                      onChange={(e) => {
+                        const prods = [...selectedRoom.existingLights];  // Changed from existingLighting to existingLights
+                        prods[idx].qty = parseInt(e.target.value) || 1;
+                        updateRoom({ existingLights: prods });  // Changed from existingLighting to existingLights
+                        updateExistingProductsInDB(prods); // sync to DB
+                      }}
+                      className="border rounded p-1 w-16 text-center"
+                    />
+
+                    <input
+                      type="number"
+                      min="0"
+                      value={prod.wattage}
+                      onChange={(e) => {
+                        const prods = [...selectedRoom.existingLights];  // Changed from existingLighting to existingLights
+                        prods[idx].wattage = parseInt(e.target.value) || 0;
+                        updateRoom({ existingLights: prods });  // Changed from existingLighting to existingLights
+                        updateExistingProductsInDB(prods); // sync to DB
+                      }}
+                      className="border rounded p-1 w-20 text-center"
+                      placeholder="Wattage"
+                    />
+
+                    <button
+                      onClick={() => {
+                        const prods = selectedRoom.existingLights.filter((_, i) => i !== idx);  // Changed from existingLighting to existingLights
+                        updateRoom({ existingLights: prods });  // Changed from existingLighting to existingLights
+                        updateExistingProductsInDB(prods); // sync to DB
+                      }}
+                      className="text-red-500 hover:underline"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+
+                <button
+                  onClick={() =>
+                    updateRoom({
+                      existingLights: [  // Changed from existingLighting to existingLights
+                        ...selectedRoom.existingLights,  // Changed from existingLighting to existingLights
+                        { productId: '', qty: 1, wattage: 0 },
+                      ],
+                    })
+                  }
+                  className="text-blue-500 hover:underline mt-1"
+                >
+                  + Add Existing Product
+                </button>
+              </div>
               {/* Suggested Lighting */}
               <div className="mb-4">
                 <label className="block font-semibold mb-1">Suggested Lighting:</label>
@@ -556,7 +702,7 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                       className="border rounded p-1 flex-1"
                     >
                       <option value="">Select Product</option>
-                      {products.map((p) => (
+                      {suggestedProducts.map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.name}
                         </option>
@@ -597,10 +743,20 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                   }
                   className="text-blue-500 hover:underline mt-1"
                 >
-                  + Add Product
+                  + Add Suggested Product
                 </button>
               </div>
-
+              <label className="block mb-2">
+                Ceiling Height (ft):
+                <input
+                  type="number"
+                  value={selectedRoom.ceilingHeight || ''}
+                  onChange={(e) =>
+                    updateRoomAndPersist({ ceilingHeight: parseFloat(e.target.value) || null })
+                  }
+                  className="border rounded p-1 w-full"
+                />
+              </label>
               {/* Other fields */}
               <label className="block mb-2">
                 Existing Lighting Issue:
@@ -621,7 +777,7 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                   rows={2}
                 />
               </label>
-
+              
               <div className="grid grid-cols-2 gap-4">
                 <label className="block">
                   Mounting Kit Qty:

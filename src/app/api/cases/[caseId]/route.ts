@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export async function GET(request: Request, { params }: { params: Promise<{ caseId: string }> }) {
-  const caseId = (await params).caseId;
+  const caseId = await (await params).caseId;
 
   if (!caseId) {
     return NextResponse.json({ error: 'Case ID is required' }, { status: 400 });
@@ -65,7 +65,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ case
 
 // Add PUT method to update case details
 export async function PUT(request: Request, { params }: { params: Promise<{ caseId: string }> }) {
-  const caseId = (await params).caseId;
+  const caseId =await (await params).caseId;
 
   if (!caseId) {
     return NextResponse.json({ error: 'Case ID is required' }, { status: 400 });

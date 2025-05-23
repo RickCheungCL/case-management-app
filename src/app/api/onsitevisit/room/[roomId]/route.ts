@@ -21,6 +21,7 @@ export async function PUT(
         mountingKitQty: data.mountingKitQty ?? undefined,
         motionSensorQty: data.motionSensorQty ?? undefined,
         locationTagId: data.locationTagId ?? undefined,
+        ceilingHeight: data.ceilingHeight ?? undefined, 
       },
     });
 

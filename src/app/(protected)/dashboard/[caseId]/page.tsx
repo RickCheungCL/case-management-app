@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import OnSiteVisitForm from '../../components/onsiteVisitForm';
-
+import Link from 'next/link';
 interface Photo {
   id: string;
   url: string;
@@ -183,6 +183,8 @@ export default function CaseDetailsPage() {
   const [fixtureTypes, setFixtureTypes] = useState<FixtureType[]>([]);
 
   const [installationTags, setInstallationTags] = useState<InstallationTag[]>([]);
+  const [operationHoursPerDay, setOperationHoursPerDay] = useState<number>(0);
+  const [operationDaysPerYear, setOperationDaysPerYear] = useState<number>(0);
 
   const fetchFixtures = async () => {
     try {
@@ -290,7 +292,18 @@ export default function CaseDetailsPage() {
       console.error('Error fetching tags:', error);
     }
   };
-
+  const fetchOperationSettings = async () => {
+    try {
+      const res = await fetch(`/api/cases/${caseId}/operation`);
+      if (!res.ok) throw new Error('Failed to fetch operation settings');
+      const data = await res.json();
+  
+      setOperationHoursPerDay(data.operationHoursPerDay);
+      setOperationDaysPerYear(data.operationDaysPerYear);
+    } catch (error) {
+      console.error('Error loading operation settings:', error);
+    }
+  };
   const fetchAvailableTags = async () => {
     try {
       const res = await fetch('/api/tags');
@@ -310,6 +323,7 @@ export default function CaseDetailsPage() {
     fetchFixtureTypes();
     fetchAvailableTags();
     fetchInstallationTags();
+    fetchOperationSettings();
   }, [caseId]);
 
   useEffect(() => {
@@ -401,7 +415,35 @@ export default function CaseDetailsPage() {
   //  toast.error('Upload failed!');
   //}
   //}}};
-
+  const handleOperationHoursChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const updatedHours = parseInt(e.target.value) || 0;
+    setOperationHoursPerDay(updatedHours);
+  
+    await fetch(`/api/cases/${caseId}/operation`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        operationHoursPerDay: updatedHours,
+        operationDaysPerYear, // ✅ use current value
+      }),
+    });
+  };
+  
+  const handleOperationDaysChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const updatedDays = parseInt(e.target.value) || 0;
+    setOperationDaysPerYear(updatedDays);
+  
+    await fetch(`/api/cases/${caseId}/operation`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        operationHoursPerDay, // ✅ use current value
+        operationDaysPerYear: updatedDays,
+      }),
+    });
+  };
+  
+  
   // Function to update contact information
   const updateContactInfo = async () => {
     try {
@@ -1351,9 +1393,48 @@ export default function CaseDetailsPage() {
           )}
 
           {/* Lighting & Service Requirement Tab */}
+          {/* Lighting & Service Requirement Tab */}
           {activeTab === 'onSiteVisitForm' && typeof caseId === 'string' && (
-            <OnSiteVisitForm caseId={caseId} />
+            <>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+              <Link
+                href={`/dashboard/${caseId}/summary`}
+                className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 mt-4 inline-block"
+              >
+                📄 View Summary
+              </Link>
+              <Link
+                href={`/dashboard/${caseId}/quotation`}
+                className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 mt-4 inline-block"
+              >
+                📄 View quotation
+              </Link>
+                <label>
+                  Operation Hours / Day:
+                  <input
+                    type="number"
+                    min="0"
+                    value={operationHoursPerDay}
+                    onChange={handleOperationHoursChange}
+                    className="border rounded p-1 w-full"
+                  />
+                </label>
+                <label>
+                  Operation Days / Year:
+                  <input
+                    type="number"
+                    min="0"
+                    value={operationDaysPerYear}
+                    onChange={handleOperationDaysChange}
+                    className="border rounded p-1 w-full"
+                  />
+                </label>
+              </div>
+
+              <OnSiteVisitForm caseId={caseId} />
+            </>
           )}
+
 
           {activeTab === 'lightingService' && (
             <div>

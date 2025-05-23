@@ -81,10 +81,14 @@ export default function DashboardPage() {
     } else if (status === 'authenticated') {
       fetch('/api/cases')
         .then((res) => res.json())
-        .then(setCases)
+        .then((data) => {
+          console.log('Fetched cases:', data); // ✅ Add this for debugging
+          setCases(data); // ❌ This assumes `data` is an array
+        })
         .catch(console.error);
     }
   }, [status]);
+  
 
   const fetchCases = async () => {
     const res = await fetch('/api/cases');

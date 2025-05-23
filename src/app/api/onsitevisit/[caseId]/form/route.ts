@@ -20,6 +20,7 @@ export async function GET(req: NextRequest, { params }: { params: { caseId: stri
               },
             },
             suggestedLights: true,
+            existingLights: { include: { product: true } }, // Changed from existingProducts to existingLights
             locationTag: true,
           },
         },

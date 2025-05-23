@@ -8,36 +8,38 @@ datasource db {
 }
 
 model Case {
-  id                  String              @id @default(cuid())
-  userId              String
-  customerName        String
-  projectDetails      String
-  uploadToken         String              @default(uuid())
-  status              String              @default("New")
-  createdAt           DateTime            @default(now())
-  updatedAt           DateTime            @updatedAt
-  schoolName          String
-  contactPerson       String
-  emailAddress        String
-  phoneNumber         String
-  schoolAddress       String
-  num2FtLinearHighBay Int                 @default(0)
-  num150WUFOHighBay   Int                 @default(0)
-  num240WUFOHighBay   Int                 @default(0)
-  num2x2LEDPanel      Int                 @default(0)
-  num2x4LEDPanel      Int                 @default(0)
-  num1x4LEDPanel      Int                 @default(0)
-  num4FtStripLight    Int                 @default(0)
-  lightingPurpose     String
-  facilitiesUsedIn    String
-  installationService String
-  activityLogs        ActivityLog[]
-  user                User                @relation(fields: [userId], references: [id])
-  fixtureCounts       CaseFixtureCount[]
-  documents           Document[]
-  installationDetail  InstallationDetail?
-  onSiteVisit         OnSiteVisit?
-  photos              Photo[]
+  id                   String              @id @default(cuid())
+  userId               String
+  customerName         String
+  projectDetails       String
+  uploadToken          String              @default(uuid())
+  status               String              @default("New")
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  schoolName           String
+  contactPerson        String
+  emailAddress         String
+  phoneNumber          String
+  schoolAddress        String
+  num2FtLinearHighBay  Int                 @default(0)
+  num150WUFOHighBay    Int                 @default(0)
+  num240WUFOHighBay    Int                 @default(0)
+  num2x2LEDPanel       Int                 @default(0)
+  num2x4LEDPanel       Int                 @default(0)
+  num1x4LEDPanel       Int                 @default(0)
+  num4FtStripLight     Int                 @default(0)
+  lightingPurpose      String
+  facilitiesUsedIn     String
+  installationService  String
+  operationDaysPerYear Int                 @default(0)
+  operationHoursPerDay Int                 @default(0)
+  activityLogs         ActivityLog[]
+  user                 User                @relation(fields: [userId], references: [id])
+  fixtureCounts        CaseFixtureCount[]
+  documents            Document[]
+  installationDetail   InstallationDetail?
+  onSiteVisit          OnSiteVisit?
+  photos               Photo[]
 }
 
 model Photo {
@@ -89,7 +91,9 @@ model LightFixtureType {
   name          String             @unique
   description   String?
   createdAt     DateTime           @default(now())
+  SKU           String?
   fixtureCounts CaseFixtureCount[]
+  wattage       Int?
 }
 
 model CaseFixtureCount {
@@ -135,6 +139,23 @@ model OnSiteVisit {
   rooms     OnSiteVisitRoom[]
 }
 
+model OnSiteExistingProduct {
+  id        String          @id @default(cuid())
+  roomId    String
+  productId String
+  quantity  Int
+  product   Product         @relation(fields: [productId], references: [id])
+  room      OnSiteVisitRoom @relation(fields: [roomId], references: [id])
+}
+
+model Product {
+  id               String                  @id @default(cuid())
+  name             String
+  wattage          Float
+  description      String?
+  existingProducts OnSiteExistingProduct[]
+}
+
 model OnSiteVisitRoom {
   id              String                   @id @default(cuid())
   onSiteVisitId   String
@@ -145,6 +166,8 @@ model OnSiteVisitRoom {
   mountingKitQty  Int
   motionSensorQty Int
   createdAt       DateTime                 @default(now())
+  ceilingHeight   Int?
+  existingLights  OnSiteExistingProduct[]
   suggestedLights OnSiteSuggestedProduct[]
   photos          OnSiteVisitPhoto[]
   locationTag     OnSiteLocationTag?       @relation(fields: [locationTagId], references: [id])
@@ -189,6 +212,13 @@ model OnSitePhotoTag {
   name         String                     @unique
   createdAt    DateTime                   @default(now())
   taggedPhotos OnSiteVisitPhotoTagPivot[]
+}
+
+model QuoteCounter {
+  id        String   @id @default(cuid())
+  caseId    String   @unique
+  count     Int      @default(1)
+  updatedAt DateTime @updatedAt
 }
 
 enum Role {
