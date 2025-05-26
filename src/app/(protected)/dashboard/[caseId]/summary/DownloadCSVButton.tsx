@@ -1,6 +1,116 @@
 import { prisma } from '@/lib/prisma';
 import React from 'react';
 
+// Inline Client Component for CSV Download
+function DownloadCSVButton({ enrichedRooms }: { enrichedRooms: any[] }) {
+  return (
+    <div className="inline-flex items-center">
+      <button
+        onClick={() => {
+          // Prepare CSV data
+          const csvData = [];
+          
+          // Add header row
+          csvData.push([
+            'Room Number',
+            'Location Tag',
+            'Ceiling Height (ft)',
+            'Light Type',
+            'Category',
+            'Product Name',
+            'Wattage',
+            'Quantity'
+          ]);
+
+          // Add data rows
+          enrichedRooms.forEach((room, index) => {
+            const roomNumber = `Room ${index + 1}`;
+            const locationTag = room.locationTag?.name || 'Untagged Location';
+            const ceilingHeight = room.ceilingHeight ?? 'N/A';
+
+            // Add suggested lights
+            if (room.suggestedLights.length > 0) {
+              room.suggestedLights.forEach((light: any) => {
+                csvData.push([
+                  roomNumber,
+                  locationTag,
+                  ceilingHeight,
+                  light.fixtureType?.name || 'Unknown Fixture',
+                  'Suggested',
+                  light.fixtureType?.name || 'Unknown',
+                  'N/A',
+                  light.quantity
+                ]);
+              });
+            } else {
+              csvData.push([
+                roomNumber,
+                locationTag,
+                ceilingHeight,
+                'No suggested lights',
+                'Suggested',
+                'N/A',
+                'N/A',
+                '0'
+              ]);
+            }
+
+            // Add existing lights
+            if (room.existingLights.length > 0) {
+              room.existingLights.forEach((light: any) => {
+                csvData.push([
+                  roomNumber,
+                  locationTag,
+                  ceilingHeight,
+                  light.product?.name || 'Unknown Product',
+                  'Existing',
+                  light.product?.name || 'Unknown',
+                  light.product?.wattage ?? 'N/A',
+                  light.quantity
+                ]);
+              });
+            } else {
+              csvData.push([
+                roomNumber,
+                locationTag,
+                ceilingHeight,
+                'No existing lights',
+                'Existing',
+                'N/A',
+                'N/A',
+                '0'
+              ]);
+            }
+          });
+
+          // Convert to CSV string
+          const csvContent = csvData.map(row => 
+            row.map(field => `"${field}"`).join(',')
+          ).join('\n');
+
+          // Create and download file
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+          const link = document.createElement('a');
+          const url = URL.createObjectURL(blob);
+          link.setAttribute('href', url);
+          link.setAttribute('download', `lighting-summary-${new Date().toISOString().split('T')[0]}.csv`);
+          link.style.visibility = 'hidden';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }}
+        className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm"
+        suppressHydrationWarning
+      >
+        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        Download CSV
+      </button>
+    </div>
+  );
+}
+
 export default async function QuotationSummary({ params }: { params: { caseId: string } }) {
   const caseId = params.caseId;
 
@@ -34,17 +144,24 @@ export default async function QuotationSummary({ params }: { params: { caseId: s
   })) || [];
 
   return (
-    <div className="printable min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-6">
         {/* Header Section */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8">
           <div className="border-b border-gray-200 pb-6">
-            <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">
-              On-Site Visit Summary
-            </h1>
-            <p className="text-gray-600 mt-2">
-              Comprehensive lighting assessment and recommendations
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">
+                  On-Site Visit Summary
+                </h1>
+                <p className="text-gray-600 mt-2">
+                  Comprehensive lighting assessment and recommendations
+                </p>
+              </div>
+              <div className="flex-shrink-0">
+                <DownloadCSVButton enrichedRooms={enrichedRooms} />
+              </div>
+            </div>
           </div>
         </div>
 
