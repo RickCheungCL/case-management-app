@@ -316,7 +316,7 @@ export default function CaseDetailsPage() {
     }
   };
   const uploadUrl = `${process.env.NEXT_PUBLIC_APP_URL}/upload/${caseId}`;
-
+  const [sending, setSending] = useState(false);
   useEffect(() => {
     fetchCase();
     fetchFixtures();
@@ -337,6 +337,29 @@ export default function CaseDetailsPage() {
       });
     }
   }, [caseData?.installationDetail]);
+
+
+  const handleSendEmail = async () => {
+    setSending(true);
+    const toastId = toast.loading('Sending email...');
+
+    try {
+      const res = await fetch(`/api/cases/${caseId}/send-email`, {
+        method: 'POST',
+      });
+
+      if (res.ok) {
+        toast.success('📨 Email sent successfully!', { id: toastId });
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || 'Failed to send email.', { id: toastId });
+      }
+    } catch (err) {
+      toast.error('Something went wrong.', { id: toastId });
+    } finally {
+      setSending(false);
+    }
+  };
   //const handleUpload = async (uploadType: 'photo' | 'document') => {
   //
   //if (!files.length) {
@@ -509,6 +532,14 @@ export default function CaseDetailsPage() {
       <div className="bg-indigo-700 text-white p-6 shadow-md">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <h1 className="text-3xl font-bold">Case: {caseData.customerName}</h1>
+          <button
+            onClick={handleSendEmail}
+            disabled={sending}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded disabled:opacity-50"
+          >
+            {sending ? 'Sending...' : 'Send Report to User'}
+          </button>
+          
           <button
             onClick={() => (window.location.href = '/dashboard')}
             className="rounded-full bg-indigo-800 hover:bg-indigo-900 p-2 transition-colors"
