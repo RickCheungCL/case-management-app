@@ -13,6 +13,7 @@ type RoomSummary = {
   suggestedEnergy_kWh: number;
   savings_kWh: number;
   savings_cost: number;
+  savings_cost_per_fixture: number;
 };
 
 type SummaryResponse = {
@@ -219,6 +220,9 @@ export default function EnergySummaryPage() {
                           Number(room.savings_cost) > 0 ? 'text-emerald-700' : 'text-red-700'
                         }`}>
                           {Number(room.savings_cost) > 0 ? '$' : '+$'}{Math.abs(Number(room.savings_cost)).toFixed(2)}
+                          <div className="text-xs text-gray-500 italic">
+                                (${Math.abs(Number(room.savings_cost_per_fixture)).toFixed(2)} / fixture)
+                            </div>
                         </div>
                       </div>
                     </td>

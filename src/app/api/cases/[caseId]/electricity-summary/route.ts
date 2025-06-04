@@ -71,6 +71,11 @@ export async function GET(
       const savings_kWh = existingEnergy_kWh - suggestedEnergy_kWh;
       const savings_cost = Number((savings_kWh * ELECTRICITY_COST_PER_KWH || 0).toFixed(2));
 
+
+      const totalSuggestedQuantity = room.suggestedLights.reduce((sum, light) => sum + light.quantity, 0);
+        const savings_cost_per_fixture = totalSuggestedQuantity > 0
+            ? savings_cost / totalSuggestedQuantity
+            : 0;
       totalExistingWattage += existingWattage;
       totalSuggestedWattage += suggestedWattage;
       totalEnergyExisting_kWh += existingEnergy_kWh;
@@ -87,6 +92,7 @@ export async function GET(
         suggestedEnergy_kWh: Number(suggestedEnergy_kWh.toFixed(2)),
         savings_kWh: Number(savings_kWh.toFixed(2)),
         savings_cost: Number(savings_cost.toFixed(2)),
+        savings_cost_per_fixture: Number(savings_cost_per_fixture.toFixed(2)),
       });
     }
 

@@ -267,11 +267,14 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
       {/* Labour Input */}
       <div className="mb-4">
       <label className="block font-semibold mb-1">Labour Description:</label>
-      <input
-        type="text"
-        className="border p-1 w-full mb-2"
+      <textarea
+        id="labour-description"
+        rows={4}
+        className="border p-1 w-full mb-2 resize-y"
         value={labourDetail.description}
-        onChange={(e) => setLabourDetail({ ...labourDetail, description: e.target.value })}
+        onChange={(e) =>
+          setLabourDetail({ ...labourDetail, description: e.target.value })
+        }
       />
       <label className="block font-semibold mb-1">Labour Cost:</label>
       <input
@@ -424,11 +427,15 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                     );
                   })}
                   {pageIndex === paginated.length - 1 && (
-                    <tr className="no-break">
-                      <td colSpan={4} className="border p-1 font-semibold text-Left">Labour: {labourDetail.description || 'N/A'}</td>
-                      <td className="border p-1 text-right">${labourDetail.amount.toFixed(2)}</td>
-                    </tr>
-                  )}
+                  <tr className="no-break">
+                    <td colSpan={4} className="border p-1 font-semibold text-left whitespace-pre-wrap">
+                      Labour: {labourDetail.description || 'N/A'}
+                    </td>
+                    <td className="border p-1 text-right">
+                      ${labourDetail.amount.toFixed(2)}
+                    </td>
+                  </tr>
+                )}
                 </tbody>
               </table>
             </div>
