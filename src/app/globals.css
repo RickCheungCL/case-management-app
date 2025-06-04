@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@import 'tailwindcss';
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -14,15 +16,15 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff;
+    --foreground: #000000;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family:var(--font-sans), Arial, Helvetica, sans-serif;
 }
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-in-out;
@@ -50,7 +52,79 @@ body {
   body * {
     visibility: hidden;
   }
-  
+
+  .printable, .printable * {
+    visibility: visible;
+  }
+
+  .printable {
+    top: 0;
+    left: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    zoom: 85%;
+    /* border: 5px solid red; */ /* Uncomment for debugging */
+  }
+  .printable > .print-page:first-child {
+    page-break-before: avoid !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .print\:hidden, .print\:hidden * {
+    display: none !important;
+  }
+  .print-page:first-of-type {
+    outline: 2px dashed red;
+  }
+  .print-page {
+    page-break-after: always;
+    break-inside: avoid;
+    min-height: auto;
+  }
+  .print-page:last-of-type {
+    page-break-after: auto;
+  }
+  tr.no-break, .no-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  table {
+    page-break-inside: auto;
+    break-inside: auto;
+    width: 100%;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  @page {
+    margin: 20mm;
+    size: A4 portrait;
+  }
+}
+
+
+
+
+@media print {
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide everything except .printable safely */
+  body * {
+    visibility: hidden;
+  }
+
   .printable, .printable * {
     visibility: visible;
   }
