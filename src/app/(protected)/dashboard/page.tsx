@@ -503,17 +503,18 @@ export default function DashboardPage() {
                 >
                   All
                 </button>
-                <button
-                  onClick={() => setFilterStatus('active')}
-                  className={`px-3 py-1.5 text-sm font-medium ${filterStatus === 'active' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-                >
-                  Active
-                </button>
+                
                 <button
                   onClick={() => setFilterStatus('new')}
                   className={`px-3 py-1.5 text-sm font-medium ${filterStatus === 'new' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
                 >
                   New
+                </button>
+                <button
+                  onClick={() => setFilterStatus('active')}
+                  className={`px-3 py-1.5 text-sm font-medium ${filterStatus === 'active' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                >
+                  Active
                 </button>
                 <button
                   onClick={() => setFilterStatus('completed')}
