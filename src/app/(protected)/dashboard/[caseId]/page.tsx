@@ -633,30 +633,111 @@ export default function CaseDetailsPage() {
 
         {/* Tabs Navigation */}
         <div className="mb-6 border-b border-gray-200">
-          <div className="flex flex-wrap -mb-px">
+          {/* First Row: Overview and Contact Information */}
+          <div className="flex flex-wrap gap-1 mb-6">
             {[
-              { id: 'details', label: 'Details' },
-              { id: 'viewDocs', label: 'View Documents' },
-              { id: 'uploadDocs', label: 'Upload Documents' },
-              { id: 'viewPhotos', label: 'View Photos' },
-              { id: 'uploadPhotos', label: 'Upload Photos' },
-              { id: 'contactInfo', label: 'Contact Information' },
-              { id: 'lightingDetails', label: 'Lighting Details' },
-              { id: 'lightingService', label: 'Lighting & Service Requirement' },
-              { id: 'onSiteVisitForm', label: 'onSiteVisitForm' },
+              { id: 'details', label: 'Overview', icon: '🔍' },
+              { id: 'contactInfo', label: 'Contact Information', icon: '👤' },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`inline-flex items-center px-4 py-3 font-medium text-sm rounded-t-lg ${
+                className={`group relative inline-flex items-center gap-2 px-6 py-3 font-medium text-sm transition-all duration-200 ${
                   activeTab === tab.id
-                    ? 'border-b-2 border-indigo-600 text-indigo-600 active'
-                    : 'border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/25 rounded-lg transform scale-105'
+                    : 'bg-white text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 border border-gray-200 hover:border-indigo-200 rounded-lg hover:shadow-md hover:transform hover:scale-105'
                 }`}
               >
+                <span className="text-base">{tab.icon}</span>
                 {tab.label}
+                {activeTab === tab.id && (
+                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-indigo-600 rounded-full"></div>
+                )}
               </button>
             ))}
+          </div>
+
+          {/* Second Row: Pre-site Visit */}
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="text-sm font-semibold text-gray-800 bg-blue-100 px-3 py-1 rounded-full">
+                Pre-site Visit
+              </div>
+              <div className="flex-1 h-px bg-gradient-to-r from-blue-200 to-transparent"></div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: 'uploadPhotos', label: 'Upload Photos', icon: '⬆️', color: 'green' },
+                { id: 'uploadDocs', label: 'Upload Documents', icon: '📤', color: 'green' },
+                { id: 'viewPhotos', label: 'View Photos', icon: '👁️', color: 'blue' },
+                { id: 'viewDocs', label: 'View Documents', icon: '📖', color: 'blue' },
+                { id: 'lightingDetails', label: 'Lighting Details', icon: '⚡', color: 'yellow' },
+              ].map((tab) => {
+                const colorClasses = {
+                  green: activeTab === tab.id 
+                    ? 'bg-green-600 text-white shadow-lg shadow-green-600/25' 
+                    : 'text-green-700 hover:text-green-800 hover:bg-green-50 border-green-200 hover:border-green-300',
+                  blue: activeTab === tab.id 
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25' 
+                    : 'text-blue-700 hover:text-blue-800 hover:bg-blue-50 border-blue-200 hover:border-blue-300',
+                  yellow: activeTab === tab.id 
+                    ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/25' 
+                    : 'text-amber-700 hover:text-amber-800 hover:bg-amber-50 border-amber-200 hover:border-amber-300'
+                };
+                
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`group relative inline-flex items-center gap-2 px-4 py-2.5 font-medium text-sm transition-all duration-200 rounded-lg ${
+                      activeTab === tab.id
+                        ? colorClasses[tab.color]
+                        : `bg-white border ${colorClasses[tab.color]} hover:shadow-md hover:transform hover:scale-105`
+                    }`}
+                  >
+                    <span className="text-base">{tab.icon}</span>
+                    {tab.label}
+                    {activeTab === tab.id && (
+                      <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${
+                        tab.color === 'green' ? 'bg-green-400' :
+                        tab.color === 'blue' ? 'bg-blue-400' : 'bg-amber-400'
+                      } animate-pulse`}></div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Third Row: Site Visit Report */}
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="text-sm font-semibold text-gray-800 bg-purple-100 px-3 py-1 rounded-full">
+                Site Visit Report
+              </div>
+              <div className="flex-1 h-px bg-gradient-to-r from-purple-200 to-transparent"></div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: 'onSiteVisitForm', label: 'On-Site Visit Form', icon: '✍️' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`group relative inline-flex items-center gap-2 px-6 py-3 font-medium text-sm transition-all duration-200 rounded-lg ${
+                    activeTab === tab.id
+                      ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/25 transform scale-105'
+                      : 'bg-white text-purple-700 hover:text-purple-800 hover:bg-purple-50 border border-purple-200 hover:border-purple-300 hover:shadow-md hover:transform hover:scale-105'
+                  }`}
+                >
+                  <span className="text-base">{tab.icon}</span>
+                  {tab.label}
+                  {activeTab === tab.id && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-400 rounded-full animate-pulse"></div>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

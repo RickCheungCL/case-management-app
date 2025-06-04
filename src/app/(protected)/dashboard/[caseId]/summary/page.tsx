@@ -74,35 +74,7 @@ export default async function QuotationSummary({ params }: { params: { caseId: s
               <div className="p-8">
                 <div className="grid md:grid-cols-2 gap-8">
                   {/* Suggested Lights Section */}
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <h3 className="text-lg font-semibold text-gray-900">Suggested Lighting</h3>
-                    </div>
-                    
-                    {room.suggestedLights.length > 0 ? (
-                      <div className="space-y-3">
-                        {room.suggestedLights.map((s, i) => (
-                          <div key={s.id} className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
-                            <div className="flex-1">
-                              <span className="font-medium text-gray-900">
-                                {s.fixtureType?.name || 'Unknown Fixture'}
-                              </span>
-                            </div>
-                            <div className="ml-4">
-                              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                Qty: {s.quantity}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="p-6 text-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-                        <p className="text-gray-500 text-sm">No suggested lighting fixtures</p>
-                      </div>
-                    )}
-                  </div>
+                  
 
                   {/* Existing Lights Section */}
                   <div className="space-y-4">
@@ -134,6 +106,35 @@ export default async function QuotationSummary({ params }: { params: { caseId: s
                     ) : (
                       <div className="p-6 text-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
                         <p className="text-gray-500 text-sm">No existing lighting fixtures</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <h3 className="text-lg font-semibold text-gray-900">Suggested Lighting</h3>
+                    </div>
+                    
+                    {room.suggestedLights.length > 0 ? (
+                      <div className="space-y-3">
+                        {room.suggestedLights.map((s, i) => (
+                          <div key={s.id} className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
+                            <div className="flex-1">
+                              <span className="font-medium text-gray-900">
+                                {s.fixtureType?.name || 'Unknown Fixture'}
+                              </span>
+                            </div>
+                            <div className="ml-4">
+                              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                Qty: {s.quantity}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-6 text-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                        <p className="text-gray-500 text-sm">No suggested lighting fixtures</p>
                       </div>
                     )}
                   </div>
