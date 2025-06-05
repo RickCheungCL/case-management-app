@@ -18,6 +18,7 @@ interface ExistingProduct {
   productId: string;
   wattage: number;
   qty: number;
+  bypassBallast:boolean;
 }
 interface RoomData {
   id: string;
@@ -28,7 +29,7 @@ interface RoomData {
   existingLights: ExistingProduct[]  // Changed from existingLighting to existingLights to match Prisma
   lightingIssue: string;
   customerRequest: string;
-  mountingKitQty: number;
+  mountingKitQty: string;
   motionSensorQty: number;
   ceilingHeight: number | null;
 }
@@ -99,6 +100,7 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
           productId: light.productId,
           qty: light.quantity,
           wattage: light.product?.wattage || 0,
+          bypassBallast: light.bypassBallast ?? false,
         })),
       }));
       
@@ -198,7 +200,7 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
       suggestedProducts: newProducts,
     });
   };
-  const updateExistingProductsInDB = async (existingLights: { productId: string; qty: number; wattage: number }[]) => {
+  const updateExistingProductsInDB = async (existingLights: { productId: string; qty: number; wattage: number;bypassBallast: boolean }[]) => {
     if (!selectedRoom) return;
     
     try {
@@ -220,7 +222,7 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
         locationTagId: null,
         lightingIssue: '',
         customerRequest: '',
-        mountingKitQty: 0,
+        mountingKitQty: '',
         motionSensorQty: 0,
       });
   
@@ -640,12 +642,25 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                             <div className="flex-1">
                               <label className="block text-xs text-gray-600">Qty</label>
                               <input
-                                type="number"
-                                min="1"
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
                                 value={prod.qty}
                                 onChange={(e) => {
+                                  const value = e.target.value;
+                                  // Allow empty string and numbers during typing
+                                  if (value === '' || /^\d*$/.test(value)) {
+                                    const prods = [...selectedRoom.existingLights];
+                                    prods[idx].qty = value === '' ? '' : parseInt(value) || 1;
+                                    updateRoom({ existingLights: prods });
+                                  }
+                                }}
+                                onBlur={(e) => {
+                                  // Convert to number on blur and apply min value of 1
+                                  const numValue = parseInt(e.target.value) || 1;
+                                  const finalValue = Math.max(1, numValue);
                                   const prods = [...selectedRoom.existingLights];
-                                  prods[idx].qty = parseInt(e.target.value) || 1;
+                                  prods[idx].qty = finalValue;
                                   updateRoom({ existingLights: prods });
                                   updateExistingProductsInDB(prods);
                                 }}
@@ -653,6 +668,22 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                               />
                             </div>
                             
+                          </div>
+                          <div>
+                            <label className="block text-xs text-gray-600">Bypass Ballast</label>
+                            <select
+                              value={prod.bypassBallast ? 'Yes' : 'No'}
+                              onChange={(e) => {
+                                const prods = [...selectedRoom.existingLights];
+                                prods[idx].bypassBallast = e.target.value === 'Yes';
+                                updateRoom({ existingLights: prods });
+                                updateExistingProductsInDB(prods);
+                              }}
+                              className="w-full border rounded p-2 text-sm text-center"
+                            >
+                              <option value="No">No</option>
+                              <option value="Yes">Yes</option>
+                            </select>
                           </div>
                           <button
                             onClick={() => {
@@ -763,9 +794,9 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                 {/* Room Details */}
                 <div className="bg-gray-50 p-4 rounded-lg border">
                   <h3 className="font-semibold text-gray-800 mb-4">🏠 Room Details</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Ceiling Height (ft):</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Ceiling Height (FT):</label>
                       <input
                         type="number"
                         value={selectedRoom.ceilingHeight || ''}
@@ -776,29 +807,16 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Mounting Kit Qty:</label>
-                      <input
-                        type="number"
-                        min="0"
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Additional Accessory:</label>
+                      <textarea
                         value={selectedRoom.mountingKitQty}
                         onChange={(e) =>
-                          updateRoomAndPersist({ mountingKitQty: parseInt(e.target.value) || 0 })
+                          updateRoomAndPersist({ mountingKitQty: e.target.value })
                         }
                         className="w-full border rounded p-2"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Motion Sensor Qty:</label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={selectedRoom.motionSensorQty}
-                        onChange={(e) =>
-                          updateRoomAndPersist({ motionSensorQty: parseInt(e.target.value) || 0 })
-                        }
-                        className="w-full border rounded p-2"
-                      />
-                    </div>
+
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -64,7 +64,7 @@ export default async function QuotationSummary({ params }: { params: { caseId: s
                         {room.locationTag?.name || 'Untagged Location'}
                       </span>
                       <span className="text-sm text-gray-600">
-                        Ceiling Height: <span className="font-medium">{room.ceilingHeight ?? 'N/A'} ft</span>
+                        Ceiling Height: <span className="font-medium">{room.ceilingHeight ?? 'N/A'} FT</span>
                       </span>
                     </div>
                   </div>

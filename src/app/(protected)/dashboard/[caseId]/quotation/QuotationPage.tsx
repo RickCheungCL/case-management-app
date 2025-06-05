@@ -20,6 +20,7 @@ interface ProductRow {
   unitPrice: number;
   wattage?: string;
   discounts: Discount[];
+  installations:Discount[];
 }
 
 interface CustomerInfo {
@@ -69,7 +70,8 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
           quantity: prod.qty,
           unitPrice: 0,
           wattage: prod.wattage,
-          discounts: []
+          discounts: [],
+          installations: [] as Discount[]
         }));
 
         setProducts(summarizedProducts);
@@ -137,6 +139,37 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
   
     return pages;
   };
+  const updateInstallation = (prodIndex: number, instIndex: number, key: keyof Discount, value: any) => {
+    setProducts((prev) => {
+      const updated = [...prev];
+      updated[prodIndex].installations[instIndex][key] =
+        key === "value" ? parseFloat(value) || 0 : value;
+      return updated;
+    });
+  };
+  
+  
+  
+  const addInstallationToProduct = (prodIndex: number) => {
+    setProducts((prev) => {
+      const updated = [...prev];
+      const current = updated[prodIndex].installations ?? [];
+  
+      // Prevent duplicate blank installation entry
+      if (current.some((f) => f.name === '' && f.value === 0)) {
+        return updated;
+      }
+  
+      updated[prodIndex].installations = [
+        ...current,
+        { name: '', type: 'fixed', value: 0 }
+      ];
+      return updated;
+    });
+  };
+  
+  
+  
   const paginated = getPaginatedProducts(products, 12);
   const updateDiscount = (prodIndex: number, discountIndex: number, key: keyof Discount, value: any) => {
     setProducts((prev) => {
@@ -148,21 +181,31 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
   };
 
   const calculateTotal = () => {
-    const subtotal =labourDetail.amount+ products.reduce((sum, prod) => {
+    const subtotal = labourDetail.amount + products.reduce((sum, prod) => {
       const base = prod.quantity * prod.unitPrice;
+  
       const totalDiscount = prod.discounts.reduce((dSum, d) => {
         if (d.type === "percentage") return dSum + base * (d.value / 100);
         return dSum + d.value;
       }, 0);
-      return sum + (base - totalDiscount) ;
+  
+      const totalInstallation = (prod.installations || []).reduce((iSum, inst) => {
+        if (inst.type === "percentage") return iSum + base * (inst.value / 100);
+        return iSum + inst.value;
+      }, 0);
+  
+      return sum + (base - totalDiscount + totalInstallation);
     }, 0);
-    const tax = (subtotal )* 0.13;
+  
+    const tax = subtotal * 0.13;
+  
     return {
       subtotal,
       tax,
-      total: subtotal + tax 
+      total: subtotal + tax,
     };
   };
+  
 
   const totals = calculateTotal();
 
@@ -411,6 +454,61 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                           </td>
                         </tr>
                       )}
+                      {prod.installations?.map((f, j) => (
+                        <tr key={`f-${prod.id || i}-${j}`} className="bg-blue-50">
+                          <td colSpan={2} className="border-b border-gray-100 px-4 py-3">
+                            <input
+                              value={f.name}
+                              className="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm bg-white"
+                              placeholder="Installation fee description"
+                              onChange={(e) => updateInstallation(i, j, "name", e.target.value)}
+                            />
+                          </td>
+                          <td className="border-b border-gray-100 px-4 py-3">
+                            <div className="flex gap-2">
+                              <select
+                                value={f.type}
+                                onChange={(e) => updateInstallation(i, j, "type", e.target.value)}
+                                className="px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm bg-white"
+                              >
+                                <option value="fixed">$</option>
+                              </select>
+                              <input
+                                type="number"
+                                min={0}
+                                step="0.01"
+                                value={f.value}
+                                className="flex-1 px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm bg-white"
+                                placeholder="0"
+                                onChange={(e) => updateInstallation(i, j, "value", e.target.value)}
+                              />
+                            </div>
+                          </td>
+                          <td></td>
+                          <td className="border-b border-gray-100 px-4 py-3 text-right text-blue-600 font-semibold">
+                            +${f.type === "percentage" ? (base * f.value / 100).toFixed(2) : f.value.toFixed(2)}
+                          </td>
+                        </tr>
+                      ))}
+
+                      {prod.installations?.length === 0 && (
+                        <tr>
+                          <td colSpan={5} className="border-b border-gray-100 px-4 py-2">
+                            <button
+                              className="text-blue-600 hover:text-blue-800 text-sm font-medium hover:underline flex items-center gap-1"
+                              onClick={() => addInstallationToProduct(i)}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                              </svg>
+                              Add Installation Fee
+                            </button>
+                          </td>
+                        </tr>
+                      )}
+
+
+                      
                     </React.Fragment>
                   );
                 })}
@@ -465,42 +563,49 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
           </div>
         </div>
 
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+     <div className="flex flex-col sm:flex-row gap-4">
+       <button
+         className="flex-1 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white px-6 py-4 rounded-lg hover:from-indigo-700 hover:to-indigo-800 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-3"
+         onClick={async () => {
+           try {
+             const res = await fetch(`/api/quote-counter/${caseId}`, { method: 'POST' });
+             const data = await res.json();
 
+             if (res.ok && data.count) {
+               const updatedSuffix = String(data.count).padStart(3, '0');
+               setQuoteSuffix(updatedSuffix);
+
+               setTimeout(() => {
+                 if (printRef.current) window.print();
+               }, 300);
+             } else {
+               alert("Failed to generate quote number");
+             }
+           } catch (err) {
+             console.error(err);
+             alert("Print failed due to quote number error");
+           }
+         }}
+       >
+         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+         </svg>
+         Print Quotation
+       </button>
+       
+       <Link href={`/dashboard/${caseId}/energy-summary`} className="flex-1">
+         <button className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-4 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-3">
+           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+           </svg>
+           View Energy Summary
+         </button>
+       </Link>
+     </div>
+   </div>
   
       {/* PDF-style Preview */}
-      <div className="flex gap-x-4 mb-4 print:hidden" >
-      <button
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4 print:hidden"
-        onClick={async () => {
-          try {
-            const res = await fetch(`/api/quote-counter/${caseId}`, { method: 'POST' });
-            const data = await res.json();
-
-            if (res.ok && data.count) {
-              const updatedSuffix = String(data.count).padStart(3, '0');
-              setQuoteSuffix(updatedSuffix);
-
-              // Wait for the UI to reflect new quote number
-              setTimeout(() => {
-                if (printRef.current) window.print();
-              }, 300);
-            } else {
-              alert("Failed to generate quote number");
-            }
-          } catch (err) {
-            console.error(err);
-            alert("Print failed due to quote number error");
-          }
-        }}
-      >
-        🖨️ Print Quotation
-      </button>
-      <Link href={`/dashboard/${caseId}/energy-summary`}>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-          ⚡ View Energy Summary
-        </button>
-      </Link>
-      </div>
       
       <div ref={printRef} className="printable bg-white">
         {paginated.map((page, pageIndex) => (
@@ -587,24 +692,40 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                           <td className="p-1 border-r  text-left">{prod.name}</td>
                           <td className="p-1 border-r  text-center">{prod.quantity}</td>
                           <td className="p-1 border-r  text-center">${prod.unitPrice.toFixed(2)}</td>
-                          <td className="p-1 border-r  text-center">${final.toFixed(2)}</td>
+                          <td className="p-1 border-r  text-right">${final.toFixed(2)}</td>
                         </tr>
                         {discount && (
                           <tr className="bg-gray-50 no-break">
                             <td></td>
                             <td colSpan={3} className="border p-1 italic text-gray-600">Discount: {discount.name}</td>
-                            <td className="border p-1 text-right text-red-500">
+                            <td className="border p-1 text-right text-grey-500">
                               -${discountAmt.toFixed(2)} / {discount.type === "percentage" ? `${discount.value}%` : `$${discount.value}`}
                             </td>
                           </tr>
                         )}
+                        {prod.installations?.map((install, j) => {
+                          const installAmt =
+                            install.type === "percentage" ? base * (install.value / 100) : install.value;
+                          return (
+                            <tr key={`install-${pageIndex}-${i}-${j}`} className="bg-grey-50 no-break">
+                              <td></td>
+                              <td colSpan={3} className="border p-1 italic text-gray-600">
+                                Installation: {install.name}
+                              </td>
+                              <td className="border p-1 text-right text-gray-600">
+                                +${installAmt.toFixed(2)} / {install.type === "percentage" ? `${install.value}%` : `$${install.value}`}
+                              </td>
+                            </tr>
+                          );
+                        })}
+
                       </React.Fragment>
                     );
                   })}
                   {pageIndex === paginated.length - 1 && (
                   <tr className="no-break">
                     <td colSpan={4} className="border p-1 font-semibold text-left whitespace-pre-wrap">
-                       {labourDetail.description || 'N/A'}
+                       {labourDetail.description || ''}
                     </td>
                     <td className="border p-1 text-right">
                       ${labourDetail.amount.toFixed(2)}

@@ -144,6 +144,7 @@ model OnSiteExistingProduct {
   roomId    String
   productId String
   quantity  Int
+  bypassBallast Boolean         @default(false) 
   product   Product         @relation(fields: [productId], references: [id])
   room      OnSiteVisitRoom @relation(fields: [roomId], references: [id])
 }
@@ -163,7 +164,7 @@ model OnSiteVisitRoom {
   locationTagId   String?
   lightingIssue   String
   customerRequest String
-  mountingKitQty  Int
+  mountingKitQty  String
   motionSensorQty Int
   createdAt       DateTime                 @default(now())
   ceilingHeight   Int?

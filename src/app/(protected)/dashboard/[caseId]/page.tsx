@@ -667,11 +667,11 @@ export default function CaseDetailsPage() {
             </div>
             <div className="flex flex-wrap gap-2">
               {[
-                { id: 'uploadPhotos', label: 'Upload Photos', icon: '⬆️', color: 'green' },
-                { id: 'uploadDocs', label: 'Upload Documents', icon: '📤', color: 'green' },
+                { id: 'uploadPhotos', label: 'Upload Photos', icon: '🔼', color: 'green' },
+                { id: 'uploadDocs', label: 'Upload Documents', icon: '🔼', color: 'green' },
                 { id: 'viewPhotos', label: 'View Photos', icon: '👁️', color: 'blue' },
-                { id: 'viewDocs', label: 'View Documents', icon: '📖', color: 'blue' },
-                { id: 'lightingDetails', label: 'Lighting Details', icon: '⚡', color: 'yellow' },
+                { id: 'viewDocs', label: 'View Documents', icon: '👁️', color: 'blue' },
+                { id: 'lightingDetails', label: 'Lighting Details', icon: '💡', color: 'yellow' },
               ].map((tab) => {
                 const colorClasses = {
                   green: activeTab === tab.id 
@@ -1511,33 +1511,57 @@ export default function CaseDetailsPage() {
               <div className="grid grid-cols-2 gap-4 mb-4">
               <Link
                 href={`/dashboard/${caseId}/summary`}
-                className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 mt-4 inline-block"
+                className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-500 mt-4 inline-block"
               >
                 📄 View Summary
               </Link>
               <Link
                 href={`/dashboard/${caseId}/quotation`}
-                className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 mt-4 inline-block"
+                className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-500 mt-4 inline-block"
               >
                 📄 View quotation
               </Link>
                 <label>
                   Operation Hours / Day:
                   <input
-                    type="number"
-                    min="0"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     value={operationHoursPerDay}
-                    onChange={handleOperationHoursChange}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Allow empty string and numbers
+                      if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                        setOperationHoursPerDay(value);
+                      }
+                    }}
+                    onBlur={(e) => {
+                      // Convert to number on blur and apply min/max
+                      const numValue = parseFloat(e.target.value) || 0;
+                      setOperationHoursPerDay(Math.max(0, numValue));
+                    }}
                     className="border rounded p-1 w-full"
                   />
                 </label>
                 <label>
                   Operation Days / Year:
                   <input
-                    type="number"
-                    min="0"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     value={operationDaysPerYear}
-                    onChange={handleOperationDaysChange}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Allow empty string and numbers
+                      if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                        setOperationDaysPerYear(value);
+                      }
+                    }}
+                    onBlur={(e) => {
+                      // Convert to number on blur and apply min/max
+                      const numValue = parseFloat(e.target.value) || 0;
+                      setOperationDaysPerYear(Math.max(0, numValue));
+                    }}
                     className="border rounded p-1 w-full"
                   />
                 </label>

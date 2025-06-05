@@ -57,9 +57,26 @@ export async function GET(
         const operationDaysPerYear = caseData.operationDaysPerYear || 0;
         
 
-      const existingWattage = room.existingLights.reduce((sum, light) => {
-        return sum + light.quantity * (light.product?.wattage ?? 0);
-      }, 0);
+        const existingWattage = room.existingLights.reduce((sum, light) => {
+            const baseWattage = light.product?.wattage ?? 0;
+            const ballastDraw = Number(light.product?.description) || 0;
+          
+            const totalWattagePerFixture = light.bypassBallast
+              ? baseWattage
+              : baseWattage + ballastDraw;
+              console.log({
+                room: room.locationTag?.name,
+                light: light.product?.name,
+                bypassBallast: light.bypassBallast,
+                base: baseWattage,
+                ballast: ballastDraw,
+                totalWattagePerFixture,
+                quantity: light.quantity,
+              });
+            return sum + light.quantity * totalWattagePerFixture;
+          }, 0);
+          
+          
 
       const suggestedWattage = room.suggestedLights.reduce((sum, light) => {
         const fixture = fixtureMap.get(light.productId);
@@ -109,6 +126,7 @@ export async function GET(
     });
   } catch (error) {
     console.error('Error calculating electricity summary:', error);
+    
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

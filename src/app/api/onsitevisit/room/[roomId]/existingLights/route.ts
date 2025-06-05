@@ -26,6 +26,7 @@ export async function PUT(req: NextRequest, { params }: { params: { roomId: stri
         roomId,
         productId: item.productId,
         quantity: item.qty,
+        bypassBallast: item.bypassBallast ?? false,
       })),
     });
 
