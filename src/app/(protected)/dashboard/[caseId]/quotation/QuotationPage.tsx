@@ -170,129 +170,302 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
   if (error) return <div className="text-red-500 text-center p-6">{error}</div>;
 
   return (
-    <div className="max-w-5xl mx-auto p-6 bg-white rounded shadow text-sm">
-      <h1 className="text-2xl font-bold mb-6">Quotation Summary</h1>
-  
-      {/* Company & Customer Info Inputs */}
-      <div className="grid grid-cols-2 gap-6 mb-4">
-        <div>
-          <h2 className="font-semibold">Dot Lighting (Canada) Inc.</h2>
-          <p>35 Riviera Dr, Unit 16</p>
-          <p>Markham, ON L3R 8N4</p>
-          <p>905-604-8832</p>
-          <p>info@dotlighting.ca</p>
+    <div className="max-w-7xl mx-auto p-6 bg-gray-50 min-h-screen">
+        {/* Header */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-indigo-100 rounded-lg">
+              <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">Quotation Summary</h1>
+              <p className="text-gray-600">Create and manage your project quotation</p>
+            </div>
+          </div>
         </div>
-        <div>
-          <h2 className="font-semibold">Quotation To:</h2>
-          <input className="border p-1 w-full mb-1" placeholder="Organization Name" value={customerInfo.customerName} onChange={(e) => setCustomerInfo({ ...customerInfo, customerName: e.target.value })} />
-          <input className="border p-1 w-full mb-1" placeholder="Contact Person" value={customerInfo.contactPerson} onChange={(e) => setCustomerInfo({ ...customerInfo, contactPerson: e.target.value })} />
-          <input className="border p-1 w-full mb-1" placeholder="Customer Email" value={customerInfo.email} onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })} />
-          <input className="border p-1 w-full mb-1" placeholder="Customer Phone" value={customerInfo.phone} onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })} />
-          <textarea className="border p-1 w-full" placeholder="Customer Address" value={customerInfo.address} onChange={(e) => setCustomerInfo({ ...customerInfo, address: e.target.value })} />
+
+        {/* Company & Customer Info */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            Company & Customer Information
+          </h2>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Company Info */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-semibold text-gray-800 mb-3">From: Dot Lighting (Canada) Inc.</h3>
+              <div className="space-y-1 text-gray-600">
+                <p>35 Riviera Dr, Unit 16</p>
+                <p>Markham, ON L3R 8N4</p>
+                <p>905-604-8832</p>
+                <p>info@dotlighting.ca</p>
+              </div>
+            </div>
+
+            {/* Customer Info Inputs */}
+            <div>
+              <h3 className="font-semibold text-gray-800 mb-4">Quotation To:</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Organization Name</label>
+                  <input 
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-300" 
+                    placeholder="Enter organization name" 
+                    value={customerInfo.customerName} 
+                    onChange={(e) => setCustomerInfo({ ...customerInfo, customerName: e.target.value })} 
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Contact Person</label>
+                  <input 
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-300" 
+                    placeholder="Enter contact person name" 
+                    value={customerInfo.contactPerson} 
+                    onChange={(e) => setCustomerInfo({ ...customerInfo, contactPerson: e.target.value })} 
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                    <input 
+                      type="email"
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-300 ${
+                        customerInfo.email && !validateEmail(customerInfo.email) 
+                          ? 'border-red-300 bg-red-50' 
+                          : 'border-gray-200'
+                      }`}
+                      placeholder="contact@example.com" 
+                      value={customerInfo.email} 
+                      onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })} 
+                    />
+                    {customerInfo.email && !validateEmail(customerInfo.email) && (
+                      <p className="text-red-500 text-xs mt-1">Please enter a valid email address</p>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                    <input 
+                      type="tel"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-300" 
+                      placeholder="+1 (555) 123-4567" 
+                      value={customerInfo.phone} 
+                      onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })} 
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                  <textarea 
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-300 resize-none" 
+                    placeholder="Enter complete address..." 
+                    rows={3}
+                    value={customerInfo.address} 
+                    onChange={(e) => setCustomerInfo({ ...customerInfo, address: e.target.value })} 
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-  
-      {/* Editable Table */}
-      <table className="w-full border mb-4">
-        <thead className="bg-gray-100">
-          <tr>
-          <th className="border px-2 py-1">SKU</th>
-            <th className="border px-2 py-1">Item</th>
-            <th className="border px-2 py-1">Qty</th>
-            <th className="border px-2 py-1">Unit Price</th>
-            <th className="border px-2 py-1">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((prod, i) => {
-            const base = prod.quantity * prod.unitPrice;
-            const discountAmt = prod.discounts.reduce((sum, d) => sum + (d.type === "percentage" ? base * (d.value / 100) : d.value), 0);
-            return (
-              <>
-                <tr key={prod.id || i}>
-                <td className="border px-2 py-1">
-                    <input className="w-full border p-1" value={prod.sku} onChange={(e) => setProducts((p) => p.map((row, idx) => idx === i ? { ...row, sku: e.target.value } : row))} />
-                  </td>
-                  <td className="border px-2 py-1">
-                    <input className="w-full border p-1" value={prod.name} onChange={(e) => setProducts((p) => p.map((row, idx) => idx === i ? { ...row, name: e.target.value } : row))} />
-                  </td>
-                  <td className="border px-2 py-1 text-center">
-                    <input type="number" inputMode="decimal" className="w-16 border p-1 text-center" value={prod.quantity.toString()} onChange={(e) => {
-                      const value = e.target.value;
-                      if (/^\d*\.?\d{0,2}$/.test(value)) {
-                        setProducts((prev) => prev.map((row, idx) => idx === i ? { ...row, quantity: parseFloat(value) || 0 } : row));
-                      }
-                    }} />
-                  </td>
-                  <td className="border px-2 py-1 text-center">
-                    <input type="number" inputMode="decimal" className="w-20 border p-1 text-center" value={prod.unitPrice.toString()} onChange={(e) => {
-                      const value = e.target.value;
-                      if (/^\d*\.?\d{0,2}$/.test(value)) {
-                        setProducts((prev) => prev.map((row, idx) => idx === i ? { ...row, unitPrice: parseFloat(value) || 0 } : row));
-                      }
-                    }} />
-                  </td>
-                  <td className="border px-2 py-1 text-right">${(base - discountAmt).toFixed(2)}</td>
+
+        {/* Products Table */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            Product Details
+          </h2>
+
+          <div className="overflow-x-auto">
+            <table className="w-full border border-gray-200 rounded-lg overflow-hidden">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="border-b border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">SKU</th>
+                  <th className="border-b border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">Item</th>
+                  <th className="border-b border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700">Qty</th>
+                  <th className="border-b border-gray-200 px-4 py-3 text-center text-sm font-semibold text-gray-700">Unit Price</th>
+                  <th className="border-b border-gray-200 px-4 py-3 text-right text-sm font-semibold text-gray-700">Total</th>
                 </tr>
-                {prod.discounts.map((d, j) => (
-                  <tr key={`d-${prod.id || i}-${j}`} className="bg-gray-50">
-                    <td colSpan={2} className="border px-2 py-1">
-                      <input value={d.name} className="border p-1 w-full" placeholder="Discount name" onChange={(e) => updateDiscount(i, j, "name", e.target.value)} />
-                    </td>
-                    <td className="border px-2 py-1">
-                      <select value={d.type} onChange={(e) => updateDiscount(i, j, "type", e.target.value)} className="border p-1 mr-2">
-                        <option value="percentage">%</option>
-                        <option value="fixed">$</option>
-                      </select>
-                      <input type="number" min={0} step="0.01" value={d.value} className="border p-1 w-20" onChange={(e) => updateDiscount(i, j, "value", e.target.value)} />
-                    </td>
-                    <td className="border px-2 py-1 text-right text-red-500">
-                      -${d.type === "percentage" ? (base * d.value / 100).toFixed(2) : d.value.toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-                {prod.discounts.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="text-sm pl-4 pb-2">
-                      <button className="text-blue-500 hover:underline" onClick={() => addDiscountToProduct(i)}>+ Add Discount</button>
-                    </td>
-                  </tr>
-                )}
-              </>
-            );
-          })}
-        </tbody>
-      </table>
-  
-      {/* Labour Input */}
-      <div className="mb-4">
-      <label className="block font-semibold mb-1">Labour Description:</label>
-      <textarea
-        id="labour-description"
-        rows={4}
-        className="border p-1 w-full mb-2 resize-y"
-        value={labourDetail.description}
-        onChange={(e) =>
-          setLabourDetail({ ...labourDetail, description: e.target.value })
-        }
-      />
-      <label className="block font-semibold mb-1">Labour Cost:</label>
-      <input
-        type="number"
-        inputMode="decimal"
-        className="border p-1 w-32"
-        value={labourDetail.amount.toFixed(2)}
-        onChange={(e) => {
-          const val = e.target.value;
-          if (/^\d*\.?\d{0,2}$/.test(val)) {
-            setLabourDetail(prev => ({
-              ...prev,
-              amount: parseFloat(val) || 0
-            }));
-          }
-        }}
-      />
-    </div >
+              </thead>
+              <tbody>
+                {products.map((prod, i) => {
+                  const base = prod.quantity * prod.unitPrice;
+                  const discountAmt = prod.discounts.reduce((sum, d) => sum + (d.type === "percentage" ? base * (d.value / 100) : d.value), 0);
+                  return (
+                    <React.Fragment key={prod.id || i}>
+                      <tr className="hover:bg-gray-50 transition-colors duration-150">
+                        <td className="border-b border-gray-100 px-4 py-3">
+                          <input 
+                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm" 
+                            placeholder="Enter SKU"
+                            value={prod.sku || ''} 
+                            onChange={(e) => setProducts((p) => p.map((row, idx) => idx === i ? { ...row, sku: e.target.value } : row))} 
+                          />
+                        </td>
+                        <td className="border-b border-gray-100 px-4 py-3">
+                          <input 
+                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm" 
+                            placeholder="Enter item name"
+                            value={prod.name} 
+                            onChange={(e) => setProducts((p) => p.map((row, idx) => idx === i ? { ...row, name: e.target.value } : row))} 
+                          />
+                        </td>
+                        <td className="border-b border-gray-100 px-4 py-3">
+                          <input 
+                            type="number" 
+                            inputMode="decimal" 
+                            className="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-center text-sm" 
+                            placeholder="0"
+                            value={prod.quantity.toString()} 
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              if (/^\d*\.?\d{0,2}$/.test(value)) {
+                                setProducts((prev) => prev.map((row, idx) => idx === i ? { ...row, quantity: parseFloat(value) || 0 } : row));
+                              }
+                            }} 
+                          />
+                        </td>
+                        <td className="border-b border-gray-100 px-4 py-3">
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">$</span>
+                            <input 
+                              type="number" 
+                              inputMode="decimal" 
+                              className="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-center text-sm" 
+                              placeholder="0.00"
+                              value={prod.unitPrice.toString()} 
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                if (/^\d*\.?\d{0,2}$/.test(value)) {
+                                  setProducts((prev) => prev.map((row, idx) => idx === i ? { ...row, unitPrice: parseFloat(value) || 0 } : row));
+                                }
+                              }} 
+                            />
+                          </div>
+                        </td>
+                        <td className="border-b border-gray-100 px-4 py-3 text-right font-semibold text-gray-800">
+                          ${(base - discountAmt).toFixed(2)}
+                        </td>
+                      </tr>
+                      
+                      {prod.discounts.map((d, j) => (
+                        <tr key={`d-${prod.id || i}-${j}`} className="bg-red-50">
+                          <td colSpan={2} className="border-b border-gray-100 px-4 py-3">
+                            <input 
+                              value={d.name} 
+                              className="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none text-sm bg-white" 
+                              placeholder="Discount description" 
+                              onChange={(e) => updateDiscount(i, j, "name", e.target.value)} 
+                            />
+                          </td>
+                          <td className="border-b border-gray-100 px-4 py-3">
+                            <div className="flex gap-2">
+                              <select 
+                                value={d.type} 
+                                onChange={(e) => updateDiscount(i, j, "type", e.target.value)} 
+                                className="px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none text-sm bg-white"
+                              >
+                                <option value="percentage">%</option>
+                                <option value="fixed">$</option>
+                              </select>
+                              <input 
+                                type="number" 
+                                min={0} 
+                                step="0.01" 
+                                value={d.value} 
+                                className="flex-1 px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none text-sm bg-white" 
+                                placeholder="0"
+                                onChange={(e) => updateDiscount(i, j, "value", e.target.value)} 
+                              />
+                            </div>
+                          </td>
+                          <td></td>
+                          <td className="border-b border-gray-100 px-4 py-3 text-right text-red-600 font-semibold">
+                            -${d.type === "percentage" ? (base * d.value / 100).toFixed(2) : d.value.toFixed(2)}
+                          </td>
+                        </tr>
+                      ))}
+                      
+                      {prod.discounts.length === 0 && (
+                        <tr>
+                          <td colSpan={5} className="border-b border-gray-100 px-4 py-2">
+                            <button 
+                              className="text-indigo-600 hover:text-indigo-800 text-sm font-medium hover:underline flex items-center gap-1" 
+                              onClick={() => addDiscountToProduct(i)}
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                              </svg>
+                              Add Discount
+                            </button>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Labour Section */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+            </svg>
+            Additional
+          </h2>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Mention any additional add-on for the quotation</label>
+              <textarea
+                rows={4}
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-300 resize-y"
+                placeholder="Describe the labour work to be performed..."
+                value={labourDetail.description}
+                onChange={(e) => setLabourDetail({ ...labourDetail, description: e.target.value })}
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Total Additional Cost</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg">$</span>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-lg font-semibold transition-all duration-200 hover:border-gray-300"
+                  placeholder="0.00"
+                  value={labourDetail.amount.toFixed(2)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (/^\d*\.?\d{0,2}$/.test(val)) {
+                      setLabourDetail(prev => ({
+                        ...prev,
+                        amount: parseFloat(val) || 0
+                      }));
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+
   
       {/* PDF-style Preview */}
       <div className="flex gap-x-4 mb-4 print:hidden" >
@@ -362,8 +535,10 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                   </thead>
                   <tbody>
                     <tr><td className="p-2">{customerInfo.customerName || 'N/A'}</td></tr>
-                    <tr><td className="p-2">{customerInfo.address || 'N/A'}</td></tr>
-                    <tr><td className="p-2">Attn: {customerInfo.contactPerson || 'N/A'}</td></tr>
+                    <tr><td className="p-2">{customerInfo.contactPerson || ''}</td></tr>
+                    
+                    <tr><td className="p-2 whitespace-pre-line">{customerInfo.address || 'N/A'}</td></tr>
+                    
                   </tbody>
                 </table>
 
@@ -377,8 +552,8 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                     </thead>
                     <tbody>
                       <tr>
-                        <td className="border text-center p-2">{customerInfo.email || 'N/A'}</td>
-                        <td className="border text-center p-2">{customerInfo.phone || 'N/A'}</td>
+                        <td className="border text-center p-2">{customerInfo.email || ''}</td>
+                        <td className="border text-center p-2">{customerInfo.phone || ''}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -429,7 +604,7 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                   {pageIndex === paginated.length - 1 && (
                   <tr className="no-break">
                     <td colSpan={4} className="border p-1 font-semibold text-left whitespace-pre-wrap">
-                      Labour: {labourDetail.description || 'N/A'}
+                       {labourDetail.description || 'N/A'}
                     </td>
                     <td className="border p-1 text-right">
                       ${labourDetail.amount.toFixed(2)}

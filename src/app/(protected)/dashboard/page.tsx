@@ -321,143 +321,236 @@ export default function DashboardPage() {
 
         {/* Create New Case Form (Collapsible) */}
         {isFormExpanded && (
-          <div className="bg-white p-6 rounded-lg shadow-md space-y-4 border-l-4 border-indigo-500 animate-fadeIn">
-            <h2 className="text-xl font-semibold text-gray-800">Create New Case</h2>
+          <div className="bg-white p-8 rounded-xl shadow-lg space-y-6 border border-gray-100 relative overflow-hidden">
+            {/* Background Pattern */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-full -translate-y-16 translate-x-16 opacity-50"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-50 to-indigo-50 rounded-full translate-y-12 -translate-x-12 opacity-50"></div>
 
-            <div className="space-y-5">
+            {/* Header */}
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-indigo-100 rounded-lg">
+                  <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-gray-800">Create New Case</h2>
+              </div>
+              <p className="text-gray-600">Fill in the details below to create a new case</p>
+            </div>
+
+            <div className="space-y-8">
               {/* Basic Information */}
-              <div>
-                <div className="mb-4">
-                  <h3 className="text-md font-medium text-gray-700">Basic Information</h3>
-                  <p className="text-sm text-gray-500">Required case information</p>
+              <div className="relative">
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                    <h3 className="text-lg font-semibold text-gray-800">Basic Information</h3>
+                  </div>
+                  <p className="text-sm text-gray-500 ml-4">Required case information</p>
                 </div>
 
-                <div className="flex flex-col gap-3">
-                  <input
-                    type="text"
-                    placeholder="Customer Name *"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    className="border border-gray-300 p-3 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                  />
-                  <textarea
-                    placeholder="Project Details *"
-                    value={projectDetails}
-                    onChange={(e) => setProjectDetails(e.target.value)}
-                    className="border border-gray-300 p-3 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none min-h-[100px]"
-                  />
+                <div className="space-y-4">
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Customer Name <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Enter customer name"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-300"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Project Details <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <div className="absolute top-3 left-3 flex items-start pointer-events-none">
+                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <textarea
+                        placeholder="Describe the project details, requirements, and scope..."
+                        value={projectDetails}
+                        onChange={(e) => setProjectDetails(e.target.value)}
+                        className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-300 min-h-[120px] resize-none"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Contact Information Toggle */}
-              <button
-                type="button"
-                onClick={() => setShowContactInfo(!showContactInfo)}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-              >
-                {showContactInfo ? (
-                  <>
+              <div className="border-t border-gray-100 pt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowContactInfo(!showContactInfo)}
+                  className="group inline-flex items-center px-5 py-3 border border-gray-200 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 hover:shadow-md"
+                >
+                  <div className={`mr-3 p-1 rounded-full transition-colors duration-200 ${showContactInfo ? 'bg-indigo-100' : 'bg-gray-100 group-hover:bg-indigo-100'}`}>
                     <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 mr-2"
+                      className={`h-4 w-4 transition-all duration-200 ${showContactInfo ? 'text-indigo-600 rotate-90' : 'text-gray-500 group-hover:text-indigo-600'}`}
                       fill="none"
-                      viewBox="0 0 24 24"
                       stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                    Hide Contact Information
-                  </>
-                ) : (
-                  <>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 mr-2"
-                      fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
-                    Add Contact Information (Optional)
-                  </>
-                )}
-              </button>
+                  </div>
+                  {showContactInfo ? 'Hide Contact Information' : 'Add Contact Information (Optional)'}
+                </button>
+              </div>
 
               {/* Contact Information (Expandable) */}
               {showContactInfo && (
-                <div className="pt-2 pb-2 animate-fadeIn">
-                  <div className="mb-4">
-                    <h3 className="text-md font-medium text-gray-700">Contact Information</h3>
-                    <p className="text-sm text-gray-500">Optional contact details</p>
+                <div className="space-y-6 animate-fadeIn">
+                  <div className="mb-6">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <h3 className="text-lg font-semibold text-gray-800">Contact Information</h3>
+                    </div>
+                    <p className="text-sm text-gray-500 ml-4">Optional contact details for this case</p>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      placeholder="Organization Name"
-                      value={organizationName}
-                      onChange={(e) => setOrganizationName(e.target.value)}
-                      className="border border-gray-300 p-3 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Contact Person"
-                      value={contactPerson}
-                      onChange={(e) => setContactPerson(e.target.value)}
-                      className="border border-gray-300 p-3 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                    />
-                    <input
-                      type="email"
-                      placeholder="Email Address"
-                      value={emailAddress}
-                      onChange={(e) => setEmailAddress(e.target.value)}
-                      className="border border-gray-300 p-3 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                    />
-                    <input
-                      type="tel"
-                      placeholder="Phone Number"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      className="border border-gray-300 p-3 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                    />
-                    <div className="md:col-span-2">
-                      <input
-                        type="text"
-                        placeholder="Address"
-                        value={address}
-                        onChange={(e) => setAddress(e.target.value)}
-                        className="w-full border border-gray-300 p-3 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-                      />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700">Organization Name</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Company or organization"
+                          value={organizationName}
+                          onChange={(e) => setOrganizationName(e.target.value)}
+                          className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-300"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700">Contact Person</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Primary contact name"
+                          value={contactPerson}
+                          onChange={(e) => setContactPerson(e.target.value)}
+                          className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-300"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700">Email Address</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <input
+                          type="email"
+                          placeholder="contact@example.com"
+                          value={emailAddress}
+                          onChange={(e) => setEmailAddress(e.target.value)}
+                          className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-300"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                          </svg>
+                        </div>
+                        <input
+                          type="tel"
+                          placeholder="+1 (555) 123-4567"
+                          value={phoneNumber}
+                          onChange={(e) => setPhoneNumber(e.target.value)}
+                          className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-300"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="md:col-span-2 space-y-2">
+                      <label className="block text-sm font-medium text-gray-700">Address</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Street address, city, state, zip code"
+                          value={address}
+                          onChange={(e) => setAddress(e.target.value)}
+                          className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-300"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
 
-              <div className="flex gap-3 pt-2">
-                <button
-                  onClick={createCase}
-                  disabled={loading}
-                  className="bg-indigo-600 text-white p-3 rounded-md hover:bg-indigo-700 disabled:bg-gray-400 transition font-medium flex-1"
-                >
-                  {loading ? 'Creating...' : 'Create Case'}
-                </button>
-                <button
-                  onClick={() => setIsFormExpanded(false)}
-                  className="border border-gray-300 text-gray-700 p-3 rounded-md hover:bg-gray-50 transition"
-                >
-                  Cancel
-                </button>
+              {/* Action Buttons */}
+              <div className="border-t border-gray-100 pt-6">
+                <div className="flex gap-4">
+                  <button
+                    onClick={createCase}
+                    disabled={loading}
+                    className="flex-1 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white py-3 px-6 rounded-lg hover:from-indigo-700 hover:to-indigo-800 disabled:from-gray-400 disabled:to-gray-500 transition-all duration-200 font-medium shadow-md hover:shadow-lg disabled:shadow-none transform hover:scale-[1.02] disabled:hover:scale-100 flex items-center justify-center gap-2"
+                  >
+                    {loading ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Create Case
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setIsFormExpanded(false)}
+                    className="px-6 py-3 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -465,23 +558,45 @@ export default function DashboardPage() {
 
         {/* Cases List with Filters */}
         <div>
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
-            <h2 className="text-xl font-semibold text-gray-800">Existing Cases</h2>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Search cases..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
-              />
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 gap-4">
+            {/* Header */}
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg shadow-md">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">Existing Cases</h2>
+                <p className="text-sm text-gray-600">Manage and track your project cases</p>
+              </div>
+            </div>
 
-              <div className="flex items-center gap-2">
-                <label className="text-sm text-gray-600">Sort by:</label>
+            {/* Controls */}
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+              {/* Search */}
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search cases..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full sm:w-64 pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-300"
+                />
+              </div>
+
+              {/* Sort Controls */}
+              <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg p-2">
+                <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Sort by:</label>
                 <select
                   value={sortKey}
                   onChange={(e) => setSortKey(e.target.value as 'createdAt' | 'updatedAt')}
-                  className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                  className="border-0 bg-transparent text-sm focus:ring-0 focus:outline-none pr-8 text-gray-700 font-medium"
                 >
                   <option value="createdAt">Created At</option>
                   <option value="updatedAt">Updated At</option>
@@ -491,103 +606,160 @@ export default function DashboardPage() {
                 </select>
                 <button
                   onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                  className="inline-flex items-center px-3 py-1 border border-gray-300 text-gray-700 rounded-md shadow-sm text-sm font-medium hover:bg-gray-50 transition"
+                  className="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors duration-200"
                 >
-                  {sortOrder === 'asc' ? 'Asc ↑' : 'Desc ↓'}
+                  {sortOrder === 'asc' ? (
+                    <>
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                      </svg>
+                      Asc
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                      Desc
+                    </>
+                  )}
                 </button>
               </div>
-              <div className="flex border border-gray-300 rounded-md overflow-hidden divide-x divide-gray-300">
-                <button
-                  onClick={() => setFilterStatus('all')}
-                  className={`px-3 py-1.5 text-sm font-medium ${filterStatus === 'all' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-                >
-                  All
-                </button>
-                
-                <button
-                  onClick={() => setFilterStatus('new')}
-                  className={`px-3 py-1.5 text-sm font-medium ${filterStatus === 'new' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-                >
-                  New
-                </button>
-                <button
-                  onClick={() => setFilterStatus('active')}
-                  className={`px-3 py-1.5 text-sm font-medium ${filterStatus === 'active' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-                >
-                  Active
-                </button>
-                <button
-                  onClick={() => setFilterStatus('completed')}
-                  className={`px-3 py-1.5 text-sm font-medium ${filterStatus === 'completed' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-                >
-                  Completed
-                </button>
+
+              {/* Status Filter */}
+              <div className="flex bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                {[
+                  { key: 'all', label: 'All', color: 'gray' },
+                  { key: 'new', label: 'New', color: 'yellow' },
+                  { key: 'active', label: 'Active', color: 'green' },
+                  { key: 'completed', label: 'Completed', color: 'blue' }
+                ].map((filter, index) => (
+                  <button
+                    key={filter.key}
+                    onClick={() => setFilterStatus(filter.key)}
+                    className={`px-4 py-2.5 text-sm font-medium transition-all duration-200 relative ${
+                      filterStatus === filter.key
+                        ? filter.color === 'gray' 
+                          ? 'bg-gray-600 text-white shadow-md'
+                          : filter.color === 'yellow'
+                          ? 'bg-yellow-500 text-white shadow-md'
+                          : filter.color === 'green'
+                          ? 'bg-green-600 text-white shadow-md'
+                          : 'bg-blue-600 text-white shadow-md'
+                        : 'text-gray-700 hover:bg-gray-50'
+                    } ${index > 0 ? 'border-l border-gray-200' : ''}`}
+                  >
+                    {filter.label}
+                    {filterStatus === filter.key && (
+                      <div className="absolute inset-x-0 bottom-0 h-0.5 bg-white opacity-75"></div>
+                    )}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
 
           {filteredCases.length === 0 ? (
-            <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-12 w-12 text-gray-400 mx-auto mb-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                />
-              </svg>
-              <p className="text-gray-500 text-lg">No cases found with the selected filter.</p>
-              {filterStatus !== 'all' && (
-                <button
-                  onClick={() => setFilterStatus('all')}
-                  className="mt-4 text-indigo-600 hover:text-indigo-800 font-medium"
-                >
-                  View all cases
-                </button>
-              )}
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-xl p-16 text-center">
+              <div className="max-w-md mx-auto">
+                <div className="p-4 bg-white rounded-full shadow-lg inline-block mb-6">
+                  <svg
+                    className="h-16 w-16 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">No cases found</h3>
+                <p className="text-gray-600 mb-6">
+                  {filterStatus !== 'all' 
+                    ? `No cases match the "${filterStatus}" filter criteria.`
+                    : "You haven't created any cases yet. Start by creating your first case."
+                  }
+                </p>
+                {filterStatus !== 'all' && (
+                  <button
+                    onClick={() => setFilterStatus('all')}
+                    className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors duration-200 shadow-md hover:shadow-lg"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    View all cases
+                  </button>
+                )}
+              </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredCases.map((c) => (
                 <div
                   key={c.id}
-                  className="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition"
+                  className="group bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 hover:transform hover:scale-[1.02]"
                 >
-                  <div className="p-5 space-y-3">
+                  <div className="p-6 space-y-4">
+                    {/* Header */}
                     <div className="flex justify-between items-start">
-                      <h3 className="font-bold text-lg text-gray-800">{c.customerName}</h3>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-lg text-gray-800 truncate group-hover:text-indigo-600 transition-colors duration-200">
+                          {c.customerName}
+                        </h3>
+                        <div className="flex items-center gap-2 mt-1">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                          <span className="text-sm text-gray-500">{c.user?.name || 'Unknown'}</span>
+                        </div>
+                      </div>
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
                           c.status.toLowerCase() === 'active'
-                            ? 'bg-green-100 text-green-800'
+                            ? 'bg-green-100 text-green-800 border border-green-200'
                             : c.status.toLowerCase() === 'completed'
-                              ? 'bg-blue-100 text-blue-800'
+                              ? 'bg-blue-100 text-blue-800 border border-blue-200'
                               : c.status.toLowerCase() === 'new'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-gray-100 text-gray-800'
+                                ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                                : 'bg-gray-100 text-gray-800 border border-gray-200'
                         }`}
                       >
                         {c.status}
                       </span>
                     </div>
-                    <p className="text-gray-600">{c.projectDetails.slice(0, 100)}...</p>
-                    <p className="text-xs text-gray-500">
-                      Created: {new Date(c.createdAt).toLocaleString()}
-                    </p>
-                    <p className="text-xs text-gray-500">User: {c.user?.name || 'Unknown'}</p>
+
+                    {/* Project Details */}
+                    <div className="space-y-2">
+                      <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
+                        {c.projectDetails.length > 120 
+                          ? `${c.projectDetails.slice(0, 120)}...`
+                          : c.projectDetails
+                        }
+                      </p>
+                    </div>
+
+                    {/* Metadata */}
+                    <div className="flex items-center gap-4 text-xs text-gray-500 pt-2 border-t border-gray-100">
+                      <div className="flex items-center gap-1">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Created {new Date(c.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+
+                    {/* Action Button */}
                     <button
                       onClick={() => router.push(`/dashboard/${c.id}`)}
-                      className="mt-2 inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition"
+                      className="w-full mt-4 inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-sm font-medium rounded-lg hover:from-indigo-700 hover:to-indigo-800 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] group"
                     >
                       <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 mr-2"
+                        className="h-5 w-5 mr-2 group-hover:rotate-3 transition-transform duration-200"
                         viewBox="0 0 20 20"
                         fill="currentColor"
                       >
@@ -599,6 +771,9 @@ export default function DashboardPage() {
                         />
                       </svg>
                       View Details
+                      <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </button>
                   </div>
                 </div>

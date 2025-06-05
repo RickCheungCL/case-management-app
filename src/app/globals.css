@@ -75,9 +75,9 @@ body {
   .print\:hidden, .print\:hidden * {
     display: none !important;
   }
-  .print-page:first-of-type {
+  /*.print-page:first-of-type {
     outline: 2px dashed red;
-  }
+  }*/
   .print-page {
     page-break-after: always;
     break-inside: avoid;
@@ -147,9 +147,7 @@ body {
   .print\:hidden, .print\:hidden * {
     display: none !important;
   }
-  .print-page:first-of-type {
-    outline: 2px dashed red;
-  }
+  
   .print-page {
     page-break-after: always;
     break-inside: avoid;
