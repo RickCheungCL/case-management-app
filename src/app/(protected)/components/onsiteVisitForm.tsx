@@ -670,7 +670,7 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                             
                           </div>
                           <div>
-                            <label className="block text-xs text-gray-600">Bypass Ballast</label>
+                            <label className="block text-xs text-gray-600">Ballast</label>
                             <select
                               value={prod.bypassBallast ? 'Yes' : 'No'}
                               onChange={(e) => {

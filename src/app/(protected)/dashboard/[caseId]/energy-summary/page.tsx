@@ -167,26 +167,26 @@ export default function EnergySummaryPage() {
     
     /* Make text even smaller */
     .text-4xl, .text-5xl {
-      font-size: 2rem !important;
+      font-size: 1rem !important;
       line-height: 1.2 !important;
     }
     
     .text-3xl {
-      font-size: 1.5rem !important;
+      font-size: 1rem !important;
       line-height: 1.2 !important;
     }
     
     .text-2xl {
-      font-size: 1.5rem !important;
+      font-size: 1rem !important;
       line-height: 1.2 !important;
     }
     
     .text-xl {
-      font-size: 1.5rem !important;
+      font-size: 1rem !important;
     }
     
     .text-lg {
-      font-size: 1.5rem !important;
+      font-size: 1rem !important;
     }
     
     /* Make grid items smaller */
@@ -240,9 +240,9 @@ export default function EnergySummaryPage() {
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-700">Current Consumption</h3>
-              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              <div className="w-12 h-12 bg-red-200 rounded-full flex items-center justify-center">
+              <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
             </div>
@@ -255,9 +255,9 @@ export default function EnergySummaryPage() {
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-700">Optimized Usage</h3>
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
               </div>
             </div>
@@ -301,6 +301,7 @@ export default function EnergySummaryPage() {
           </div>
         </div>
         {/* Payback Calculator */}
+            {/* Payback Calculator */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-12">
             <div className="flex items-center gap-3 mb-6">
                 <div className="p-3 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl shadow-md">
@@ -343,6 +344,37 @@ export default function EnergySummaryPage() {
                     <p className="text-sm text-blue-700 mt-1">
                         {(((summary.totalExistingWattage - summary.totalSuggestedWattage) / summary.totalExistingWattage) * 100).toFixed(1)}% reduction
                     </p>
+                    </div>
+                </div>
+
+                {/* New CO2 and Tree Equivalency Section */}
+                <div className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-lg p-6 border border-green-200">
+                    <div className="text-center">
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                        <p className="text-sm font-medium text-green-800">Environmental Impact</p>
+                    </div>
+                    <div className="space-y-3">
+                        <div>
+                        <p className="text-xl font-bold text-green-900">
+                            {((Number(summary.savings_kWh) * 0.39) / 1000).toFixed(1)} tonnes CO₂
+                        </p>
+                        <p className="text-xs text-green-700">Reduced annually</p>
+                        </div>
+                        <div className="border-t border-green-200 pt-2">
+                        <div className="flex items-center justify-center gap-1">
+                            <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            <p className="text-lg font-bold text-green-900">
+                            {Math.round((Number(summary.savings_kWh) * 0.39) / 21.8)} trees
+                            </p>
+                        </div>
+                        <p className="text-xs text-green-700">Equivalent trees planted</p>
+                        </div>
+                    </div>
                     </div>
                 </div>
                 </div>
@@ -399,7 +431,7 @@ export default function EnergySummaryPage() {
                         } else {
                             resultDiv.innerHTML = `
                             <div class="text-center">
-                                <p class="text-sm font-medium text-gray-500">Enter investment cost to calculate payback period</p>
+                                <p class="text-sm font-medium text-gray-500">Enter cost to calculate payback period</p>
                             </div>
                             `;
                         }

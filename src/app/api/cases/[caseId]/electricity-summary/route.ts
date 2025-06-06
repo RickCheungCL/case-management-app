@@ -62,8 +62,8 @@ export async function GET(
             const ballastDraw = Number(light.product?.description) || 0;
           
             const totalWattagePerFixture = light.bypassBallast
-              ? baseWattage
-              : baseWattage + ballastDraw;
+              ? baseWattage + ballastDraw
+              : baseWattage ;
               console.log({
                 room: room.locationTag?.name,
                 light: light.product?.name,

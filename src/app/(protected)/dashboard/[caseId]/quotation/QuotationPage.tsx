@@ -825,25 +825,33 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                   type="text"
                   inputMode="decimal"
                   className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-lg font-semibold transition-all duration-200 hover:border-gray-300"
-                  placeholder="0.00"
+                  placeholder="-0.00"
                   value={labourDetail.amount === 0 ? '' : labourDetail.amount.toString()}
                   onChange={(e) => {
-                    const val = e.target.value;
+                    let val = e.target.value;
                     
-                    // Allow negative sign, digits, and decimal point
-                    if (/^-?\d*\.?\d{0,2}$/.test(val)) {
+                    // Remove any existing minus signs
+                    val = val.replace(/-/g, '');
+                    
+                    // Allow only digits and decimal point
+                    if (/^\d*\.?\d{0,2}$/.test(val)) {
+                      // Always make it negative (except for empty string)
+                      const numericValue = val === '' ? 0 : -(parseFloat(val) || 0);
+                      
                       setLabourDetail(prev => ({
                         ...prev,
-                        amount: val === '' || val === '-' ? 0 : parseFloat(val) || 0
+                        amount: numericValue
                       }));
                     }
                   }}
                   onBlur={(e) => {
-                    // Format the value when user leaves the field
+                    // Format the value when user leaves the field - ensure it's negative
                     const val = parseFloat(e.target.value) || 0;
+                    const negativeVal = val > 0 ? -val : val; // Force negative if positive
+                    
                     setLabourDetail(prev => ({
                       ...prev,
-                      amount: val
+                      amount: negativeVal
                     }));
                   }}
                   onFocus={(e) => {
