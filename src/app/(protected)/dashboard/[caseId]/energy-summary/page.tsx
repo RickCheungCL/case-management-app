@@ -84,9 +84,150 @@ export default function EnergySummaryPage() {
   const { summary, rooms } = data;
 
   return (
+    <>
+      {/* Add this style tag */}
+      <style jsx>{`
+      @media print {
+        * {
+          -webkit-print-color-adjust: exact !important;
+          color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        
+        html, body {
+          width: 100% !important;
+          height: auto !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: visible !important;
+        }
+        
+        .printable {
+        transform: scale(1) !important;
+        transform-origin: top left !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: auto !important;
+        margin: 0 !important;
+        overflow: visible !important;
+        }
+        
+        .container, .max-w-7xl {
+          max-width: none !important;
+          width: 100% !important;
+        }
+        
+        /* Keep summary and calculator together on same page */
+        .summary-calculator-group {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+        display: block !important;
+        }
+        .summary-calculator-group > * {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        page-break-before: avoid !important;
+        break-before: avoid !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+        }
+        /* Force room breakdown to start on new page */
+        .room-breakdown {
+          page-break-before: always !important;
+          break-before: page !important;
+        }
+        
+        /* Reduce spacing for print to fit more on first page */
+        .py-8 {
+      padding-top: 0.25rem !important;
+      padding-bottom: 0.25rem !important;
+    }
+    
+    .mb-12 {
+      margin-bottom: 0.5rem !important;
+    }
+    
+    .mb-8 {
+      margin-bottom: 0.25rem !important;
+    }
+    
+    .mb-6 {
+      margin-bottom: 0.25rem !important;
+    }
+    
+    .p-8 {
+      padding: 0.5rem !important;
+    }
+    
+    .p-6 {
+      padding: 0.25rem !important;
+    }
+    
+    /* Make text even smaller */
+    .text-4xl, .text-5xl {
+      font-size: 2rem !important;
+      line-height: 1.2 !important;
+    }
+    
+    .text-3xl {
+      font-size: 1.5rem !important;
+      line-height: 1.2 !important;
+    }
+    
+    .text-2xl {
+      font-size: 1.5rem !important;
+      line-height: 1.2 !important;
+    }
+    
+    .text-xl {
+      font-size: 1.5rem !important;
+    }
+    
+    .text-lg {
+      font-size: 1.5rem !important;
+    }
+    
+    /* Make grid items smaller */
+    .gap-8 {
+      gap: 0.5rem !important;
+    }
+    
+    .gap-6 {
+      gap: 0.25rem !important;
+    }
+    
+    /* Reduce heights even more */
+    .min-h-[120px] {
+      min-height: 60px !important;
+    }
+    
+    /* Make calculator more compact */
+    .space-y-6 {
+      gap: 0.25rem !important;
+    }
+    
+    .grid.lg\\:grid-cols-2 {
+      grid-template-columns: 1fr 1fr !important;
+      gap: 0.5rem !important;
+    }
+    
+    /* Remove gradients for better print */
+    
+    
+    @page {
+      margin: 0.2in;
+      size: letter;
+        
+    
+      }
+    }
+    `}</style>
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 printable">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
+        <div className="summary-calculator-group">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">
             Energy Efficiency Report
@@ -159,8 +300,145 @@ export default function EnergySummaryPage() {
             </div>
           </div>
         </div>
+        {/* Payback Calculator */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-12">
+            <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl shadow-md">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                </div>
+                <div>
+                <h2 className="text-2xl font-bold text-gray-900">Investment Payback Calculator</h2>
+                <p className="text-gray-600 mt-1">Calculate your period based on energy savings</p>
+                </div>
+            </div>
 
+            <div className="grid lg:grid-cols-2 gap-8">
+                {/* Current Savings Display */}
+                <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900">Annual Savings Summary</h3>
+                
+                <div className="bg-gradient-to-br from-emerald-50 to-green-100 rounded-lg p-6 border border-emerald-200">
+                    <div className="text-center">
+                    <p className="text-sm font-medium text-emerald-800 mb-2">Annual Cost Savings</p>
+                    <p className="text-3xl font-bold text-emerald-900">
+                        {Number(summary.savings_cost) > 0 ? '$' : '+$'}{Math.abs(Number(summary.savings_cost)).toFixed(2)}
+                    </p>
+                    <p className="text-sm text-emerald-700 mt-1">
+                        {Number(summary.savings_cost) > 0 
+                        ? `${Number(summary.savings_kWh).toFixed(2)} kWh saved annually`
+                        : `${Math.abs(Number(summary.savings_kWh)).toFixed(2)} kWh additional usage annually`
+                        }
+                    </p>
+                    </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg p-6 border border-blue-200">
+                    <div className="text-center">
+                    <p className="text-sm font-medium text-blue-800 mb-2">Energy Reduction</p>
+                    <p className="text-2xl font-bold text-blue-900">
+                        {summary.totalExistingWattage - summary.totalSuggestedWattage}W
+                    </p>
+                    <p className="text-sm text-blue-700 mt-1">
+                        {(((summary.totalExistingWattage - summary.totalSuggestedWattage) / summary.totalExistingWattage) * 100).toFixed(1)}% reduction
+                    </p>
+                    </div>
+                </div>
+                </div>
+
+                {/* Payback Calculator Input */}
+                <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900">Payback Calculator</h3>
+                
+                <div className="bg-gradient-to-br from-gray-50 to-slate-100 rounded-lg p-6 border border-gray-200">
+                    <label htmlFor="investment-cost" className="block text-sm font-medium text-gray-700 mb-3">
+                    Initial Cost ($)
+                    </label>
+                    <input
+                    type="number"
+                    id="investment-cost"
+                    name="investment-cost"
+                    min="0"
+                    step="100"
+                    placeholder="Enter total cost..."
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-lg font-semibold"
+                    onInput={(e) => {
+                        const target = e.target as HTMLInputElement;
+                        const cost = parseFloat(target.value) || 0;
+                        const annualSavings = Math.abs(Number(summary.savings_cost));
+                        const paybackYears = annualSavings > 0 ? cost / annualSavings : 0;
+                        const paybackMonths = paybackYears * 12;
+                        
+                        const resultDiv = document.getElementById('payback-result');
+                        if (resultDiv) {
+                        if (cost > 0 && annualSavings > 0) {
+                            resultDiv.innerHTML = `
+                            <div class="text-center">
+                                <p class="text-sm font-medium text-purple-800 mb-2">Payback Period</p>
+                                <p class="text-3xl font-bold text-purple-900">${paybackYears.toFixed(1)} years</p>
+                                <p class="text-sm text-purple-700 mt-1">≈ ${paybackMonths.toFixed(0)} months</p>
+                                <div class="w-full bg-gray-200 rounded-full h-3 mt-4">
+                                <div class="bg-gradient-to-r from-purple-500 to-indigo-600 h-3 rounded-full transition-all duration-500" style="width: ${Math.min((1 / paybackYears) * 100, 100)}%"></div>
+                                </div>
+                                <p class="text-xs text-gray-600 mt-2">Break-even visualization (${(1/paybackYears*100).toFixed(1)}% progress per year)</p>
+                            </div>
+                            `;
+                        } else if (cost > 0 && annualSavings <= 0) {
+                            resultDiv.innerHTML = `
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                </div>
+                                <p class="text-sm font-medium text-red-800">No Payback Period</p>
+                                <p class="text-xs text-red-600 mt-1">Current configuration shows no cost savings</p>
+                            </div>
+                            `;
+                        } else {
+                            resultDiv.innerHTML = `
+                            <div class="text-center">
+                                <p class="text-sm font-medium text-gray-500">Enter investment cost to calculate payback period</p>
+                            </div>
+                            `;
+                        }
+                        }
+                    }}
+                    />
+                </div>
+
+                <div id="payback-result" className="bg-gradient-to-br from-purple-50 to-indigo-100 rounded-lg p-6 border border-purple-200 min-h-[120px] flex items-center justify-center">
+                    <div className="text-center">
+                    <p className="text-sm font-medium text-gray-500">Enter cost to calculate payback period</p>
+                    </div>
+                </div>
+
+                {Number(summary.savings_cost) > 0 && (
+                    <div className="bg-gradient-to-br from-yellow-50 to-amber-100 rounded-lg p-4 border border-yellow-200">
+                    <div className="flex items-start gap-3">
+                        <div className="p-1 bg-yellow-200 rounded-full">
+                        <svg className="w-4 h-4 text-yellow-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        </div>
+                        <div>
+                        <p className="text-sm font-medium text-yellow-800">Note</p>
+                        <p className="text-xs text-yellow-700 mt-1">
+                            Payback calculations are based on your projected annual savings of ${Math.abs(Number(summary.savings_cost)).toFixed(2)}. 
+                            Actual results may vary based on usage patterns and electricity rates.
+                        </p>
+                        </div>
+                    </div>
+                    </div>
+                )}
+                </div>
+            </div>
+            </div>
+
+        </div>        
         {/* Room Breakdown */}
+        <div className="room-breakdown">
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
           <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-8 py-6 border-b border-gray-200">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Room-by-Room Analysis</h2>
@@ -232,7 +510,7 @@ export default function EnergySummaryPage() {
             </table>
           </div>
         </div>
-
+        </div>
         {/* Footer */}
         <div className="text-center mt-12 p-6 bg-white bg-opacity-60 rounded-2xl backdrop-blur-sm">
           <p className="text-gray-600">
@@ -244,5 +522,6 @@ export default function EnergySummaryPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

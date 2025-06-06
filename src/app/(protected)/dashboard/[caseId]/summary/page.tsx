@@ -134,7 +134,7 @@ export default async function QuotationSummary({ params }: { params: { caseId: s
             </div>
           </div>
         </div>
-
+        
         {/* Rooms Grid */}
         <div className="space-y-8">
           {enrichedRooms.map((room, index) => (
@@ -162,7 +162,7 @@ export default async function QuotationSummary({ params }: { params: { caseId: s
                   </div>
                 </div>
               </div>
-
+              
               <div className="p-8">
                 <div className="grid lg:grid-cols-2 gap-8">
                   {/* Existing Lights Section */}

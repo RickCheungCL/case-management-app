@@ -102,6 +102,28 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
       alert("Failed to update quote number");
     }
   };
+
+  function generateQuotationCode(caseId: string): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    
+    let hash = 0;
+    for (let i = 0; i < caseId.length; i++) {
+      const char = caseId.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    
+    hash = Math.abs(hash);
+    
+    let encoded = '';
+    for (let i = 0; i < 7; i++) {
+      encoded = chars[hash % chars.length] + encoded;
+      hash = Math.floor(hash / chars.length);
+    }
+    
+    encoded = encoded.padStart(7, 'A').substring(0, 7);
+    return '.' + encoded;
+  }
   const addDiscountToProduct = (index: number) => {
     setProducts((prev) => {
       const updated = [...prev];
@@ -343,7 +365,7 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
               <tbody>
                 {products.map((prod, i) => {
                   const base = prod.quantity * prod.unitPrice;
-                  const discountAmt = prod.discounts.reduce((sum, d) => sum + (d.type === "percentage" ? base * (d.value / 100) : d.value), 0);
+                  const discountAmt = prod.discounts.reduce((sum, d) => sum + (d.type === "percentage" ? base * (d.value / 100) : (d.value * prod.quantity)), 0);
                   return (
                     <React.Fragment key={prod.id || i}>
                       <tr className="hover:bg-gray-50 transition-colors duration-150">
@@ -434,7 +456,7 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                           </td>
                           <td></td>
                           <td className="border-b border-gray-100 px-4 py-3 text-right text-red-600 font-semibold">
-                            -${d.type === "percentage" ? (base * d.value / 100).toFixed(2) : d.value.toFixed(2)}
+                            -${d.type === "percentage" ? (base * d.value / 100).toFixed(2) : (d.value * prod.quantity).toFixed(2)}
                           </td>
                         </tr>
                       ))}
@@ -607,7 +629,7 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
   
       {/* PDF-style Preview */}
       
-      <div ref={printRef} className="printable bg-white">
+      <div ref={printRef} className="printable bg-white" style={{fontFamily: '"Times New Roman", Times, serif'}}>
         {paginated.map((page, pageIndex) => (
           <div key={pageIndex} className="print-page mb-12 flex flex-col justify-between ">
             {/* HEADER - always shown */}
@@ -625,7 +647,7 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                   <p>905-604-8832 info@dotlighting.ca</p>
                 </div>
                 <div className="text-right">
-                  <p><strong>Quote No:</strong> {caseId}-{quoteSuffix}</p>
+                  <p><strong>Quote No:</strong> DOT{generateQuotationCode(caseId)}-{quoteSuffix}</p>
                   <p><strong>Date:</strong> {format(new Date(), "yyyy-MM-dd")}</p>
                   <p><strong>GST/HST No.:</strong> 770796126</p>
                 </div>
@@ -682,9 +704,12 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                   {page.map((prod, i) => {
                     const base = prod.quantity * prod.unitPrice;
                     const discount = prod.discounts?.[0];
-                    const discountAmt = discount?.type === "percentage" ? base * (discount.value / 100) : discount?.value || 0;
-                    const final = base - discountAmt;
-
+                    const discountAmt = discount?.type === "percentage" ? base * (discount.value / 100) : (discount?.value * prod.quantity) || 0;
+                    const installationAmt = prod.installations?.reduce((sum, install) => {
+                      return sum + (install.type === "percentage" ? base * (install.value / 100) : install.value);
+                    }, 0) || 0;
+                    const final = base - discountAmt+installationAmt;
+                    const hasAdjustments = (prod.discounts && prod.discounts.length > 0) || (prod.installations && prod.installations.length > 0);
                     return (
                       <React.Fragment key={`prod-${pageIndex}-${i}`}>
                         <tr className="no-break">
@@ -692,14 +717,14 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                           <td className="p-1 border-r  text-left">{prod.name}</td>
                           <td className="p-1 border-r  text-center">{prod.quantity}</td>
                           <td className="p-1 border-r  text-center">${prod.unitPrice.toFixed(2)}</td>
-                          <td className="p-1 border-r  text-right">${final.toFixed(2)}</td>
+                          <td className="p-1 border-r  text-right">${base.toFixed(2)}</td>
                         </tr>
                         {discount && (
                           <tr className="bg-gray-50 no-break">
                             <td></td>
                             <td colSpan={3} className="border p-1 italic text-gray-600">Discount: {discount.name}</td>
                             <td className="border p-1 text-right text-grey-500">
-                              -${discountAmt.toFixed(2)} / {discount.type === "percentage" ? `${discount.value}%` : `$${discount.value}`}
+                              -${discountAmt.toFixed(2)} / {discount.type === "percentage" ? `${discount.value}%` : `$${discount.value} per unit`}
                             </td>
                           </tr>
                         )}
@@ -713,12 +738,21 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                                 Installation: {install.name}
                               </td>
                               <td className="border p-1 text-right text-gray-600">
-                                +${installAmt.toFixed(2)} / {install.type === "percentage" ? `${install.value}%` : `$${install.value}`}
+                                ${installAmt.toFixed(2)} 
                               </td>
                             </tr>
                           );
                         })}
-
+                      {hasAdjustments && (
+                        
+                        <tr className="bg-grey-50 no-break italic font-semibold">
+                          <td></td>
+                          <td colSpan={3} className="border  p-1 text-gray-600   text-left">Subtotal</td>
+                          <td className="border p-1 text-right ">
+                            ${(final).toFixed(2)}
+                          </td>
+                        </tr>
+                      )}
                       </React.Fragment>
                     );
                   })}
