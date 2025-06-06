@@ -47,7 +47,12 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  
+  
   useEffect(() => {
+    
+
+
     const fetchPrefillData = async () => {
       setIsLoading(true);
 
@@ -97,7 +102,47 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
     if (res.ok) {
       const newSuffix = String(data.count).padStart(3, '0');
       setQuoteSuffix(newSuffix);
-      setTimeout(() => window.print(), 300); // Give time to update before printing
+      
+      // Adjust fonts right before printing
+      setTimeout(() => {
+        // Font adjustment function
+        const adjustFontSizes = () => {
+          console.log('Adjusting fonts before print...'); // For debugging
+          const pages = document.querySelectorAll('.print-page');
+          
+          pages.forEach((page, index) => {
+            const table = page.querySelector('table:not(.print-header table):not(.print-footer table)');
+            if (!table) return;
+            
+            const rows = table.querySelectorAll('tbody tr');
+            const rowCount = rows.length;
+            console.log(`Page ${index + 1}: ${rowCount} rows`); // For debugging
+            
+            // Remove existing font classes
+            page.classList.remove('auto-large-font', 'auto-medium-font');
+            
+            // Apply font size based on row count
+            if (rowCount <= 8) {
+              page.classList.add('auto-large-font');
+              console.log(`Page ${index + 1}: Applied LARGE font`);
+            } else if (rowCount <= 12) {
+              page.classList.add('auto-medium-font');
+              console.log(`Page ${index + 1}: Applied MEDIUM font`);
+            } else {
+              console.log(`Page ${index + 1}: Using DEFAULT font`);
+            }
+          });
+        };
+        
+        // Run font adjustment
+        adjustFontSizes();
+        
+        // Print after font adjustment
+        setTimeout(() => {
+          console.log('Starting print...');
+          window.print();
+        }, 200);
+      }, 300);
     } else {
       alert("Failed to update quote number");
     }
@@ -121,8 +166,8 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
       hash = Math.floor(hash / chars.length);
     }
     
-    encoded = encoded.padStart(7, 'A').substring(0, 7);
-    return '.' + encoded;
+    encoded = encoded.padStart(5, 'A').substring(0, 5);
+    return '-' + encoded;
   }
   const addDiscountToProduct = (index: number) => {
     setProducts((prev) => {
@@ -216,7 +261,7 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
         return iSum + inst.value;
       }, 0);
   
-      return sum + (base - totalDiscount + totalInstallation);
+      return sum + (base - totalDiscount*prod.quantity + totalInstallation*prod.quantity);
     }, 0);
   
     const tax = subtotal * 0.13;
@@ -235,7 +280,172 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
   if (error) return <div className="text-red-500 text-center p-6">{error}</div>;
 
   return (
+    <>
+    <style jsx>{`
+      @media print {
+        /* Hide everything except printable */
+        body * {
+          visibility: hidden !important;
+        }
+        
+        .printable,
+        .printable * {
+          visibility: visible !important;
+        }
+        
+        /* Hide elements with no-printing class */
+        .no-printing {
+          display: none !important;
+          visibility: hidden !important;
+        }
+        
+        /* Position printable content */
+        .printable {
+          position: absolute !important;
+          left: 0 !important;
+          top: 0 !important;
+          width: 100% !important;
+          height: 100vh !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          background: white !important;
+          transform: scale(0.95) !important;
+          transform-origin: top center !important;
+          display: flex !important;
+          flex-direction: column !important;
+        }
+        
+        /* Adjust page settings */
+        @page {
+          margin: 0.3in !important;
+          size: letter !important;
+        }
+        
+        /* DEFAULT table styles (compact) */
+        .printable tbody {
+          font-size: 0.8rem !important;
+        }
+        
+        .printable tbody td {
+          padding: 0.1rem 0.2rem !important;
+          line-height: 1.1 !important;
+        }
+        
+        .printable thead th {
+          font-size: 0.8rem !important;
+          padding: 0.3rem !important;
+        }
+        
+        .print-footer {
+          font-size: 0.7rem !important;
+        }
+        
+        /* DYNAMIC font classes - LARGE (≤8 rows) */
+        .auto-large-font tbody {
+          font-size: 1.3rem !important;
+        }
+        
+        .auto-large-font tbody td {
+          padding: 0.15rem 0.25rem !important;
+          line-height: 1.3 !important;
+        }
+        
+        .auto-large-font thead th {
+          font-size: 1.3rem !important;
+          padding: 0.4rem !important;
+        }
+        
+        .auto-large-font .print-footer {
+          font-size: 1.3rem !important;
+        }
+        
+        /* DYNAMIC font classes - MEDIUM (9-12 rows) */
+        .auto-medium-font tbody {
+          font-size: 1rem !important;
+        }
+        
+        .auto-medium-font tbody td {
+          padding: 0.12rem 0.22rem !important;
+          line-height: 1.2 !important;
+        }
+        
+        .auto-medium-font thead th {
+          font-size: 1rem !important;
+          padding: 0.35rem !important;
+        }
+        
+        .auto-medium-font .print-footer {
+          font-size: 1rem !important;
+        }
+        
+        /* Page layout */
+        .print-page {
+          height: 100vh !important;
+          display: flex !important;
+          flex-direction: column !important;
+          page-break-after: always !important;
+          box-sizing: border-box !important;
+        }
+        
+        .print-page:last-child {
+          page-break-after: avoid !important;
+        }
+        
+        /* Header at top */
+        .print-header {
+          flex-shrink: 0 !important;
+        }
+        
+        /* Table section grows */
+        .flex-grow {
+          flex-grow: 1 !important;
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: flex-start !important;
+        }
+        
+        /* Footer at bottom */
+        .print-footer {
+          margin-top: auto !important;
+          margin-bottom: 0 !important;
+          padding-bottom: 0.2in !important;
+          flex-shrink: 0 !important;
+        }
+        
+        .print-footer table {
+          font-size: 0.75rem !important;
+        }
+        
+        .print-footer .grid {
+          margin-bottom: 0.5rem !important;
+        }
+        
+        .print-footer p {
+          margin: 0.2rem 0 !important;
+          line-height: 1.2 !important;
+        }
+        
+        .print-footer ol li {
+          margin: 0.1rem 0 !important;
+          line-height: 1.1 !important;
+        }
+        
+        .print-footer table td {
+          padding: 0.2rem !important;
+        }
+        
+        .print-footer p:last-child {
+          margin-bottom: 0 !important;
+        }
+        
+        /* Prevent row breaks */
+        .no-break {
+          page-break-inside: avoid !important;
+        }
+      }
+    `}</style>
     <div className="max-w-7xl mx-auto p-6 bg-gray-50 min-h-screen">
+        <div className="no-printing">
         {/* Header */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex items-center gap-3 mb-2">
@@ -419,7 +629,7 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                           </div>
                         </td>
                         <td className="border-b border-gray-100 px-4 py-3 text-right font-semibold text-gray-800">
-                          ${(base - discountAmt).toFixed(2)}
+                          ${(base).toFixed(2)}
                         </td>
                       </tr>
                       
@@ -438,20 +648,43 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                               <select 
                                 value={d.type} 
                                 onChange={(e) => updateDiscount(i, j, "type", e.target.value)} 
-                                className="px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none text-sm bg-white"
+                                className="px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none text-sm bg-white min-w-[60px]"
                               >
                                 <option value="percentage">%</option>
                                 <option value="fixed">$</option>
                               </select>
-                              <input 
-                                type="number" 
-                                min={0} 
-                                step="0.01" 
-                                value={d.value} 
-                                className="flex-1 px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none text-sm bg-white" 
-                                placeholder="0"
-                                onChange={(e) => updateDiscount(i, j, "value", e.target.value)} 
-                              />
+                              <div className="flex-1 relative">
+                                {d.type === "fixed" && (
+                                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">$</span>
+                                )}
+                                <input 
+                                  type="text"
+                                  inputMode="decimal"
+                                  value={d.value === 0 ? '' : d.value.toString()}
+                                  className={`w-full ${d.type === "fixed" ? 'pl-7' : 'pl-3'} pr-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none text-sm bg-white`}
+                                  placeholder={d.type === "percentage" ? "0" : "0.00"}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    
+                                    // Allow decimal numbers with up to 2 decimal places
+                                    if (/^\d*\.?\d{0,2}$/.test(val)) {
+                                      updateDiscount(i, j, "value", val === '' ? 0 : parseFloat(val) || 0);
+                                    }
+                                  }}
+                                  onBlur={(e) => {
+                                    // Format the value when user leaves the field
+                                    const val = parseFloat(e.target.value) || 0;
+                                    updateDiscount(i, j, "value", val);
+                                  }}
+                                  onFocus={(e) => {
+                                    // Select all text when focused for easy editing
+                                    e.target.select();
+                                  }}
+                                />
+                                {d.type === "percentage" && d.value > 0 && (
+                                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">%</span>
+                                )}
+                              </div>
                             </div>
                           </td>
                           <td></td>
@@ -491,24 +724,48 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                               <select
                                 value={f.type}
                                 onChange={(e) => updateInstallation(i, j, "type", e.target.value)}
-                                className="px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm bg-white"
+                                className="px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm bg-white min-w-[60px]"
                               >
                                 <option value="fixed">$</option>
+                                
                               </select>
-                              <input
-                                type="number"
-                                min={0}
-                                step="0.01"
-                                value={f.value}
-                                className="flex-1 px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm bg-white"
-                                placeholder="0"
-                                onChange={(e) => updateInstallation(i, j, "value", e.target.value)}
-                              />
+                              <div className="flex-1 relative">
+                                {f.type === "fixed" && (
+                                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">$</span>
+                                )}
+                                <input
+                                  type="text"
+                                  inputMode="decimal"
+                                  value={f.value === 0 ? '' : f.value.toString()}
+                                  className={`w-full ${f.type === "fixed" ? 'pl-7' : 'pl-3'} pr-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm bg-white`}
+                                  placeholder={f.type === "percentage" ? "0" : "0.00"}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    
+                                    // Allow decimal numbers with up to 2 decimal places
+                                    if (/^\d*\.?\d{0,2}$/.test(val)) {
+                                      updateInstallation(i, j, "value", val === '' ? 0 : parseFloat(val) || 0);
+                                    }
+                                  }}
+                                  onBlur={(e) => {
+                                    // Format the value when user leaves the field
+                                    const val = parseFloat(e.target.value) || 0;
+                                    updateInstallation(i, j, "value", val);
+                                  }}
+                                  onFocus={(e) => {
+                                    // Select all text when focused for easy editing
+                                    e.target.select();
+                                  }}
+                                />
+                                {f.type === "percentage" && f.value > 0 && (
+                                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">%</span>
+                                )}
+                              </div>
                             </div>
                           </td>
                           <td></td>
                           <td className="border-b border-gray-100 px-4 py-3 text-right text-blue-600 font-semibold">
-                            +${f.type === "percentage" ? (base * f.value / 100).toFixed(2) : f.value.toFixed(2)}
+                            +${f.type === "percentage" ? (base * f.value / 100).toFixed(2) : (f.value * prod.quantity).toFixed(2)}
                           </td>
                         </tr>
                       ))}
@@ -545,16 +802,16 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
             </svg>
-            Additional
+            Additional Promotion
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Mention any additional add-on for the quotation</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Mention any add-on for the quotation</label>
               <textarea
                 rows={4}
                 className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-300 resize-y"
-                placeholder="Describe the labour work to be performed..."
+                placeholder="Describe any detail to be performed..."
                 value={labourDetail.description}
                 onChange={(e) => setLabourDetail({ ...labourDetail, description: e.target.value })}
               />
@@ -565,19 +822,33 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
               <div className="relative">
                 <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 text-lg">$</span>
                 <input
-                  type="number"
+                  type="text"
                   inputMode="decimal"
                   className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-lg font-semibold transition-all duration-200 hover:border-gray-300"
                   placeholder="0.00"
-                  value={labourDetail.amount.toFixed(2)}
+                  value={labourDetail.amount === 0 ? '' : labourDetail.amount.toString()}
                   onChange={(e) => {
                     const val = e.target.value;
-                    if (/^\d*\.?\d{0,2}$/.test(val)) {
+                    
+                    // Allow negative sign, digits, and decimal point
+                    if (/^-?\d*\.?\d{0,2}$/.test(val)) {
                       setLabourDetail(prev => ({
                         ...prev,
-                        amount: parseFloat(val) || 0
+                        amount: val === '' || val === '-' ? 0 : parseFloat(val) || 0
                       }));
                     }
+                  }}
+                  onBlur={(e) => {
+                    // Format the value when user leaves the field
+                    const val = parseFloat(e.target.value) || 0;
+                    setLabourDetail(prev => ({
+                      ...prev,
+                      amount: val
+                    }));
+                  }}
+                  onFocus={(e) => {
+                    // Select all text when focused for easy editing
+                    e.target.select();
                   }}
                 />
               </div>
@@ -587,34 +858,70 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
      <div className="flex flex-col sm:flex-row gap-4">
-       <button
-         className="flex-1 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white px-6 py-4 rounded-lg hover:from-indigo-700 hover:to-indigo-800 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-3"
-         onClick={async () => {
-           try {
-             const res = await fetch(`/api/quote-counter/${caseId}`, { method: 'POST' });
-             const data = await res.json();
+      <button
+          className="flex-1 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white px-6 py-4 rounded-lg hover:from-indigo-700 hover:to-indigo-800 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-3"
+        onClick={async () => {
+          try {
+            const res = await fetch(`/api/quote-counter/${caseId}`, { method: 'POST' });
+            const data = await res.json();
 
-             if (res.ok && data.count) {
-               const updatedSuffix = String(data.count).padStart(3, '0');
-               setQuoteSuffix(updatedSuffix);
+            if (res.ok && data.count) {
+              const updatedSuffix = String(data.count).padStart(3, '0');
+              setQuoteSuffix(updatedSuffix);
 
-               setTimeout(() => {
-                 if (printRef.current) window.print();
-               }, 300);
-             } else {
-               alert("Failed to generate quote number");
-             }
-           } catch (err) {
-             console.error(err);
-             alert("Print failed due to quote number error");
-           }
-         }}
-       >
-         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-         </svg>
-         Print Quotation
-       </button>
+              setTimeout(() => {
+                // Font adjustment function
+                const adjustFontSizes = () => {
+                  console.log('Adjusting fonts before print...');
+                  const pages = document.querySelectorAll('.print-page');
+                  
+                  pages.forEach((page, index) => {
+                    const table = page.querySelector('table:not(.print-header table):not(.print-footer table)');
+                    if (!table) return;
+                    
+                    const rows = table.querySelectorAll('tbody tr');
+                    const rowCount = rows.length;
+                    console.log(`Page ${index + 1}: ${rowCount} rows`);
+                    
+                    // Remove existing font classes
+                    page.classList.remove('auto-large-font', 'auto-medium-font');
+                    
+                    // Apply font size based on row count
+                    if (rowCount <= 13) {
+                      page.classList.add('auto-large-font');
+                      console.log(`Page ${index + 1}: Applied LARGE font`);
+                    } else if (rowCount <= 20) {
+                      page.classList.add('auto-medium-font');
+                      console.log(`Page ${index + 1}: Applied MEDIUM font`);
+                    } else {
+                      console.log(`Page ${index + 1}: Using DEFAULT font`);
+                    }
+                  });
+                };
+                
+                // Run font adjustment
+                adjustFontSizes();
+                
+                // Print after font adjustment
+                setTimeout(() => {
+                  console.log('Starting print...');
+                  window.print();
+                }, 200);
+              }, 300);
+            } else {
+              alert("Failed to generate quote number");
+            }
+          } catch (err) {
+            console.error(err);
+            alert("Print failed due to quote number error");
+          }
+        }}
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+        </svg>
+        Print Quotation
+      </button>
        
        <Link href={`/dashboard/${caseId}/energy-summary`} className="flex-1">
          <button className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-4 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 font-medium shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-3">
@@ -625,12 +932,16 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
          </button>
        </Link>
      </div>
-   </div>
-  
+        </div>
+        </div>
       {/* PDF-style Preview */}
-      
+      <div className="PrintingSection">
       <div ref={printRef} className="printable bg-white" style={{fontFamily: '"Times New Roman", Times, serif'}}>
+         
+
         {paginated.map((page, pageIndex) => (
+            
+
           <div key={pageIndex} className="print-page mb-12 flex flex-col justify-between ">
             {/* HEADER - always shown */}
             <div className="print-header mb-4">
@@ -706,7 +1017,7 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                     const discount = prod.discounts?.[0];
                     const discountAmt = discount?.type === "percentage" ? base * (discount.value / 100) : (discount?.value * prod.quantity) || 0;
                     const installationAmt = prod.installations?.reduce((sum, install) => {
-                      return sum + (install.type === "percentage" ? base * (install.value / 100) : install.value);
+                      return sum + (install.type === "percentage" ? base * (install.value / 100) : install.value * prod.quantity);
                     }, 0) || 0;
                     const final = base - discountAmt+installationAmt;
                     const hasAdjustments = (prod.discounts && prod.discounts.length > 0) || (prod.installations && prod.installations.length > 0);
@@ -720,24 +1031,31 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                           <td className="p-1 border-r  text-right">${base.toFixed(2)}</td>
                         </tr>
                         {discount && (
-                          <tr className="bg-gray-50 no-break">
-                            <td></td>
-                            <td colSpan={3} className="border p-1 italic text-gray-600">Discount: {discount.name}</td>
-                            <td className="border p-1 text-right text-grey-500">
+                          <tr className="bg-gray-50 no-break ">
+                            <td className="border-r"></td>
+                            <td className="p-1 border-r  italic text-gray-600">Discount: {discount.name}</td>
+                            
+                            <td className="border-r"></td>
+                            <td className="border-r"></td>
+                            
+                            <td className="border-r p-1 text-right text-grey-500">
                               -${discountAmt.toFixed(2)} / {discount.type === "percentage" ? `${discount.value}%` : `$${discount.value} per unit`}
                             </td>
+                            
                           </tr>
                         )}
                         {prod.installations?.map((install, j) => {
                           const installAmt =
-                            install.type === "percentage" ? base * (install.value / 100) : install.value;
+                            install.type === "percentage" ? base * (install.value / 100) : install.value * prod.quantity;
                           return (
                             <tr key={`install-${pageIndex}-${i}-${j}`} className="bg-grey-50 no-break">
-                              <td></td>
-                              <td colSpan={3} className="border p-1 italic text-gray-600">
+                              <td className="border-r"></td>
+                              <td className="border-r p-1 italic text-gray-600">
                                 Installation: {install.name}
                               </td>
-                              <td className="border p-1 text-right text-gray-600">
+                              <td className="border-r"></td>
+                              <td className="border-r"></td>
+                              <td className="border-r p-1 text-right text-gray-600">
                                 ${installAmt.toFixed(2)} 
                               </td>
                             </tr>
@@ -746,9 +1064,11 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                       {hasAdjustments && (
                         
                         <tr className="bg-grey-50 no-break italic font-semibold">
-                          <td></td>
-                          <td colSpan={3} className="border  p-1 text-gray-600   text-left">Subtotal</td>
-                          <td className="border p-1 text-right ">
+                          <td className="border-r"></td>
+                          <td  className="border-r  p-1 text-gray-600   text-left">Subtotal</td>
+                          <td className="border-r"></td>
+                          <td className="border-r"></td>
+                          <td className="border-r p-1 text-right ">
                             ${(final).toFixed(2)}
                           </td>
                         </tr>
@@ -819,9 +1139,10 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
           </div>
         ))}
       </div>
-
+      </div>
 
     </div>
+    </>
   );
   
   
