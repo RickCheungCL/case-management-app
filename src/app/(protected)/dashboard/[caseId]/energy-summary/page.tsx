@@ -214,7 +214,15 @@ export default function EnergySummaryPage() {
     }
     
     /* Remove gradients for better print */
-    
+    @keyframes plant-tree {
+    0% { transform: translateY(10px) scale(0.8); opacity: 0; }
+    50% { transform: translateY(-5px) scale(1.1); opacity: 0.8; }
+    100% { transform: translateY(0) scale(1); opacity: 0.6; }
+  }
+  
+  .plant-animation {
+    animation: plant-tree 4s ease-in-out infinite;
+  }
     
     @page {
       margin: 0.2in;
@@ -235,71 +243,189 @@ export default function EnergySummaryPage() {
           <p className="text-gray-600 text-lg">Comprehensive analysis of your electricity consumption and savings potential</p>
         </div>
 
+    
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-700">Current Consumption</h3>
-              <div className="w-12 h-12 bg-red-200 rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-700">Current Consumption</h3>
+                <div className="w-12 h-12 bg-red-200 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                </div>
+                <div className="space-y-2">
+                <p className="text-2xl font-bold text-gray-900">{summary.totalExistingWattage.toLocaleString()} W</p>
+                <p className="text-sm text-gray-600">{summary.totalEnergyExisting_kWh.toFixed(2)} kWh/year</p>
+                </div>
             </div>
-            <div className="space-y-2">
-              <p className="text-2xl font-bold text-gray-900">{summary.totalExistingWattage.toLocaleString()} W</p>
-              <p className="text-sm text-gray-600">{summary.totalEnergyExisting_kWh.toFixed(2)} kWh/year</p>
-            </div>
-          </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-700">Optimized Usage</h3>
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-              </div>
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-700">Optimized Usage</h3>
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                </div>
+                </div>
+                <div className="space-y-2">
+                <p className="text-2xl font-bold text-gray-900">{summary.totalSuggestedWattage.toLocaleString()} W</p>
+                <p className="text-sm text-gray-600">{summary.totalEnergySuggested_kWh.toFixed(2)} kWh/year</p>
+                </div>
             </div>
-            <div className="space-y-2">
-              <p className="text-2xl font-bold text-gray-900">{summary.totalSuggestedWattage.toLocaleString()} W</p>
-              <p className="text-sm text-gray-600">{summary.totalEnergySuggested_kWh.toFixed(2)} kWh/year</p>
-            </div>
-          </div>
 
-          <div className={`${Number(summary.savings_cost) > 0 
-              ? 'bg-gradient-to-br from-emerald-500 to-teal-600' 
-              : 'bg-gradient-to-br from-red-500 to-red-600'
-            } rounded-2xl shadow-lg p-6 text-white hover:shadow-xl transition-all duration-300 md:col-span-2 lg:col-span-1`}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">
-                {Number(summary.savings_cost) > 0 ? 'Total Savings' : 'Additional Costs'}
-              </h3>
-              <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                {Number(summary.savings_cost) > 0 ? (
-                  <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                ) : (
-                  <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                )}
-              </div>
+            <div className={`${Number(summary.savings_cost) > 0 
+                ? 'bg-gradient-to-br from-emerald-500 to-teal-600' 
+                : 'bg-gradient-to-br from-red-500 to-red-600'
+                } rounded-2xl shadow-lg p-6 text-white hover:shadow-xl transition-all duration-300`}>
+                <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">
+                    {Number(summary.savings_cost) > 0 ? 'Total Savings' : 'Additional Costs'}
+                </h3>
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    {Number(summary.savings_cost) > 0 ? (
+                    <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    ) : (
+                    <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    )}
+                </div>
+                </div>
+                <div className="space-y-2">
+                <p className="text-3xl font-bold">
+                    {Number(summary.savings_cost) > 0 ? '$' : '+$'}{Math.abs(Number(summary.savings_cost)).toFixed(2)}
+                </p>
+                <p className={Number(summary.savings_cost) > 0 ? "text-emerald-100" : "text-red-100"}>
+                    {Number(summary.savings_cost) > 0 
+                    ? `${Number(summary.savings_kWh).toFixed(2)} kWh saved annually`
+                    : `${Math.abs(Number(summary.savings_kWh)).toFixed(2)} kWh additional usage annually`
+                    }
+                </p>
+                </div>
             </div>
-            <div className="space-y-2">
-              <p className="text-3xl font-bold">
-                {Number(summary.savings_cost) > 0 ? '$' : '+$'}{Math.abs(Number(summary.savings_cost)).toFixed(2)}
-              </p>
-              <p className={Number(summary.savings_cost) > 0 ? "text-emerald-100" : "text-red-100"}>
-                {Number(summary.savings_cost) > 0 
-                  ? `${Number(summary.savings_kWh).toFixed(2)} kWh saved annually`
-                  : `${Math.abs(Number(summary.savings_kWh)).toFixed(2)} kWh additional usage annually`
+
+
+            </div>
+            {/* Environmental Impact Card with Dynamic Tree Background and Planting Animation */}
+
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 relative overflow-hidden">
+            {/* Dynamic Tree Background */}
+            <div className="absolute inset-0 opacity-10 pointer-events-none">
+                {(() => {
+                const treeCount = Math.round((Number(summary.savings_kWh) * 0.39) / 21.8);
+                const displayTrees = Math.min(treeCount, 45); // Reduced to 45 to leave space for person
+                const trees = [];
+                
+                for (let i = 0; i < displayTrees; i++) {
+                    const randomX = Math.random() * 100;
+                    const randomY = Math.random() * 100;
+                    const randomSize = 12 + Math.random() * 8;
+                    const randomOpacity = 0.3 + Math.random() * 0.7;
+                    
+                    trees.push(
+                    <div
+                        key={i}
+                        className="absolute text-green-500"
+                        style={{
+                        left: `${randomX}%`,
+                        top: `${randomY}%`,
+                        fontSize: `${randomSize}px`,
+                        opacity: randomOpacity,
+                        transform: `rotate(${Math.random() * 40 - 20}deg)`
+                        }}
+                    >
+                        🌳
+                    </div>
+                    );
                 }
-              </p>
+                
+                // Add person planting trees if we have trees to show
+                if (treeCount > 0) {
+                    trees.push(
+                    <div
+                        key="planter"
+                        className="absolute bottom-4 right-4 text-2xl animate-bounce"
+                        style={{
+                        opacity: 0.6,
+                        animationDelay: '0.5s',
+                        animationDuration: '2s'
+                        }}
+                    >
+                        🧑‍🌾
+                    </div>
+                    );
+                    
+                    // Add a small tree being planted near the person
+                    trees.push(
+                    <div
+                        key="new-tree"
+                        className="absolute bottom-6 right-8 text-lg animate-pulse"
+                        style={{
+                        opacity: 0.8,
+                        animationDelay: '1s',
+                        animationDuration: '3s'
+                        }}
+                    >
+                        🌱
+                    </div>
+                    );
+                    
+                    // Add some tools/shovel
+                    trees.push(
+                    <div
+                        key="tools"
+                        className="absolute bottom-2 right-6 text-sm"
+                        style={{
+                        opacity: 0.5,
+                        transform: 'rotate(15deg)'
+                        }}
+                    >
+                        🪴
+                    </div>
+                    );
+                }
+                
+                return trees;
+                })()}
             </div>
-          </div>
-        </div>
+
+            {/* Card Content */}
+            <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-700">Environmental Impact</h3>
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                </div>
+                </div>
+                <div className="space-y-3 bg-white bg-opacity-90 rounded-lg p-3">
+                <div>
+                    <p className="text-2xl font-bold text-gray-900">
+                    {((Number(summary.savings_kWh) * 0.39) / 1000).toFixed(1)} tonnes
+                    </p>
+                    <p className="text-sm text-gray-600">CO₂ reduced annually</p>
+                </div>
+                <div className="border-t border-gray-200 pt-2">
+                    <div className="flex items-center gap-1">
+                    <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <p className="text-lg font-bold text-gray-900">
+                        {Math.round((Number(summary.savings_kWh) * 0.39) / 21.8)} trees
+                    </p>
+                    <span className="text-sm text-gray-600">equivalent planted</span>
+                    </div>
+                </div>
+                </div>
+            </div>
+            </div>
+
         {/* Payback Calculator */}
             {/* Payback Calculator */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-12">
@@ -347,36 +473,7 @@ export default function EnergySummaryPage() {
                     </div>
                 </div>
 
-                {/* New CO2 and Tree Equivalency Section */}
-                <div className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-lg p-6 border border-green-200">
-                    <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                        <p className="text-sm font-medium text-green-800">Environmental Impact</p>
-                    </div>
-                    <div className="space-y-3">
-                        <div>
-                        <p className="text-xl font-bold text-green-900">
-                            {((Number(summary.savings_kWh) * 0.39) / 1000).toFixed(1)} tonnes CO₂
-                        </p>
-                        <p className="text-xs text-green-700">Reduced annually</p>
-                        </div>
-                        <div className="border-t border-green-200 pt-2">
-                        <div className="flex items-center justify-center gap-1">
-                            <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                            <p className="text-lg font-bold text-green-900">
-                            {Math.round((Number(summary.savings_kWh) * 0.39) / 21.8)} trees
-                            </p>
-                        </div>
-                        <p className="text-xs text-green-700">Equivalent trees planted</p>
-                        </div>
-                    </div>
-                    </div>
-                </div>
+                
                 </div>
 
                 {/* Payback Calculator Input */}
