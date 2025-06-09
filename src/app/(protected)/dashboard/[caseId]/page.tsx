@@ -438,32 +438,34 @@ export default function CaseDetailsPage() {
   //  toast.error('Upload failed!');
   //}
   //}}};
-  const handleOperationHoursChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const updatedHours = parseInt(e.target.value) || 0;
-    setOperationHoursPerDay(updatedHours);
-  
-    await fetch(`/api/cases/${caseId}/operation`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        operationHoursPerDay: updatedHours,
-        operationDaysPerYear, // ✅ use current value
-      }),
-    });
+  const handleOperationHoursChange = async (value: number) => {
+    try {
+      await fetch(`/api/cases/${caseId}/operation`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          operationHoursPerDay: value,
+          operationDaysPerYear: operationDaysPerYear || 0, // ✅ fallback to 0 if undefined
+        }),
+      });
+    } catch (error) {
+      console.error('Error updating operation hours:', error);
+    }
   };
   
-  const handleOperationDaysChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const updatedDays = parseInt(e.target.value) || 0;
-    setOperationDaysPerYear(updatedDays);
-  
-    await fetch(`/api/cases/${caseId}/operation`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        operationHoursPerDay, // ✅ use current value
-        operationDaysPerYear: updatedDays,
-      }),
-    });
+  const handleOperationDaysChange = async (value: number) => {
+    try {
+      await fetch(`/api/cases/${caseId}/operation`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          operationHoursPerDay: operationHoursPerDay || 0, // ✅ fallback to 0 if undefined
+          operationDaysPerYear: value,
+        }),
+      });
+    } catch (error) {
+      console.error('Error updating operation days:', error);
+    }
   };
   
   
@@ -1521,28 +1523,32 @@ export default function CaseDetailsPage() {
               >
                 📄 View quotation
               </Link>
-                <label>
-                  Operation Hours / Day:
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    value={operationHoursPerDay}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      // Allow empty string and numbers
-                      if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                        setOperationHoursPerDay(value);
-                      }
-                    }}
-                    onBlur={(e) => {
-                      // Convert to number on blur and apply min/max
-                      const numValue = parseFloat(e.target.value) || 0;
-                      setOperationHoursPerDay(Math.max(0, numValue));
-                    }}
-                    className="border rounded p-1 w-full"
-                  />
+              <label>
+  Operation Hours / Day:
+  <input
+    type="text"
+    inputMode="numeric"
+    pattern="[0-9]*"
+    value={operationHoursPerDay}
+    onChange={(e) => {
+      const value = e.target.value;
+      // Allow empty string and numbers
+      if (value === '' || /^\d*\.?\d*$/.test(value)) {
+        setOperationHoursPerDay(Number(value));
+      }
+    }}
+    onBlur={async (e) => {
+      // Convert to number on blur and apply min/max
+      const numValue = parseFloat(e.target.value) || 0;
+      const finalValue = Math.max(0, numValue);
+      setOperationHoursPerDay(finalValue);
+      // Save to database
+      await handleOperationHoursChange(finalValue);
+    }}
+    className="border rounded p-1 w-full"
+  />
                 </label>
+
                 <label>
                   Operation Days / Year:
                   <input
@@ -1554,13 +1560,16 @@ export default function CaseDetailsPage() {
                       const value = e.target.value;
                       // Allow empty string and numbers
                       if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                        setOperationDaysPerYear(value);
+                        setOperationDaysPerYear(Number(value));
                       }
                     }}
-                    onBlur={(e) => {
+                    onBlur={async (e) => {
                       // Convert to number on blur and apply min/max
                       const numValue = parseFloat(e.target.value) || 0;
-                      setOperationDaysPerYear(Math.max(0, numValue));
+                      const finalValue = Math.max(0, numValue);
+                      setOperationDaysPerYear(finalValue);
+                      // Save to database
+                      await handleOperationDaysChange(finalValue);
                     }}
                     className="border rounded p-1 w-full"
                   />

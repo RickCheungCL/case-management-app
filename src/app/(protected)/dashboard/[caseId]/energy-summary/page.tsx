@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams } from 'next/navigation';
+import PropTypes from 'prop-types';
 
 type RoomSummary = {
   roomName: string;
@@ -82,11 +83,20 @@ export default function EnergySummaryPage() {
   }
 
   const { summary, rooms } = data;
-
+  
   return (
     <>
       {/* Add this style tag */}
       <style jsx>{`
+       @keyframes plant-tree {
+            0% { transform: translateY(10px) scale(0.8); opacity: 0; }
+            50% { transform: translateY(-5px) scale(1.1); opacity: 0.8; }
+            100% { transform: translateY(0) scale(1); opacity: 0.6; }
+        }
+        
+        .plant-animation {
+            animation: plant-tree 4s ease-in-out infinite;
+        }
       @media print {
         * {
           -webkit-print-color-adjust: exact !important;
@@ -313,79 +323,84 @@ export default function EnergySummaryPage() {
             </div>
             {/* Environmental Impact Card with Dynamic Tree Background and Planting Animation */}
 
+            {/* Environmental Impact Card with Size-Varied Trees */}
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 relative overflow-hidden">
-            {/* Dynamic Tree Background */}
-            <div className="absolute inset-0 opacity-10 pointer-events-none">
+            {/* Dynamic Tree Background - Size Progression */}
+            <div className="absolute inset-0 opacity-15 pointer-events-none">
                 {(() => {
                 const treeCount = Math.round((Number(summary.savings_kWh) * 0.39) / 21.8);
-                const displayTrees = Math.min(treeCount, 45); // Reduced to 45 to leave space for person
+                const displayTrees = Math.min(treeCount, 30);
                 const trees = [];
                 
                 for (let i = 0; i < displayTrees; i++) {
-                    const randomX = Math.random() * 100;
-                    const randomY = Math.random() * 100;
-                    const randomSize = 12 + Math.random() * 8;
-                    const randomOpacity = 0.3 + Math.random() * 0.7;
+                    const randomX = Math.random() * 85 + 5; // 5-90% to avoid edges
+                    const randomY = Math.random() * 75 + 10; // 10-85% to avoid edges
+                    
+                    // Determine tree type based on position in array (progression)
+                    let treeType, size, opacity, color;
+                    
+                    if (i < displayTrees * 0.3) {
+                    // First 30% - Saplings
+                    treeType = 'sapling';
+                    size = 12 + Math.random() * 6; // 12-18px
+                    opacity = 0.6 + Math.random() * 0.2;
+                    color = 'text-green-400';
+                    } else if (i < displayTrees * 0.7) {
+                    // Next 40% - Medium Trees
+                    treeType = 'tree';
+                    size = 18 + Math.random() * 8; // 18-26px
+                    opacity = 0.5 + Math.random() * 0.3;
+                    color = 'text-green-500';
+                    } else {
+                    // Last 30% - Big Trees
+                    treeType = 'bigTree';
+                    size = 24 + Math.random() * 12; // 24-36px
+                    opacity = 0.4 + Math.random() * 0.4;
+                    color = 'text-green-600';
+                    }
                     
                     trees.push(
                     <div
                         key={i}
-                        className="absolute text-green-500"
+                        className={`absolute ${color}`}
                         style={{
                         left: `${randomX}%`,
                         top: `${randomY}%`,
-                        fontSize: `${randomSize}px`,
-                        opacity: randomOpacity,
-                        transform: `rotate(${Math.random() * 40 - 20}deg)`
+                        width: `${size}px`,
+                        height: `${size}px`,
+                        opacity: opacity,
+                        transform: `rotate(${Math.random() * 20 - 10}deg)`
                         }}
                     >
-                        🌳
-                    </div>
-                    );
-                }
-                
-                // Add person planting trees if we have trees to show
-                if (treeCount > 0) {
-                    trees.push(
-                    <div
-                        key="planter"
-                        className="absolute bottom-4 right-4 text-2xl animate-bounce"
-                        style={{
-                        opacity: 0.6,
-                        animationDelay: '0.5s',
-                        animationDuration: '2s'
-                        }}
-                    >
-                        🧑‍🌾
-                    </div>
-                    );
-                    
-                    // Add a small tree being planted near the person
-                    trees.push(
-                    <div
-                        key="new-tree"
-                        className="absolute bottom-6 right-8 text-lg animate-pulse"
-                        style={{
-                        opacity: 0.8,
-                        animationDelay: '1s',
-                        animationDuration: '3s'
-                        }}
-                    >
-                        🌱
-                    </div>
-                    );
-                    
-                    // Add some tools/shovel
-                    trees.push(
-                    <div
-                        key="tools"
-                        className="absolute bottom-2 right-6 text-sm"
-                        style={{
-                        opacity: 0.5,
-                        transform: 'rotate(15deg)'
-                        }}
-                    >
-                        🪴
+                        {treeType === 'sapling' && (
+                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+                            {/* Small sapling */}
+                            <path d="M12 18v-4c0-1 0.5-2 2-2s2 1 2 2-0.5 2-2 2-2-1-2-2z" fillOpacity="0.7" />
+                            <path d="M12 18v-4c0-1-0.5-2-2-2s-2 1-2 2 0.5 2 2 2 2-1 2-2z" fillOpacity="0.5" />
+                            <rect x="11.5" y="16" width="1" height="6" fill="#8B4513" />
+                        </svg>
+                        )}
+                        
+                        {treeType === 'tree' && (
+                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+                            {/* Medium tree */}
+                            <path d="M12 16v-6c0-2 1-3 3-3s3 1 3 3-1 3-3 3-3-1-3-3z" fillOpacity="0.8" />
+                            <path d="M12 16v-6c0-2-1-3-3-3s-3 1-3 3 1 3 3 3 3-1 3-3z" fillOpacity="0.6" />
+                            <path d="M12 12c0-1.5 0.5-2.5 2-2.5s2 1 2 2.5-0.5 2.5-2 2.5-2-1-2-2.5z" fillOpacity="0.9" />
+                            <rect x="11" y="16" width="2" height="6" fill="#8B4513" />
+                        </svg>
+                        )}
+                        
+                        {treeType === 'bigTree' && (
+                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+                            {/* Big tree */}
+                            <path d="M12 14v-8c0-3 2-4 4-4s4 1 4 4-2 4-4 4-4-1-4-4z" fillOpacity="0.9" />
+                            <path d="M12 14v-8c0-3-2-4-4-4s-4 1-4 4 2 4 4 4 4-1 4-4z" fillOpacity="0.7" />
+                            <path d="M12 10c0-2 1-3 3-3s3 1 3 3-1 3-3 3-3-1-3-3z" fillOpacity="1" />
+                            <path d="M12 10c0-2-1-3-3-3s-3 1-3 3 1 3 3 3 3-1 3-3z" fillOpacity="0.8" />
+                            <rect x="10.5" y="14" width="3" height="8" fill="#8B4513" />
+                        </svg>
+                        )}
                     </div>
                     );
                 }
@@ -399,12 +414,13 @@ export default function EnergySummaryPage() {
                 <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-700">Environmental Impact</h3>
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L8 8h2v2H8l4 6 4-6h-2V8h2l-4-6z" />
+                    <rect x="11" y="16" width="2" height="6" fill="#8B4513" />
                     </svg>
                 </div>
                 </div>
-                <div className="space-y-3 bg-white bg-opacity-90 rounded-lg p-3">
+                <div className="space-y-3 bg-white bg-opacity-95 rounded-lg p-3 backdrop-blur-sm">
                 <div>
                     <p className="text-2xl font-bold text-gray-900">
                     {((Number(summary.savings_kWh) * 0.39) / 1000).toFixed(1)} tonnes
@@ -413,8 +429,9 @@ export default function EnergySummaryPage() {
                 </div>
                 <div className="border-t border-gray-200 pt-2">
                     <div className="flex items-center gap-1">
-                    <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L8 8h2v2H8l4 6 4-6h-2V8h2l-4-6z" />
+                        <rect x="11" y="16" width="2" height="6" fill="#8B4513" />
                     </svg>
                     <p className="text-lg font-bold text-gray-900">
                         {Math.round((Number(summary.savings_kWh) * 0.39) / 21.8)} trees
