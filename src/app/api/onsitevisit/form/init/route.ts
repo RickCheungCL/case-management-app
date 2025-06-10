@@ -52,7 +52,7 @@ export async function GET(request: Request) {
               location: 'Default Room',
               lightingIssue: '',
               customerRequest: '',
-              mountingKitQty: 0,
+              mountingKitQty: '',
               motionSensorQty: 0
             }]
           }
