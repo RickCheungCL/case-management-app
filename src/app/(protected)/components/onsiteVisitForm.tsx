@@ -351,7 +351,14 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
           <div className="flex-1 overflow-y-auto">
             {rooms.map((room, index) => {
               const tagName = locationTags.find((tag) => tag.id === room.locationTagId)?.name;
-              const displayName = tagName ? `Room ${index + 1} - (${tagName})` : `Room ${index + 1}`;
+              
+              const displayName = room.location
+                ? tagName
+                  ? `${index + 1}) ${room.location} - (${tagName})`
+                  : `${index + 1}) ${room.location}`
+                : tagName
+                  ? `Room ${index + 1} - (${tagName})`
+                  : `Room ${index + 1}`;
               return (
                 <div
                   key={room.id}
@@ -406,10 +413,15 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
             <div className="max-w-6xl mx-auto">
               {/* Header */}
               <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  {locationTags.find((t) => t.id === selectedRoom.locationTagId)?.name ??
-                    `Room ${rooms.findIndex((r) => r.id === selectedRoomId) + 1}`}
-                </h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                {selectedRoom.location
+                  ? locationTags.find((t) => t.id === selectedRoom.locationTagId)?.name
+                    ? `${rooms.findIndex((r) => r.id === selectedRoomId) + 1}) ${selectedRoom.location} - (${locationTags.find((t) => t.id === selectedRoom.locationTagId)?.name})`
+                    : `${rooms.findIndex((r) => r.id === selectedRoomId) + 1}) ${selectedRoom.location}`
+                  : locationTags.find((t) => t.id === selectedRoom.locationTagId)?.name
+                    ? `Room ${rooms.findIndex((r) => r.id === selectedRoomId) + 1} - (${locationTags.find((t) => t.id === selectedRoom.locationTagId)?.name})`
+                    : `Room ${rooms.findIndex((r) => r.id === selectedRoomId) + 1}`}
+              </h2>
                 <div className="h-1 w-20 bg-blue-500 rounded"></div>
               </div>
 
