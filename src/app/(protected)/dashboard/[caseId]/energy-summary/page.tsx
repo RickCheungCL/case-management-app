@@ -434,20 +434,69 @@ export default function EnergySummaryPage() {
                       <span className="text-3xl">🏭</span>
                     </div>
                     <p className="text-3xl font-bold text-gray-900 mb-2">
-                      {((Number(summary.savings_kWh) * 0.39) / 1000).toFixed(1)}
+                      -{Math.abs((Number(summary.savings_kWh) * 0.39) / 1000).toFixed(1)}
                     </p>
                     <p className="text-base text-gray-600 leading-tight font-medium">tonnes CO₂ reduced annually</p>
                   </div>
                   
                   {/* Trees Equivalent */}
                   <div className="flex flex-col items-center text-center">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-3">
-                      <span className="text-3xl">🌲</span>
+                    <div className="w-40 h-16 bg-green-100 rounded-xl flex flex-col items-center justify-center py-1">
+                      {(() => {
+                        const totalTrees = Math.round((Number(summary.savings_kWh) * 0.39) / 21.8);
+                        const displayTrees = Math.min(totalTrees, 11); // Max 11 trees to fit nicely (6+5)
+                        const trees = [];
+                        
+                        // Calculate trees for each row
+                        const row1Count = Math.min(6, displayTrees);
+                        const row2Count = Math.max(0, displayTrees - 6);
+                        
+                        // Row 1 - Top (up to 6 trees)
+                        const row1Trees = [];
+                        for (let i = 0; i < row1Count; i++) {
+                          const isSmall = i < Math.ceil(displayTrees * 0.3); // First 30% are saplings
+                          row1Trees.push(
+                            <span key={`row1-${i}`} className={isSmall ? "text-sm" : "text-base"}>
+                              {isSmall ? "🌱" : "🌲"}
+                            </span>
+                          );
+                        }
+                        
+                        // Row 2 - Bottom (remaining trees, up to 5)
+                        const row2Trees = [];
+                        for (let i = 0; i < row2Count; i++) {
+                          const totalIndex = row1Count + i;
+                          const isSmall = totalIndex < Math.ceil(displayTrees * 0.3);
+                          row2Trees.push(
+                            <span key={`row2-${i}`} className={isSmall ? "text-sm" : "text-base"}>
+                              {isSmall ? "🌱" : "🌲"}
+                            </span>
+                          );
+                        }
+                        
+                        return (
+                          <>
+                            {/* Row 1 - Top */}
+                            <div className="flex gap-0.5 mb-0.5">
+                              {row1Trees}
+                            </div>
+                            {/* Row 2 - Bottom */}
+                            {row2Count > 0 && (
+                              <div className="flex gap-0.5">
+                                {row2Trees}
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
+                    
                     <p className="text-3xl font-bold text-gray-900 mb-2">
-                      {Math.round(((Number(summary.savings_kWh) * 0.39) / 1000) * 1000 / 21.8)}
+                      {Math.abs(Math.round((Number(summary.savings_kWh) * 0.39) / 21.8)).toLocaleString()}
                     </p>
-                    <p className="text-base text-gray-600 leading-tight font-medium">trees equivalent that can be planted</p>
+                    <p className="text-base text-gray-600 leading-tight font-medium">
+                      trees equivalent that can be planted
+                    </p>
                   </div>
                 </div>
               </div>
