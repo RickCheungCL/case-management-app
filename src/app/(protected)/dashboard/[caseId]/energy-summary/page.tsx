@@ -88,69 +88,86 @@ export default function EnergySummaryPage() {
     <>
       {/* Add this style tag */}
       <style jsx>{`
-       @keyframes plant-tree {
-            0% { transform: translateY(10px) scale(0.8); opacity: 0; }
-            50% { transform: translateY(-5px) scale(1.1); opacity: 0.8; }
-            100% { transform: translateY(0) scale(1); opacity: 0.6; }
-        }
-        
-        .plant-animation {
-            animation: plant-tree 4s ease-in-out infinite;
-        }
-      @media print {
-        * {
-          -webkit-print-color-adjust: exact !important;
-          color-adjust: exact !important;
-          print-color-adjust: exact !important;
-        }
-        
-        html, body {
-          width: 100% !important;
-          height: auto !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          overflow: visible !important;
-        }
-        
-        .printable {
-        transform: scale(1) !important;
-        transform-origin: top left !important;
-        width: 100% !important;
-        height: auto !important;
-        min-height: auto !important;
-        margin: 0 !important;
-        overflow: visible !important;
-        }
-        
-        .container, .max-w-7xl {
-          max-width: none !important;
-          width: 100% !important;
-        }
-        
-        /* Keep summary and calculator together on same page */
-        .summary-calculator-group {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        page-break-after: avoid !important;
-        break-after: avoid !important;
-        display: block !important;
-        }
-        .summary-calculator-group > * {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        page-break-before: avoid !important;
-        break-before: avoid !important;
-        page-break-after: avoid !important;
-        break-after: avoid !important;
-        }
-        /* Force room breakdown to start on new page */
-        .room-breakdown {
-          page-break-before: always !important;
-          break-before: page !important;
-        }
-        
-        /* Reduce spacing for print to fit more on first page */
-        .py-8 {
+  /* Animation definitions - Keep only once */
+  @keyframes plant-tree {
+    0% { transform: translateY(10px) scale(0.8); opacity: 0; }
+    50% { transform: translateY(-5px) scale(1.1); opacity: 0.8; }
+    100% { transform: translateY(0) scale(1); opacity: 0.6; }
+  }
+  
+  .plant-animation {
+    animation: plant-tree 4s ease-in-out infinite;
+  }
+
+  @media print {
+    /* Color preservation */
+    * {
+      -webkit-print-color-adjust: exact !important;
+      color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    
+    /* Base layout */
+    html, body {
+      width: 100% !important;
+      height: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: visible !important;
+    }
+    
+    /* Printable container */
+    .printable {
+      transform: scale(1) !important;
+      transform-origin: top left !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: auto !important;
+      margin: 0 !important;
+      overflow: visible !important;
+    }
+    
+    /* Container widths */
+    .container, .max-w-7xl {
+      max-width: none !important;
+      width: 100% !important;
+    }
+    
+    /* FIXED: Separate summary and calculator sections */
+    .summary-section {
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+      /* Summary stays on page 1 */
+    }
+    
+    .calculator-section {
+      page-break-before: always !important;  /* Force to new page */
+      break-before: page !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+      /* Calculator starts on page 2 */
+    }
+    
+    /* Room breakdown on new page */
+    .room-breakdown {
+      page-break-before: always !important;
+      break-before: page !important;
+      /* Room breakdown starts on page 3 */
+    }
+    
+    /* Utility classes for other sections */
+    .section-break {
+      page-break-before: always !important;
+      break-before: page !important;
+    }
+    
+    .keep-together {
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+    
+    /* Spacing reductions */
+    .py-8 {
       padding-top: 0.25rem !important;
       padding-bottom: 0.25rem !important;
     }
@@ -175,7 +192,7 @@ export default function EnergySummaryPage() {
       padding: 0.25rem !important;
     }
     
-    /* Make text even smaller */
+    /* Text size optimizations */
     .text-4xl, .text-5xl {
       font-size: 1rem !important;
       line-height: 1.2 !important;
@@ -199,7 +216,7 @@ export default function EnergySummaryPage() {
       font-size: 1rem !important;
     }
     
-    /* Make grid items smaller */
+    /* Grid spacing */
     .gap-8 {
       gap: 0.5rem !important;
     }
@@ -208,12 +225,12 @@ export default function EnergySummaryPage() {
       gap: 0.25rem !important;
     }
     
-    /* Reduce heights even more */
+    /* Height reductions */
     .min-h-[120px] {
       min-height: 60px !important;
     }
     
-    /* Make calculator more compact */
+    /* Calculator layout */
     .space-y-6 {
       gap: 0.25rem !important;
     }
@@ -223,29 +240,17 @@ export default function EnergySummaryPage() {
       gap: 0.5rem !important;
     }
     
-    /* Remove gradients for better print */
-    @keyframes plant-tree {
-    0% { transform: translateY(10px) scale(0.8); opacity: 0; }
-    50% { transform: translateY(-5px) scale(1.1); opacity: 0.8; }
-    100% { transform: translateY(0) scale(1); opacity: 0.6; }
-  }
-  
-  .plant-animation {
-    animation: plant-tree 4s ease-in-out infinite;
-  }
-    
+    /* Page settings */
     @page {
       margin: 0.2in;
       size: letter;
-        
-    
-      }
     }
-    `}</style>
+  }
+`}</style>
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 printable">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
-        <div className="summary-calculator-group">
+        <div className="summary-section">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">
             Energy Efficiency Report
@@ -442,10 +447,11 @@ export default function EnergySummaryPage() {
                 </div>
             </div>
             </div>
+            </div> 
 
         {/* Payback Calculator */}
             {/* Payback Calculator */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-12">
+            <div className="calculator-section bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-12">
             <div className="flex items-center gap-3 mb-6">
                 <div className="p-3 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl shadow-md">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -582,7 +588,7 @@ export default function EnergySummaryPage() {
             </div>
             </div>
 
-        </div>        
+              
         {/* Room Breakdown */}
         <div className="room-breakdown">
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
