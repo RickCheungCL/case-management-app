@@ -88,165 +88,165 @@ export default function EnergySummaryPage() {
     <>
       {/* Add this style tag */}
       <style jsx>{`
-  /* Animation definitions - Keep only once */
-  @keyframes plant-tree {
-    0% { transform: translateY(10px) scale(0.8); opacity: 0; }
-    50% { transform: translateY(-5px) scale(1.1); opacity: 0.8; }
-    100% { transform: translateY(0) scale(1); opacity: 0.6; }
-  }
-  
-  .plant-animation {
-    animation: plant-tree 4s ease-in-out infinite;
-  }
+        /* Animation definitions - Keep only once */
+        @keyframes plant-tree {
+          0% { transform: translateY(10px) scale(0.8); opacity: 0; }
+          50% { transform: translateY(-5px) scale(1.1); opacity: 0.8; }
+          100% { transform: translateY(0) scale(1); opacity: 0.6; }
+        }
+        
+        .plant-animation {
+          animation: plant-tree 4s ease-in-out infinite;
+        }
 
-  @media print {
-    /* Color preservation */
-    * {
-      -webkit-print-color-adjust: exact !important;
-      color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-    
-    /* Base layout */
-    html, body {
-      width: 100% !important;
-      height: auto !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      overflow: visible !important;
-    }
-    
-    /* Printable container */
-    .printable {
-      transform: scale(1) !important;
-      transform-origin: top left !important;
-      width: 100% !important;
-      height: auto !important;
-      min-height: auto !important;
-      margin: 0 !important;
-      overflow: visible !important;
-    }
-    
-    /* Container widths */
-    .container, .max-w-7xl {
-      max-width: none !important;
-      width: 100% !important;
-    }
-    
-    /* FIXED: Separate summary and calculator sections */
-    .summary-section {
-      page-break-inside: avoid !important;
-      break-inside: avoid !important;
-      /* Summary stays on page 1 */
-    }
-    
-    .calculator-section {
-      page-break-before: always !important;  /* Force to new page */
-      break-before: page !important;
-      page-break-inside: avoid !important;
-      break-inside: avoid !important;
-      /* Calculator starts on page 2 */
-    }
-    
-    /* Room breakdown on new page */
-    .room-breakdown {
-      page-break-before: always !important;
-      break-before: page !important;
-      /* Room breakdown starts on page 3 */
-    }
-    
-    /* Utility classes for other sections */
-    .section-break {
-      page-break-before: always !important;
-      break-before: page !important;
-    }
-    
-    .keep-together {
-      page-break-inside: avoid !important;
-      break-inside: avoid !important;
-    }
-    
-    /* Spacing reductions */
-    .py-8 {
-      padding-top: 0.25rem !important;
-      padding-bottom: 0.25rem !important;
-    }
-    
-    .mb-12 {
-      margin-bottom: 0.5rem !important;
-    }
-    
-    .mb-8 {
-      margin-bottom: 0.25rem !important;
-    }
-    
-    .mb-6 {
-      margin-bottom: 0.25rem !important;
-    }
-    
-    .p-8 {
-      padding: 0.5rem !important;
-    }
-    
-    .p-6 {
-      padding: 0.25rem !important;
-    }
-    
-    /* Text size optimizations */
-    .text-4xl, .text-5xl {
-      font-size: 1rem !important;
-      line-height: 1.2 !important;
-    }
-    
-    .text-3xl {
-      font-size: 1rem !important;
-      line-height: 1.2 !important;
-    }
-    
-    .text-2xl {
-      font-size: 1rem !important;
-      line-height: 1.2 !important;
-    }
-    
-    .text-xl {
-      font-size: 1rem !important;
-    }
-    
-    .text-lg {
-      font-size: 1rem !important;
-    }
-    
-    /* Grid spacing */
-    .gap-8 {
-      gap: 0.5rem !important;
-    }
-    
-    .gap-6 {
-      gap: 0.25rem !important;
-    }
-    
-    /* Height reductions */
-    .min-h-[120px] {
-      min-height: 60px !important;
-    }
-    
-    /* Calculator layout */
-    .space-y-6 {
-      gap: 0.25rem !important;
-    }
-    
-    .grid.lg\\:grid-cols-2 {
-      grid-template-columns: 1fr 1fr !important;
-      gap: 0.5rem !important;
-    }
-    
-    /* Page settings */
-    @page {
-      margin: 0.2in;
-      size: letter;
-    }
-  }
-`}</style>
+        @media print {
+          /* Color preservation */
+          * {
+            -webkit-print-color-adjust: exact !important;
+            color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          
+          /* Base layout */
+          html, body {
+            width: 100% !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: visible !important;
+          }
+          
+          /* Printable container */
+          .printable {
+            transform: scale(1) !important;
+            transform-origin: top left !important;
+            width: 100% !important;
+            height: auto !important;
+            min-height: auto !important;
+            margin: 0 !important;
+            overflow: visible !important;
+          }
+          
+          /* Container widths */
+          .container, .max-w-7xl {
+            max-width: none !important;
+            width: 100% !important;
+          }
+          
+          /* FIXED: Separate summary and calculator sections */
+          .summary-section {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            /* Summary stays on page 1 */
+          }
+          
+          .calculator-section {
+            page-break-before: always !important;  /* Force to new page */
+            break-before: page !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            /* Calculator starts on page 2 */
+          }
+          
+          /* Room breakdown on new page */
+          .room-breakdown {
+            page-break-before: always !important;
+            break-before: page !important;
+            /* Room breakdown starts on page 3 */
+          }
+          
+          /* Utility classes for other sections */
+          .section-break {
+            page-break-before: always !important;
+            break-before: page !important;
+          }
+          
+          .keep-together {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          
+          /* Spacing reductions */
+          .py-8 {
+            padding-top: 0.25rem !important;
+            padding-bottom: 0.25rem !important;
+          }
+          
+          .mb-12 {
+            margin-bottom: 0.5rem !important;
+          }
+          
+          .mb-8 {
+            margin-bottom: 0.25rem !important;
+          }
+          
+          .mb-6 {
+            margin-bottom: 0.25rem !important;
+          }
+          
+          .p-8 {
+            padding: 0.5rem !important;
+          }
+          
+          .p-6 {
+            padding: 0.25rem !important;
+          }
+          
+          /* Text size optimizations */
+          .text-4xl, .text-5xl {
+            font-size: 1rem !important;
+            line-height: 1.2 !important;
+          }
+          
+          .text-3xl {
+            font-size: 1rem !important;
+            line-height: 1.2 !important;
+          }
+          
+          .text-2xl {
+            font-size: 1rem !important;
+            line-height: 1.2 !important;
+          }
+          
+          .text-xl {
+            font-size: 1rem !important;
+          }
+          
+          .text-lg {
+            font-size: 1rem !important;
+          }
+          
+          /* Grid spacing */
+          .gap-8 {
+            gap: 0.5rem !important;
+          }
+          
+          .gap-6 {
+            gap: 0.25rem !important;
+          }
+          
+          /* Height reductions */
+          .min-h-[120px] {
+            min-height: 60px !important;
+          }
+          
+          /* Calculator layout */
+          .space-y-6 {
+            gap: 0.25rem !important;
+          }
+          
+          .grid.lg\\:grid-cols-2 {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 0.5rem !important;
+          }
+          
+          /* Page settings */
+          @page {
+            margin: 0.2in;
+            size: letter;
+          }
+        }
+      `}</style>
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 printable">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
@@ -329,123 +329,128 @@ export default function EnergySummaryPage() {
             {/* Environmental Impact Card with Dynamic Tree Background and Planting Animation */}
 
             {/* Environmental Impact Card with Size-Varied Trees */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 relative overflow-hidden">
-            {/* Dynamic Tree Background - Size Progression */}
-            <div className="absolute inset-0 opacity-15 pointer-events-none">
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 relative overflow-hidden environmental-impact-card">
+              {/* Dynamic Tree Background - Size Progression */}
+              <div 
+                className="absolute inset-0 opacity-15 pointer-events-none tree-background" 
+                aria-hidden="true"
+              >
                 {(() => {
-                const treeCount = Math.round((Number(summary.savings_kWh) * 0.39) / 21.8);
-                const displayTrees = Math.min(treeCount, 30);
-                const trees = [];
-                
-                for (let i = 0; i < displayTrees; i++) {
-                    const randomX = Math.random() * 85 + 5; // 5-90% to avoid edges
-                    const randomY = Math.random() * 75 + 10; // 10-85% to avoid edges
+                  const co2Reduced = ((Number(summary.savings_kWh) * 0.39) / 1000); // tonnes
+                  const treesEquivalent = Math.round(co2Reduced * 1000 / 21.8); // trees that can be planted
+                  const displayTrees = Math.min(treesEquivalent, 25); // Cap at 25 for performance
+                  const trees = [];
+                  
+                  for (let i = 0; i < displayTrees; i++) {
+                    const randomX = Math.random() * 75 + 12.5; // 12.5-87.5% for better edge handling
+                    const randomY = Math.random() * 65 + 17.5; // 17.5-82.5% for better spacing
                     
                     // Determine tree type based on position in array (progression)
                     let treeType, size, opacity, color;
                     
                     if (i < displayTrees * 0.3) {
-                    // First 30% - Saplings
-                    treeType = 'sapling';
-                    size = 12 + Math.random() * 6; // 12-18px
-                    opacity = 0.6 + Math.random() * 0.2;
-                    color = 'text-green-400';
+                      // First 30% - Saplings (larger)
+                      treeType = 'sapling';
+                      size = 20 + Math.random() * 10; // 20-30px (increased from 12-18px)
+                      opacity = 0.6 + Math.random() * 0.2;
+                      color = 'text-green-400';
                     } else if (i < displayTrees * 0.7) {
-                    // Next 40% - Medium Trees
-                    treeType = 'tree';
-                    size = 18 + Math.random() * 8; // 18-26px
-                    opacity = 0.5 + Math.random() * 0.3;
-                    color = 'text-green-500';
+                      // Next 40% - Medium Trees (larger)
+                      treeType = 'tree';
+                      size = 28 + Math.random() * 12; // 28-40px (increased from 18-26px)
+                      opacity = 0.5 + Math.random() * 0.3;
+                      color = 'text-green-500';
                     } else {
-                    // Last 30% - Big Trees
-                    treeType = 'bigTree';
-                    size = 24 + Math.random() * 12; // 24-36px
-                    opacity = 0.4 + Math.random() * 0.4;
-                    color = 'text-green-600';
+                      // Last 30% - Big Trees (larger)
+                      treeType = 'bigTree';
+                      size = 36 + Math.random() * 18; // 36-54px (increased from 24-36px)
+                      opacity = 0.4 + Math.random() * 0.4;
+                      color = 'text-green-600';
                     }
                     
                     trees.push(
-                    <div
+                      <div
                         key={i}
-                        className={`absolute ${color}`}
+                        className={`absolute ${color} tree-item`}
                         style={{
-                        left: `${randomX}%`,
-                        top: `${randomY}%`,
-                        width: `${size}px`,
-                        height: `${size}px`,
-                        opacity: opacity,
-                        transform: `rotate(${Math.random() * 20 - 10}deg)`
+                          left: `${randomX}%`,
+                          top: `${randomY}%`,
+                          width: `${size}px`,
+                          height: `${size}px`,
+                          opacity: opacity,
+                          transform: `rotate(${Math.random() * 20 - 10}deg)`
                         }}
-                    >
+                      >
                         {treeType === 'sapling' && (
-                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+                          <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
                             {/* Small sapling */}
                             <path d="M12 18v-4c0-1 0.5-2 2-2s2 1 2 2-0.5 2-2 2-2-1-2-2z" fillOpacity="0.7" />
                             <path d="M12 18v-4c0-1-0.5-2-2-2s-2 1-2 2 0.5 2 2 2 2-1 2-2z" fillOpacity="0.5" />
                             <rect x="11.5" y="16" width="1" height="6" fill="#8B4513" />
-                        </svg>
+                          </svg>
                         )}
                         
                         {treeType === 'tree' && (
-                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+                          <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
                             {/* Medium tree */}
                             <path d="M12 16v-6c0-2 1-3 3-3s3 1 3 3-1 3-3 3-3-1-3-3z" fillOpacity="0.8" />
                             <path d="M12 16v-6c0-2-1-3-3-3s-3 1-3 3 1 3 3 3 3-1 3-3z" fillOpacity="0.6" />
                             <path d="M12 12c0-1.5 0.5-2.5 2-2.5s2 1 2 2.5-0.5 2.5-2 2.5-2-1-2-2.5z" fillOpacity="0.9" />
                             <rect x="11" y="16" width="2" height="6" fill="#8B4513" />
-                        </svg>
+                          </svg>
                         )}
                         
                         {treeType === 'bigTree' && (
-                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+                          <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
                             {/* Big tree */}
                             <path d="M12 14v-8c0-3 2-4 4-4s4 1 4 4-2 4-4 4-4-1-4-4z" fillOpacity="0.9" />
                             <path d="M12 14v-8c0-3-2-4-4-4s-4 1-4 4 2 4 4 4 4-1 4-4z" fillOpacity="0.7" />
-                            <path d="M12 10c0-2 1-3 3-3s3 1 3 3-1 3-3 3-3-1-3-3z" fillOpacity="1" />
+                            <path d="M12 10c0-2 1-3 3-3s3 1 3 3-1 3 3 3-3-1-3-3z" fillOpacity="1" />
                             <path d="M12 10c0-2-1-3-3-3s-3 1-3 3 1 3 3 3 3-1 3-3z" fillOpacity="0.8" />
                             <rect x="10.5" y="14" width="3" height="8" fill="#8B4513" />
-                        </svg>
+                          </svg>
                         )}
-                    </div>
+                      </div>
                     );
-                }
-                
-                return trees;
+                  }
+                  
+                  return trees;
                 })()}
-            </div>
+              </div>
 
-            {/* Card Content */}
-            <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-700">Environmental Impact</h3>
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                    <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2L8 8h2v2H8l4 6 4-6h-2V8h2l-4-6z" />
-                    <rect x="11" y="16" width="2" height="6" fill="#8B4513" />
-                    </svg>
+              {/* Card Content */}
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-semibold text-gray-700">Environmental Impact</h3>
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                    <span className="text-3xl">🌲</span>
+                  </div>
                 </div>
-                </div>
-                <div className="space-y-3 bg-white bg-opacity-95 rounded-lg p-3 backdrop-blur-sm">
-                <div>
-                    <p className="text-2xl font-bold text-gray-900">
-                    {((Number(summary.savings_kWh) * 0.39) / 1000).toFixed(1)} tonnes
-                    </p>
-                    <p className="text-sm text-gray-600">CO₂ reduced annually</p>
-                </div>
-                <div className="border-t border-gray-200 pt-2">
-                    <div className="flex items-center gap-1">
-                    <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2L8 8h2v2H8l4 6 4-6h-2V8h2l-4-6z" />
-                        <rect x="11" y="16" width="2" height="6" fill="#8B4513" />
-                    </svg>
-                    <p className="text-lg font-bold text-gray-900">
-                        {Math.round((Number(summary.savings_kWh) * 0.39) / 21.8)} trees
-                    </p>
-                    <span className="text-sm text-gray-600">equivalent planted</span>
+                
+                <div className="grid grid-cols-2 gap-6 bg-white bg-opacity-95 rounded-lg p-4 backdrop-blur-sm">
+                  {/* CO2 Reduction */}
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                      <span className="text-3xl">🏭</span>
                     </div>
+                    <p className="text-3xl font-bold text-gray-900 mb-2">
+                      {((Number(summary.savings_kWh) * 0.39) / 1000).toFixed(1)}
+                    </p>
+                    <p className="text-base text-gray-600 leading-tight font-medium">tonnes CO₂ reduced annually</p>
+                  </div>
+                  
+                  {/* Trees Equivalent */}
+                  <div className="flex flex-col items-center text-center">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-3">
+                      <span className="text-3xl">🌲</span>
+                    </div>
+                    <p className="text-3xl font-bold text-gray-900 mb-2">
+                      {Math.round(((Number(summary.savings_kWh) * 0.39) / 1000) * 1000 / 21.8)}
+                    </p>
+                    <p className="text-base text-gray-600 leading-tight font-medium">trees equivalent that can be planted</p>
+                  </div>
                 </div>
-                </div>
-            </div>
+              </div>
             </div>
             </div> 
 
