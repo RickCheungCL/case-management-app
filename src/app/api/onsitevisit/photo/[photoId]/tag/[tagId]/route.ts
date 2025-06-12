@@ -8,7 +8,7 @@ export async function DELETE(
   req: NextRequest,
   context: RouteContext<{ photoId: string; tagId: string }>
 ) {
-  const { photoId, tagId } = context.params;
+  const { photoId, tagId } = await context.params;
 
   if (!photoId || !tagId) {
     return NextResponse.json({ error: 'Missing photoId or tagId' }, { status: 400 });

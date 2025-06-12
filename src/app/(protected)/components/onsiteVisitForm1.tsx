@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect,useCallback } from 'react';
-import useSWR,{ mutate } from 'swr';
+import { useState, useEffect } from 'react';
+import useSWR from 'swr';
 import axios from 'axios';
 
 interface OnSiteVisitPhoto {
@@ -36,7 +36,15 @@ interface RoomData {
   ceilingHeight: number | null;
 }
 
+const LOCATION_TAGS = [
+  { id: 'lt1', name: 'Main Hall' },
+  { id: 'lt2', name: 'Storage Area' },
+];
 
+const photoTags = [
+  { id: 'pt1', name: 'Sky Lift Required' },
+  { id: 'pt2', name: 'Ceiling Obstruction' },
+];
 const fetcher = async (url: string) => {
   const response = await fetch(url);
   if (!response.ok) {
@@ -52,7 +60,8 @@ const axiosFetcher = async (url: string) => {
 export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
   
   
-  
+  const [existingProducts, setExistingProducts] = useState<{ id: string; name: string; wattage: number }[]>([]);
+  const [suggestedProducts, setSuggestedProducts] = useState<{ id: string;description:string; name: string }[]>([]);
 
 
   const [isUploading, setIsUploading] = useState(false);
@@ -60,109 +69,107 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [newLocationTag, setNewLocationTag] = useState('');
   const [newPhotoTagInput, setNewPhotoTagInput] = useState('');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const [rooms, setRooms] = useState<RoomData[]>([]);
+  
+  const selectedRoom = rooms.find((r) => r.id === selectedRoomId);
 
+  
+  const [photoTags, setPhotoTags] = useState<{ id: string; name: string }[]>([]);
+  
+  const [locationTags, setLocationTags] = useState<{ id: string; name: string }[]>([]);
   // 🚀 Fetch initial OnSiteVisit data (rooms, photos, tags, products)
 
   
 
   
 
-  const { data: onSiteVisitData, error: onSiteError, isLoading: isLoadingOnSite } = useSWR(
-    `/api/onsitevisit/form/init?caseId=${caseId}`,
-    axiosFetcher,
-    {
-      revalidateOnFocus: false,
-      dedupingInterval: 5000, // Prevent duplicate requests within 5 seconds
-    }
-  );
-
-  const { data: existingProducts = [], error: existingError } = useSWR(
-    '/api/products/existing',
-    fetcher,
-    { revalidateOnFocus: false }
-  );
-
-  const { data: suggestedProducts = [], error: suggestedError } = useSWR(
-    '/api/products/suggested',
-    fetcher,
-    { revalidateOnFocus: false }
-  );
-
-  const { data: photoTags = [], error: photoTagsError } = useSWR(
-    '/api/onsitevisit/photo/tag',
-    fetcher,
-    { revalidateOnFocus: false }
-  );
-
-  const { data: locationTags = [], error: locationTagsError } = useSWR(
-    '/api/onsitevisit/location-tag',
-    axiosFetcher,
-    { revalidateOnFocus: false }
-  );
-
-  // Process rooms data from SWR
-  const rooms: RoomData[] = onSiteVisitData?.rooms?.map((room: any) => ({
-    id: room.id,
-    location: room.location,
-    locationTagId: room.locationTagId,
-    lightingIssue: room.lightingIssue,
-    customerRequest: room.customerRequest,
-    mountingKitQty: room.mountingKitQty,
-    motionSensorQty: room.motionSensorQty,
-    ceilingHeight: room.ceilingHeight || null,
-    photos: room.photos.map((photo: any) => ({
-      id: photo.id,
-      url: photo.url,
-      comment: photo.comment ?? '',
-      tags: photo.tags.map((pivot: any) => pivot.tag.id),
-    })),
-    suggestedProducts: room.suggestedLights.map((light: any) => ({
-      productId: light.productId,
-      description: light.description,
-      qty: light.quantity,
-    })),
-    existingLights: room.existingLights.map((light: any) => ({
-      productId: light.productId,
-      qty: light.quantity,
-      wattage: light.product?.wattage || 0,
-      bypassBallast: light.bypassBallast ?? false,
-    })),
-  })) || [];
-
-  const selectedRoom = rooms.find((r) => r.id === selectedRoomId);
-
-  // Set initial selected room when data loads
   useEffect(() => {
-    if (rooms.length > 0 && !selectedRoomId) {
-      setSelectedRoomId(rooms[0].id);
-    }
-  }, [rooms, selectedRoomId]);
+    const fetchInit = async () => {
+      try{
+      const res = await axios.get(`/api/onsitevisit/form/init?caseId=${caseId}`);
+      const data = res.data;
+      console.log('Loaded OnSiteVisit:', data);
 
-  // Optimistic update helper
-  const optimisticUpdate = useCallback(async (
-    key: string,
-    updateFn: (data: any) => any,
-    apiCall: () => Promise<any>
-  ) => {
-    try {
-      // Optimistically update
-      await mutate(key, updateFn, false);
+      const loadedRooms: RoomData[] = data.rooms.map((room: any) => ({
+        id: room.id,
+        location: room.location,
+        locationTagId: room.locationTagId,
+        lightingIssue: room.lightingIssue,
+        customerRequest: room.customerRequest,
+        mountingKitQty: room.mountingKitQty,
+        motionSensorQty: room.motionSensorQty,
+        ceilingHeight: room.ceilingHeight || null,
+        photos: room.photos.map((photo: any) => ({
+          id: photo.id,
+          url: photo.url,
+          comment: photo.comment ?? '',
+          tags: photo.tags.map((pivot: any) => pivot.tag.id),
+        })),
+        suggestedProducts: room.suggestedLights.map((light: any) => ({
+          productId: light.productId,
+          description: light.description,
+          qty: light.quantity,
+        })),
+        existingLights: room.existingLights.map((light: any) => ({  // Changed from existingProducts to existingLights to match Prisma schema
+          productId: light.productId,
+          qty: light.quantity,
+          wattage: light.product?.wattage || 0,
+          bypassBallast: light.bypassBallast ?? false,
+        })),
+      }));
       
-      // Make API call
-      await apiCall();
+      const fetchExistingProducts = async () => {
+        const res = await fetch('/api/products/existing');
+        const data = await res.json();
+        setExistingProducts(data);
+      };
       
-      // Revalidate to ensure consistency
-      mutate(key);
-    } catch (error) {
-      // Revert on error
-      mutate(key);
-      console.error('Update failed:', error);
-      throw error;
-    }
-  }, []);
-
+      const fetchSuggestedProducts = async () => {
+        const res = await fetch('/api/fixture-types');
+        const data = await res.json();
+        setSuggestedProducts(data);
+      };
+      
+      fetchExistingProducts();
+      fetchSuggestedProducts();
+      
+      
+      const fetchProducts = async () => {
+        const [suggestedRes, existingRes] = await Promise.all([
+          fetch('/api/products/suggested'),
+          fetch('/api/products/existing'),
+        ]);
+        const suggested = await suggestedRes.json();
+        const existing = await existingRes.json();
+      
+        setSuggestedProducts(suggested);
+        setExistingProducts(existing);
+      };
+      
+      fetchProducts();
+      const loadTags = async () => {
+        const res = await fetch(`/api/onsitevisit/photo/tag`);
+        const data = await res.json();
+        setPhotoTags(data);
+      };
+      loadTags();
+      const fetchLocationTags = async () => {
+        const res = await axios.get('/api/onsitevisit/location-tag');
+        setLocationTags(res.data);
+      };
+      fetchLocationTags();
+      setRooms(loadedRooms);
+      if (loadedRooms.length > 0) {
+        setSelectedRoomId(loadedRooms[0].id);
+      }
+      } catch (error){
+        console.error('Error fetching onsite visit data:', error);
+      }
+    };
+    
+    fetchInit();
+  }, [caseId]);
   const handleDeleteRoom = async (roomIdToDelete: string) => {
     if (rooms.length <= 1) {
       alert('At least one room is required.');
@@ -172,109 +179,57 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
     if (!confirm('Are you sure you want to delete this room?')) return;
 
     try {
-      await optimisticUpdate(
-        `/api/onsitevisit/form/init?caseId=${caseId}`,
-        (data) => ({
-          ...data,
-          rooms: data.rooms.filter((r: any) => r.id !== roomIdToDelete)
-        }),
-        () => axios.delete(`/api/onsitevisit/room/${roomIdToDelete}`)
-      );
+      await axios.delete(`/api/onsitevisit/room/${roomIdToDelete}`);
+      const updatedRooms = rooms.filter((r) => r.id !== roomIdToDelete);
+      setRooms(updatedRooms);
 
-      // Update selected room if necessary
-      const remainingRooms = rooms.filter((r) => r.id !== roomIdToDelete);
-      if (remainingRooms.length > 0 && selectedRoomId === roomIdToDelete) {
-        setSelectedRoomId(remainingRooms[0].id);
+      // Select another room (first one by default)
+      if (updatedRooms.length > 0) {
+        setSelectedRoomId(updatedRooms[0].id);
       }
     } catch (error) {
       console.error('Failed to delete room', error);
       alert('Failed to delete room. Check console for details.');
     }
   };
-
   const handleAddPhotoTag = async () => {
-    if (!newPhotoTagInput.trim()) return;
-
-    try {
-      const newTag = await axios.post('/api/onsitevisit/photo/tag', { 
-        name: newPhotoTagInput.trim() 
-      });
-      
-      // Update SWR cache
-      mutate('/api/onsitevisit/photo/tag', [...photoTags, newTag.data], false);
+    if (newPhotoTagInput.trim()) {
+      const res = await axios.post('/api/onsitevisit/photo/tag', { name: newPhotoTagInput.trim() });
+      setPhotoTags([...photoTags, res.data]);
       setNewPhotoTagInput('');
-    } catch (error) {
-      console.error('Failed to add photo tag:', error);
     }
   };
-
-  const updateRoomAndPersist = async (updated: Partial<RoomData>) => {
+  const updateRoomAndPersist = (updated: Partial<RoomData>) => {
     if (!selectedRoom) return;
 
-    try {
-      await optimisticUpdate(
-        `/api/onsitevisit/form/init?caseId=${caseId}`,
-        (data) => ({
-          ...data,
-          rooms: data.rooms.map((r: any) => 
-            r.id === selectedRoom.id ? { ...r, ...updated } : r
-          )
-        }),
-        () => axios.put(`/api/onsitevisit/room/${selectedRoom.id}`, updated)
-      );
-    } catch (error) {
-      console.error('Failed to update room:', error);
-    }
+    const updatedRoom = { ...selectedRoom, ...updated };
+    setRooms((prev) => prev.map((r) => (r.id === selectedRoomId ? updatedRoom : r)));
+
+    axios.put(`/api/onsitevisit/room/${selectedRoom.id}`, updated).catch(console.error);
   };
 
   const updateSuggestedProductsInDB = async (newProducts: ProductSelection[]) => {
     if (!selectedRoom) return;
 
-    try {
-      await optimisticUpdate(
-        `/api/onsitevisit/form/init?caseId=${caseId}`,
-        (data) => ({
-          ...data,
-          rooms: data.rooms.map((r: any) => 
-            r.id === selectedRoom.id 
-              ? { ...r, suggestedLights: newProducts.map(p => ({ ...p, quantity: p.qty })) }
-              : r
-          )
-        }),
-        () => axios.put(`/api/onsitevisit/${caseId}/room/${selectedRoom.id}/suggestedProducts`, {
-          suggestedProducts: newProducts,
-        })
-      );
-    } catch (error) {
-      console.error('Failed to update suggested products:', error);
-    }
+    await axios.put(`/api/onsitevisit/${caseId}/room/${selectedRoom.id}/suggestedProducts`, {
+      suggestedProducts: newProducts,
+    });
   };
-
-  const updateExistingProductsInDB = async (existingLights: ExistingProduct[]) => {
+  const updateExistingProductsInDB = async (existingLights: { productId: string; qty: number; wattage: number;bypassBallast: boolean }[]) => {
     if (!selectedRoom) return;
-
+    
     try {
-      await optimisticUpdate(
-        `/api/onsitevisit/form/init?caseId=${caseId}`,
-        (data) => ({
-          ...data,
-          rooms: data.rooms.map((r: any) => 
-            r.id === selectedRoom.id 
-              ? { ...r, existingLights: existingLights.map(l => ({ ...l, quantity: l.qty })) }
-              : r
-          )
-        }),
-        () => fetch(`/api/onsitevisit/room/${selectedRoom.id}/existingLights`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ existingLights }),
-        })
-      );
+      await fetch(`/api/onsitevisit/room/${selectedRoom.id}/existingLights`, {  // Changed endpoint to match backend
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ existingLights }),  // Consistent naming
+      });
     } catch (error) {
       console.error('Failed to update existing lighting:', error);
     }
   };
-
+  
+  // ✅ Add new room (via API)
   const addRoom = async () => {
     try {
       const res = await axios.post(`/api/onsitevisit/${caseId}/room`, {
@@ -285,37 +240,36 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
         mountingKitQty: '',
         motionSensorQty: 0,
       });
-
+  
       const newRoom = res.data;
-
-      // Update SWR cache optimistically
-      await mutate(
-        `/api/onsitevisit/form/init?caseId=${caseId}`,
-        (data) => ({
-          ...data,
-          rooms: [...(data?.rooms || []), {
-            id: newRoom.id,
-            location: newRoom.location,
-            locationTagId: newRoom.locationTagId,
-            lightingIssue: newRoom.lightingIssue,
-            customerRequest: newRoom.customerRequest,
-            mountingKitQty: newRoom.mountingKitQty,
-            motionSensorQty: newRoom.motionSensorQty,
-            ceilingHeight: null,
-            photos: [],
-            suggestedLights: [],
-            existingLights: [],
-          }]
-        }),
-        false
-      );
+  
+      setRooms((prev) => [
+        ...prev,
+        {
+          id: newRoom.id,
+          location: newRoom.location,
+          locationTagId: newRoom.locationTagId,
+          photos: [],
+          existingLights: [],  // Changed from existingLights to existingLights
+          suggestedProducts: [],
+          lightingIssue: newRoom.lightingIssue,
+          customerRequest: newRoom.customerRequest,
+          mountingKitQty: newRoom.mountingKitQty,
+          motionSensorQty: newRoom.motionSensorQty,
+          ceilingHeight: null,
+        },
+      ]);
+  
+     
 
       setSelectedRoomId(newRoom.id);
     } catch (error) {
       console.error('Failed to add room:', error);
-      // Revalidate on error
-      mutate(`/api/onsitevisit/form/init?caseId=${caseId}`);
     }
+  };
+
+  const updateRoom = (updated: Partial<RoomData>) => {
+    setRooms((prev) => prev.map((r) => (r.id === selectedRoomId ? { ...r, ...updated } : r)));
   };
 
   const handlePhotoUpload = async (files: File[]) => {
@@ -351,126 +305,36 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
       }
     }
 
-    // Update SWR cache with new photos
-    await mutate(
-      `/api/onsitevisit/form/init?caseId=${caseId}`,
-      (data) => ({
-        ...data,
-        rooms: data.rooms.map((r: any) => 
-          r.id === selectedRoom.id 
-            ? { ...r, photos: [...r.photos, ...uploadedPhotos] }
-            : r
-        )
-      }),
-      false
-    );
-
+    updateRoom({ photos: [...selectedRoom.photos, ...uploadedPhotos] });
     setIsUploading(false);
     setUploadProgress(null);
   };
-  const updateRoom = useCallback(async (updated: Partial<RoomData>) => {
-    if (!selectedRoom) return;
-  
-    await mutate(
-      `/api/onsitevisit/form/init?caseId=${caseId}`,
-      (data) => ({
-        ...data,
-        rooms: data.rooms.map((r: any) => 
-          r.id === selectedRoom.id ? { ...r, ...updated } : r
-        )
-      }),
-      false
-    );
-  }, [selectedRoom, caseId]);
+
   const handleCommentUpdate = async (photoIndex: number, newComment: string) => {
     if (!selectedRoom) return;
-    
-    const updatedPhotos = [...selectedRoom.photos];
-    const photo = updatedPhotos[photoIndex];
-    updatedPhotos[photoIndex] = { ...photo, comment: newComment };
+    const photos = [...selectedRoom.photos];
+    const photo = photos[photoIndex];
+    photos[photoIndex].comment = newComment;
+    updateRoom({ photos });
 
-    // Optimistic update
-    await mutate(
-      `/api/onsitevisit/form/init?caseId=${caseId}`,
-      (data) => ({
-        ...data,
-        rooms: data.rooms.map((r: any) => 
-          r.id === selectedRoom.id 
-            ? { ...r, photos: updatedPhotos }
-            : r
-        )
-      }),
-      false
-    );
-
-    // API call
     if (photo.id) {
-      try {
-        await axios.put(`/api/onsitevisit/${caseId}/photo/${photo.id}`, { comment: newComment });
-      } catch (error) {
-        // Revert on error
-        mutate(`/api/onsitevisit/form/init?caseId=${caseId}`);
-        console.error('Failed to update comment:', error);
-      }
+      await axios.put(`/api/onsitevisit/${caseId}/photo/${photo.id}`, { comment: newComment });
     }
   };
 
   const handleDeletePhoto = async (photoIndex: number) => {
     if (!selectedRoom) return;
-    
-    const photo = selectedRoom.photos[photoIndex];
-    const updatedPhotos = selectedRoom.photos.filter((_, i) => i !== photoIndex);
+    const photos = [...selectedRoom.photos];
+    const photo = photos[photoIndex];
 
-    // Optimistic update
-    await mutate(
-      `/api/onsitevisit/form/init?caseId=${caseId}`,
-      (data) => ({
-        ...data,
-        rooms: data.rooms.map((r: any) => 
-          r.id === selectedRoom.id 
-            ? { ...r, photos: updatedPhotos }
-            : r
-        )
-      }),
-      false
-    );
-
-    // API call
     if (photo.id) {
-      try {
-        await axios.delete(`/api/onsitevisit/photo/${photo.id}`);
-      } catch (error) {
-        // Revert on error
-        mutate(`/api/onsitevisit/form/init?caseId=${caseId}`);
-        console.error('Failed to delete photo:', error);
-      }
+      await axios.delete(`/api/onsitevisit/photo/${photo.id}`);
     }
+
+    photos.splice(photoIndex, 1);
+    updateRoom({ photos });
   };
-
-  // Error handling
-  if (onSiteError || existingError || suggestedError || photoTagsError || locationTagsError) {
-    return (
-      <div className="flex items-center justify-center h-64 text-red-600">
-        <div className="text-center">
-          <div className="text-xl mb-2">⚠️ Error Loading Data</div>
-          <div className="text-sm">Please try refreshing the page</div>
-        </div>
-      </div>
-    );
-  }
-
-  // Loading state
-  if (isLoadingOnSite) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <div className="text-gray-600">Loading on-site visit data...</div>
-        </div>
-      </div>
-    );
-  }
-
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <>
       {/* Sidebar Toggle Button for Mobile */}
@@ -510,7 +374,6 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                 : tagName
                   ? `Room ${index + 1} - (${tagName})`
                   : `Room ${index + 1}`;
-              
               return (
                 <div
                   key={room.id}
@@ -565,15 +428,15 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
             <div className="max-w-6xl mx-auto">
               {/* Header */}
               <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  {selectedRoom.location
-                    ? locationTags.find((t) => t.id === selectedRoom.locationTagId)?.name
-                      ? `${rooms.findIndex((r) => r.id === selectedRoomId) + 1}) ${selectedRoom.location} - (${locationTags.find((t) => t.id === selectedRoom.locationTagId)?.name})`
-                      : `${rooms.findIndex((r) => r.id === selectedRoomId) + 1}) ${selectedRoom.location}`
-                    : locationTags.find((t) => t.id === selectedRoom.locationTagId)?.name
-                      ? `Room ${rooms.findIndex((r) => r.id === selectedRoomId) + 1} - (${locationTags.find((t) => t.id === selectedRoom.locationTagId)?.name})`
-                      : `Room ${rooms.findIndex((r) => r.id === selectedRoomId) + 1}`}
-                </h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                {selectedRoom.location
+                  ? locationTags.find((t) => t.id === selectedRoom.locationTagId)?.name
+                    ? `${rooms.findIndex((r) => r.id === selectedRoomId) + 1}) ${selectedRoom.location} - (${locationTags.find((t) => t.id === selectedRoom.locationTagId)?.name})`
+                    : `${rooms.findIndex((r) => r.id === selectedRoomId) + 1}) ${selectedRoom.location}`
+                  : locationTags.find((t) => t.id === selectedRoom.locationTagId)?.name
+                    ? `Room ${rooms.findIndex((r) => r.id === selectedRoomId) + 1} - (${locationTags.find((t) => t.id === selectedRoom.locationTagId)?.name})`
+                    : `Room ${rooms.findIndex((r) => r.id === selectedRoomId) + 1}`}
+              </h2>
                 <div className="h-1 w-20 bg-blue-500 rounded"></div>
               </div>
 
@@ -602,8 +465,7 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                             await axios.put(`/api/onsitevisit/room/${selectedRoom.id}/location-tag`, {
                               locationTagId: newTagId,
                             });
-                            // Update SWR cache
-                            mutate(`/api/onsitevisit/form/init?caseId=${caseId}`);
+                            updateRoom({ locationTagId: newTagId });
                           } catch (err) {
                             alert(err.response?.data?.error || 'Failed to update location tag');
                           }
@@ -675,172 +537,105 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                     )}
                   </div>
 
-                  {selectedRoom.photos && selectedRoom.photos.length > 0 && (
+                  {selectedRoom.photos.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {selectedRoom.photos.map((photo, idx) => {
-                        if (!photo || !photo.id) {
-                          console.warn('Skipping invalid photo at index:', idx);
-                          return null;
-                        }
-                        
-                        return (
-                          <div key={`${photo.id}-${idx}`} className="bg-white border rounded-lg p-3 shadow-sm">
-                            <img
-                              src={photo.url}
-                              alt="preview"
-                              className="w-full h-32 object-cover rounded mb-3"
-                            />
-                            <input
-                              type="text"
-                              placeholder="Comment"
-                              value={photo.comment || ''}
-                              onChange={(e) => handleCommentUpdate(idx, e.target.value)}
-                              className="w-full border rounded p-2 mb-2 text-sm"
-                            />
+                      {selectedRoom.photos.map((photo, idx) => (
+                        <div key={idx} className="bg-white border rounded-lg p-3 shadow-sm">
+                          <img
+                            src={photo.url}
+                            alt="preview"
+                            className="w-full h-32 object-cover rounded mb-3"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Comment"
+                            value={photo.comment}
+                            onChange={(e) => handleCommentUpdate(idx, e.target.value)}
+                            className="w-full border rounded p-2 mb-2 text-sm"
+                          />
 
-                            <div className="flex flex-wrap gap-1 mb-2">
-                              {(photo.tags || []).map((tagId) => {
-                                const tag = (photoTags || []).find((t) => String(t?.id) === String(tagId));
-                                if (!tag) {
-                                  console.warn('❌ Tag not found for ID:', tagId);
-                                  return null;
-                                }
-                                
-                                return (
-                                  <span
-                                    key={tagId}
-                                    className="inline-flex items-center px-2 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs"
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {photo.tags.map((tagId) => {
+                              const tag = photoTags.find((t) => t.id === tagId);
+                              return (
+                                <span
+                                  key={tagId}
+                                  className="inline-flex items-center px-2 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs"
+                                >
+                                  {tag?.name}
+                                  <button
+                                    onClick={async () => {
+                                      const photos = [...selectedRoom.photos];
+                                      const photo = photos[idx];
+                                      await axios.delete(
+                                        `/api/onsitevisit/photo/${photo.id}/tag/${tagId}`,
+                                      );
+                                      photo.tags = photo.tags.filter((id) => id !== tagId);
+                                      photos[idx] = photo;
+                                      updateRoom({ photos });
+                                    }}
+                                    className="ml-1 text-indigo-500 hover:text-indigo-800"
                                   >
-                                    {tag.name}
-                                    <button
-                                      onClick={async () => {
-                                        try {
-                                          const updatedPhotos = [...selectedRoom.photos];
-                                          const photoToUpdate = updatedPhotos[idx];
-                                          
-                                          if (!photoToUpdate || !photoToUpdate.id) return;
-                                          
-                                          // Optimistic update
-                                          photoToUpdate.tags = (photoToUpdate.tags || []).filter((id) => id !== tagId);
-                                          
-                                          await mutate(
-                                            `/api/onsitevisit/form/init?caseId=${caseId}`,
-                                            (data) => {
-                                              if (!data || !data.rooms) return data;
-                                              return {
-                                                ...data,
-                                                rooms: data.rooms.map((r: any) => 
-                                                  r?.id === selectedRoom.id 
-                                                    ? { ...r, photos: updatedPhotos }
-                                                    : r
-                                                )
-                                              };
-                                            },
-                                            false
-                                          );
-                                          
-                                          // API call
-                                          await axios.delete(`/api/onsitevisit/photo/${photoToUpdate.id}/tag/${tagId}`);
-                                        } catch (error) {
-                                          console.error('Failed to remove tag:', error);
-                                          // Revert on error
-                                          mutate(`/api/onsitevisit/form/init?caseId=${caseId}`);
-                                        }
-                                      }}
-                                      className="ml-1 text-indigo-500 hover:text-indigo-800"
-                                    >
-                                      ×
-                                    </button>
-                                  </span>
-                                );
-                              })}
-                            </div>
+                                    ×
+                                  </button>
+                                </span>
+                              );
+                            })}
+                          </div>
 
-                            <select
-                              value=""
-                              onChange={async (e) => {
-                                const selectedTagId = e.target.value;
-                                if (!selectedTagId || !photo || !photo.id) return;
-                                
-                                try {
-                                  const updatedPhotos = [...selectedRoom.photos];
-                                  const photoToUpdate = updatedPhotos[idx];
-
-                                  if (!photoToUpdate || !photoToUpdate.tags?.includes(selectedTagId)) {
-                                    updatedPhotos[idx] = {
-                                      ...photoToUpdate,
-                                      tags: [...(photoToUpdate.tags || []), selectedTagId],
-                                    };
-
-                                    await mutate(
-                                      `/api/onsitevisit/form/init?caseId=${caseId}`,
-                                      (data) => {
-                                        if (!data || !data.rooms) return data;
-                                        return {
-                                          ...data,
-                                          rooms: data.rooms.map((r: any) =>
-                                            r?.id === selectedRoom.id ? { ...r, photos: updatedPhotos } : r
-                                          ),
-                                        };
-                                      },
-                                      false
-                                    );
-
-                                    // ✅ API is already correct
-                                    await axios.post(`/api/onsitevisit/photo/${photo.id}/tag`, {
-                                      tagId: selectedTagId,
-                                    });
-                                  }
-                                } catch (error) {
-                                  console.error('Failed to add tag:', error);
-                                  // Revert on error
-                                  mutate(`/api/onsitevisit/form/init?caseId=${caseId}`);
+                          <select
+                            value=""
+                            onChange={async (e) => {
+                              const selectedTagId = e.target.value;
+                              if (selectedTagId) {
+                                const photos = [...selectedRoom.photos];
+                                const photo = photos[idx];
+                                if (!photo.tags.includes(selectedTagId)) {
+                                  await axios.post(`/api/onsitevisit/photo/${photo.id}/tag`, {
+                                    tagId: selectedTagId,
+                                  });
+                                  photo.tags = [...photo.tags, selectedTagId];
+                                  photos[idx] = photo;
+                                  updateRoom({ photos });
                                 }
-                              }}
-                              className="w-full border rounded p-1 mb-2 text-sm"
-                            >
-                              <option value="">Add Tag...</option>
-                              {(Array.isArray(photoTags) ? photoTags : [])
-                              .filter(
-                                (tag): tag is { id: string; name: string } =>
-                                  tag !== null &&
-                                  typeof tag === 'object' &&
-                                  'id' in tag &&
-                                  'name' in tag &&
-                                  !photo.tags?.includes(tag.id)
-                              )
+                              }
+                            }}
+                            className="w-full border rounded p-1 mb-2 text-sm"
+                          >
+                            <option value="">Add Tag...</option>
+                            {photoTags
+                              .filter((tag) => !photo.tags.includes(tag.id))
                               .map((tag) => (
                                 <option key={tag.id} value={tag.id}>
                                   {tag.name}
                                 </option>
                               ))}
-                            </select>
+                          </select>
 
-                            <div className="flex gap-2 mb-2">
-                              <input
-                                type="text"
-                                placeholder="New Photo Tag"
-                                value={newPhotoTagInput}
-                                onChange={(e) => setNewPhotoTagInput(e.target.value)}
-                                className="flex-1 border rounded p-1 text-sm"
-                              />
-                              <button
-                                onClick={handleAddPhotoTag}
-                                className="bg-green-500 text-white px-2 py-1 rounded text-sm hover:bg-green-600"
-                              >
-                                Add
-                              </button>
-                            </div>
-
+                          <div className="flex gap-2 mb-2">
+                            <input
+                              type="text"
+                              placeholder="New Photo Tag"
+                              value={newPhotoTagInput}
+                              onChange={(e) => setNewPhotoTagInput(e.target.value)}
+                              className="flex-1 border rounded p-1 text-sm"
+                            />
                             <button
-                              onClick={() => handleDeletePhoto(idx)}
-                              className="w-full text-red-600 hover:text-red-800 p-1 text-sm"
+                              onClick={handleAddPhotoTag}
+                              className="bg-green-500 text-white px-2 py-1 rounded text-sm hover:bg-green-600"
                             >
-                              🗑️ Delete
+                              Add
                             </button>
                           </div>
-                        );
-                      }).filter(Boolean)}
+
+                          <button
+                            onClick={() => handleDeletePhoto(idx)}
+                            className="w-full text-red-600 hover:text-red-800 p-1 text-sm"
+                          >
+                            🗑️ Delete
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>

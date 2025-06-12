@@ -39,38 +39,80 @@ export async function DELETE(
   const { roomId } = context.params;
 
   try {
-    // 1️⃣ Delete Photo Tag Pivots for all photos in this room
-    const photos = await prisma.onSiteVisitPhoto.findMany({
-      where: { roomId },
-      select: { id: true },
-    });
+    console.log(`Starting deletion process for room: ${roomId}`);
 
-    const photoIds = photos.map((photo) => photo.id);
-
-    if (photoIds.length > 0) {
-      await prisma.onSiteVisitPhotoTagPivot.deleteMany({
-        where: { photoId: { in: photoIds } },
+    // Use a transaction to ensure all operations succeed or fail together
+    await prisma.$transaction(async (tx) => {
+      // 1️⃣ Delete Photo Tag Pivots for all photos in this room
+      const photos = await tx.onSiteVisitPhoto.findMany({
+        where: { roomId },
+        select: { id: true },
       });
 
-      // 2️⃣ Delete the Photos
-      await prisma.onSiteVisitPhoto.deleteMany({
+      const photoIds = photos.map((photo) => photo.id);
+      console.log(`Found ${photoIds.length} photos to delete for room ${roomId}`);
+
+      if (photoIds.length > 0) {
+        const deletedPivots = await tx.onSiteVisitPhotoTagPivot.deleteMany({
+          where: { photoId: { in: photoIds } },
+        });
+        console.log(`Deleted ${deletedPivots.count} photo tag pivots`);
+
+        // 2️⃣ Delete the Photos
+        const deletedPhotos = await tx.onSiteVisitPhoto.deleteMany({
+          where: { roomId },
+        });
+        console.log(`Deleted ${deletedPhotos.count} photos`);
+      }
+
+      // 3️⃣ Delete Suggested Products linked to this room
+      const deletedSuggestedProducts = await tx.onSiteSuggestedProduct.deleteMany({
         where: { roomId },
       });
-    }
+      console.log(`Deleted ${deletedSuggestedProducts.count} suggested products`);
 
-    // 3️⃣ Delete Suggested Products linked to this room
-    await prisma.onSiteSuggestedProduct.deleteMany({
-      where: { roomId },
+      // 4️⃣ Delete Existing Products linked to this room (CORRECTED TABLE NAME!)
+      const deletedExistingProducts = await tx.onSiteExistingProduct.deleteMany({
+        where: { roomId },
+      });
+      console.log(`Deleted ${deletedExistingProducts.count} existing products`);
+
+      // 5️⃣ Finally delete the Room
+      const deletedRoom = await tx.onSiteVisitRoom.delete({
+        where: { id: roomId },
+      });
+      console.log(`Successfully deleted room: ${roomId}`);
+
+      return deletedRoom;
     });
 
-    // 4️⃣ Finally delete the Room
-    await prisma.onSiteVisitRoom.delete({
-      where: { id: roomId },
+    return NextResponse.json({ 
+      success: true, 
+      message: `Room ${roomId} and all related data deleted successfully` 
     });
 
-    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Failed to delete room:', error);
-    return NextResponse.json({ error: 'Failed to delete room' }, { status: 500 });
+    
+    // Provide more specific error information
+    let errorMessage = 'Failed to delete room';
+    
+    if (error.code === 'P2025') {
+      errorMessage = 'Room not found or already deleted';
+      return NextResponse.json({ error: errorMessage }, { status: 404 });
+    } else if (error.code === 'P2003') {
+      errorMessage = 'Cannot delete room due to related data constraints';
+      return NextResponse.json({ error: errorMessage }, { status: 409 });
+    } else if (error.code === 'P2002') {
+      errorMessage = 'Constraint violation during deletion';
+      return NextResponse.json({ error: errorMessage }, { status: 409 });
+    }
+    
+    return NextResponse.json({ 
+      error: errorMessage,
+      details: error.message,
+      code: error.code || 'UNKNOWN_ERROR'
+    }, { status: 500 });
   }
 }
+

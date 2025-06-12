@@ -8,7 +8,7 @@ export async function POST(
   req: NextRequest,
   context: RouteContext<{ photoId: string }>
 ) {
-  const { photoId } = context.params;
+  const { photoId } =await context.params;
   const { tagId } = await req.json();
 
   if (!photoId || !tagId) {
