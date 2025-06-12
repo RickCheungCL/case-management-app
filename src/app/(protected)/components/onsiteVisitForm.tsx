@@ -12,6 +12,7 @@ interface OnSiteVisitPhoto {
 
 interface ProductSelection {
   productId: string;
+  description:string;
   qty: number;
 }
 interface ExistingProduct {
@@ -48,7 +49,7 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
   
   
   const [existingProducts, setExistingProducts] = useState<{ id: string; name: string; wattage: number }[]>([]);
-  const [suggestedProducts, setSuggestedProducts] = useState<{ id: string; name: string }[]>([]);
+  const [suggestedProducts, setSuggestedProducts] = useState<{ id: string;description:string; name: string }[]>([]);
 
 
   const [isUploading, setIsUploading] = useState(false);
@@ -68,7 +69,7 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
   const [operationHoursPerDay, setOperationHoursPerDay] = useState<number>(0);
   const [operationDaysPerYear, setOperationDaysPerYear] = useState<number>(0);
 
-
+  
 
   useEffect(() => {
     const fetchInit = async () => {
@@ -94,6 +95,7 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
         })),
         suggestedProducts: room.suggestedLights.map((light: any) => ({
           productId: light.productId,
+          description: light.description,
           qty: light.quantity,
         })),
         existingLights: room.existingLights.map((light: any) => ({  // Changed from existingProducts to existingLights to match Prisma schema
@@ -727,80 +729,130 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
 
                   {/* Suggested Lighting */}
                   <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                    <h3 className="font-semibold text-gray-800 mb-4">Suggested Lighting</h3>
-                    {selectedRoom.suggestedProducts.map((prod, idx) => (
-                      <div key={idx} className="bg-white p-3 rounded border mb-3">
-                        <div className="space-y-2">
-                          <select
-                            value={prod.productId}
-                            onChange={(e) => {
-                              const prods = [...selectedRoom.suggestedProducts];
-                              prods[idx].productId = e.target.value;
-                              updateRoom({ suggestedProducts: prods });
-                              updateSuggestedProductsInDB(prods);
-                            }}
-                            className="w-full border rounded p-2 text-sm"
-                          >
-                            <option value="">Select Product</option>
-                            {suggestedProducts.map((p) => (
-                              <option key={p.id} value={p.id}>
-                                {p.name}
-                              </option>
-                            ))}
-                          </select>
-                          <div>
-                            <label className="block text-xs text-gray-600">Qty</label>
-                            <input
-                              type="number"
-                              min="1"
-                              value={prod.qty}
-                              onChange={(e) => {
-                                const prods = [...selectedRoom.suggestedProducts];
-                                const value = e.target.value;
-                                prods[idx].qty = value === '' ? '' : parseInt(value) || 1;
-                                updateRoom({ suggestedProducts: prods });
-                                if (value !== '') {
-                                  updateSuggestedProductsInDB(prods);
-                                }
-                              }}
-                              onBlur={(e) => {
-                                if (e.target.value === '' || parseInt(e.target.value) < 1) {
-                                  const prods = [...selectedRoom.suggestedProducts];
-                                  prods[idx].qty = 1;
-                                  updateRoom({ suggestedProducts: prods });
-                                  updateSuggestedProductsInDB(prods);
-                                }
-                              }}
-                              className="w-full border rounded p-2 text-sm text-center"
-                            />
-                          </div>
-                          <button
-                            onClick={() => {
-                              const prods = selectedRoom.suggestedProducts.filter((_, i) => i !== idx);
-                              updateRoom({ suggestedProducts: prods });
-                              updateSuggestedProductsInDB(prods);
-                            }}
-                            className="w-full text-red-600 hover:text-red-800 text-sm"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                    <button
-                      onClick={() =>
-                        updateRoom({
-                          suggestedProducts: [
-                            ...selectedRoom.suggestedProducts,
-                            { productId: '', qty: 1 },
-                          ],
-                        })
-                      }
-                      className="w-full border-2 border-dashed border-green-300 rounded p-2 text-green-600 hover:bg-green-100"
-                    >
-                      + Add Suggested Product
-                    </button>
-                  </div>
+  <h3 className="font-semibold text-gray-800 mb-4">Suggested Lighting</h3>
+  {selectedRoom.suggestedProducts.map((prod, idx) => (
+    <div key={idx} className="bg-white p-3 rounded border mb-3">
+      <div className="space-y-2">
+        <select
+          value={prod.productId}
+          onChange={(e) => {
+            const prods = [...selectedRoom.suggestedProducts];
+            prods[idx].productId = e.target.value;
+            
+            // Find the selected product to get its description
+            const selectedProduct = suggestedProducts.find(p => p.id === e.target.value);
+            if (selectedProduct) {
+              prods[idx].description = selectedProduct.description || '';
+            }
+            
+            updateRoom({ suggestedProducts: prods });
+            updateSuggestedProductsInDB(prods);
+          }}
+          className="w-full border rounded p-2 text-sm"
+        >
+          <option value="">Select Product</option>
+          {/* Group products by description (category) */}
+          {Object.entries(
+            suggestedProducts.reduce((groups, product) => {
+              // Use the description field as category, handle null descriptions
+              const category = product.description || 'Uncategorized';
+              if (!groups[category]) {
+                groups[category] = [];
+              }
+              groups[category].push(product);
+              return groups;
+            }, {})
+          )
+          .sort(([a], [b]) => {
+            // Custom sorting: SuperPanel and SuperStrip first, then alphabetical
+            const priorityOrder = ['SuperPanel', 'SuperStrip','LED_Panel'];
+            
+            const aIsPriority = priorityOrder.includes(a);
+            const bIsPriority = priorityOrder.includes(b);
+            
+            // If both are priority categories, sort by their order in the priority array
+            if (aIsPriority && bIsPriority) {
+              return priorityOrder.indexOf(a) - priorityOrder.indexOf(b);
+            }
+            
+            // If only 'a' is priority, it comes first
+            if (aIsPriority && !bIsPriority) {
+              return -1;
+            }
+            
+            // If only 'b' is priority, it comes first  
+            if (!aIsPriority && bIsPriority) {
+              return 1;
+            }
+            
+            // Neither are priority, sort alphabetically
+            return a.localeCompare(b);
+          })
+          .map(([category, products]) => (
+            <optgroup key={category} label={category.replace(/_/g, ' ')}>
+              {products
+                .sort((a, b) => a.name.localeCompare(b.name)) // Sort products within category
+                .map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+            </optgroup>
+          ))}
+        </select>
+        <div>
+          <label className="block text-xs text-gray-600">Qty</label>
+          <input
+            type="number"
+            min="1"
+            value={prod.qty}
+            onChange={(e) => {
+              const prods = [...selectedRoom.suggestedProducts];
+              const value = e.target.value;
+              prods[idx].qty = value === '' ? '' : parseInt(value) || 1;
+              updateRoom({ suggestedProducts: prods });
+              if (value !== '') {
+                updateSuggestedProductsInDB(prods);
+              }
+            }}
+            onBlur={(e) => {
+              if (e.target.value === '' || parseInt(e.target.value) < 1) {
+                const prods = [...selectedRoom.suggestedProducts];
+                prods[idx].qty = 1;
+                updateRoom({ suggestedProducts: prods });
+                updateSuggestedProductsInDB(prods);
+              }
+            }}
+            className="w-full border rounded p-2 text-sm text-center"
+          />
+        </div>
+        <button
+          onClick={() => {
+            const prods = selectedRoom.suggestedProducts.filter((_, i) => i !== idx);
+            updateRoom({ suggestedProducts: prods });
+            updateSuggestedProductsInDB(prods);
+          }}
+          className="w-full text-red-600 hover:text-red-800 text-sm"
+        >
+          Remove
+        </button>
+      </div>
+    </div>
+  ))}
+  <button
+    onClick={() =>
+      updateRoom({
+        suggestedProducts: [
+          ...selectedRoom.suggestedProducts,
+          { productId: '', description: '', qty: 1 },
+        ],
+      })
+    }
+    className="w-full border-2 border-dashed border-green-300 rounded p-2 text-green-600 hover:bg-green-100"
+  >
+    + Add Suggested Product
+  </button>
+</div>
                 </div>
 
                 {/* Room Details */}
