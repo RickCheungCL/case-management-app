@@ -116,7 +116,11 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
       id: photo.id,
       url: photo.url,
       comment: photo.comment ?? '',
-      tags: photo.tags.map((pivot: any) => pivot.tag.id),
+      tags: (photo.tags || []).map((pivot: any) => ({
+        tag_id: pivot.tagId || pivot.tag_id || pivot.tag?.id,
+        photo_id: pivot.photoId || pivot.photo_id || photo.id,
+        tag: pivot.tag ?? photoTags.find((t: any) => t.id === pivot.tagId),
+      })),
     })),
     suggestedProducts: room.suggestedLights.map((light: any) => ({
       productId: light.productId,
@@ -699,61 +703,48 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                             />
 
                             <div className="flex flex-wrap gap-1 mb-2">
-                              {(photo.tags || []).map((tagId) => {
-                                const tag = (photoTags || []).find((t) => String(t?.id) === String(tagId));
-                                if (!tag) {
-                                  console.warn('❌ Tag not found for ID:', tagId);
-                                  return null;
-                                }
-                                
-                                return (
-                                  <span
-                                    key={tagId}
-                                    className="inline-flex items-center px-2 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs"
+                            {(photo.tags || []).map((pivot) => {
+                              const tag = pivot?.tag;
+
+                              if (!tag || !tag.id || !tag.name) {
+                                console.warn("⚠️ Skipping invalid tag pivot:", pivot);
+                                return null;
+                              }
+
+                              return (
+                                <span
+                                  key={tag.id}
+                                  className="inline-flex items-center px-2 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs"
+                                >
+                                  {tag.name}
+                                  <button
+                                    onClick={async () => {
+                                      const updatedPhotos = [...selectedRoom.photos];
+                                      const photoToUpdate = updatedPhotos[idx];
+
+                                      if (!photoToUpdate) return;
+
+                                      // Optimistically remove tag pivot
+                                      photoToUpdate.tags = (photoToUpdate.tags || []).filter(
+                                        (t) => t.tag?.id !== tag.id
+                                      );
+                                      updatedPhotos[idx] = { ...photoToUpdate };
+
+                                      updateRoom({ photos: updatedPhotos });
+
+                                      try {
+                                        await axios.delete(`/api/onsitevisit/photo/${photo.id}/tag/${tag.id}`);
+                                      } catch (err) {
+                                        console.error("Failed to delete tag:", err);
+                                      }
+                                    }}
+                                    className="ml-1 text-indigo-500 hover:text-indigo-800"
                                   >
-                                    {tag.name}
-                                    <button
-                                      onClick={async () => {
-                                        try {
-                                          const updatedPhotos = [...selectedRoom.photos];
-                                          const photoToUpdate = updatedPhotos[idx];
-                                          
-                                          if (!photoToUpdate || !photoToUpdate.id) return;
-                                          
-                                          // Optimistic update
-                                          photoToUpdate.tags = (photoToUpdate.tags || []).filter((id) => id !== tagId);
-                                          
-                                          await mutate(
-                                            `/api/onsitevisit/form/init?caseId=${caseId}`,
-                                            (data) => {
-                                              if (!data || !data.rooms) return data;
-                                              return {
-                                                ...data,
-                                                rooms: data.rooms.map((r: any) => 
-                                                  r?.id === selectedRoom.id 
-                                                    ? { ...r, photos: updatedPhotos }
-                                                    : r
-                                                )
-                                              };
-                                            },
-                                            false
-                                          );
-                                          
-                                          // API call
-                                          await axios.delete(`/api/onsitevisit/photo/${photoToUpdate.id}/tag/${tagId}`);
-                                        } catch (error) {
-                                          console.error('Failed to remove tag:', error);
-                                          // Revert on error
-                                          mutate(`/api/onsitevisit/form/init?caseId=${caseId}`);
-                                        }
-                                      }}
-                                      className="ml-1 text-indigo-500 hover:text-indigo-800"
-                                    >
-                                      ×
-                                    </button>
-                                  </span>
-                                );
-                              })}
+                                    ×
+                                  </button>
+                                </span>
+                              );
+                            })}
                             </div>
 
                             <select
@@ -766,10 +757,29 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                                   const updatedPhotos = [...selectedRoom.photos];
                                   const photoToUpdate = updatedPhotos[idx];
 
-                                  if (!photoToUpdate || !photoToUpdate.tags?.includes(selectedTagId)) {
+                                  // Check if tag already exists (using the correct pivot structure)
+                                  const tagExists = (photoToUpdate.tags || []).some(
+                                    (pivot) => pivot?.tag?.id === selectedTagId
+                                  );
+
+                                  if (!tagExists) {
+                                    // Find the full tag object
+                                    const selectedTag = photoTags.find(tag => tag.id === selectedTagId);
+                                    if (!selectedTag) return;
+
+                                    // Create the proper pivot structure to match your display code
+                                    const newTagPivot = {
+                                      tag: {
+                                        id: selectedTag.id,
+                                        name: selectedTag.name
+                                      },
+                                      photo_id: photo.id,
+                                      tag_id: selectedTag.id
+                                    };
+
                                     updatedPhotos[idx] = {
                                       ...photoToUpdate,
-                                      tags: [...(photoToUpdate.tags || []), selectedTagId],
+                                      tags: [...(photoToUpdate.tags || []), newTagPivot], // Add pivot, not just ID
                                     };
 
                                     await mutate(
@@ -786,7 +796,6 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                                       false
                                     );
 
-                                    // ✅ API is already correct
                                     await axios.post(`/api/onsitevisit/photo/${photo.id}/tag`, {
                                       tagId: selectedTagId,
                                     });
@@ -800,20 +809,18 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                               className="w-full border rounded p-1 mb-2 text-sm"
                             >
                               <option value="">Add Tag...</option>
-                              {(Array.isArray(photoTags) ? photoTags : [])
-                              .filter(
-                                (tag): tag is { id: string; name: string } =>
-                                  tag !== null &&
-                                  typeof tag === 'object' &&
-                                  'id' in tag &&
-                                  'name' in tag &&
-                                  !photo.tags?.includes(tag.id)
-                              )
-                              .map((tag) => (
-                                <option key={tag.id} value={tag.id}>
-                                  {tag.name}
-                                </option>
-                              ))}
+                              {photoTags
+                                .filter((tag): tag is { id: string; name: string } =>
+                                  tag && typeof tag.id === "string" && typeof tag.name === "string"
+                                )
+                                .filter((tag) =>
+                                  (photo.tags || []).every((pivot) => pivot?.tag?.id !== tag.id)
+                                )
+                                .map((tag) => (
+                                  <option key={tag.id} value={tag.id}>
+                                    {tag.name}
+                                  </option>
+                                ))}
                             </select>
 
                             <div className="flex gap-2 mb-2">
