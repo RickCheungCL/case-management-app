@@ -272,8 +272,38 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
       total: subtotal + tax,
     };
   };
-  
-
+  const companyConfigs = {
+    dotlighting: {
+      name: "Dot Lighting (Canada) Inc.",
+      address: "35 Riviera Dr, Unit 16",
+      city: "Markham, ON L3R 8N4",
+      phone: "905-604-8832",
+      email: "info@dotlighting.ca",
+      website: "www.dotlighting.ca",
+      logo: "/logo.png", // Main Dot Lighting logo
+      gstNumber: "770796126",
+      quotePrefix: "DOT", // DOT1234-A format
+      etransfer:"philip@dotlighting.ca"
+    },
+    MaxOnePlus: {
+      name: "Max One Plus Inc.",
+      address: "9040 Leslie Street",
+      city: "Richmond Hill, ON L4B 3M4",
+      phone: "437-898-7988",
+      email: "sales@maxoneplus.ca ",
+      website: "www.maxoneplus.ca",
+      logo: "/web-80.jpg", // Different logo for subsidiary
+      gstNumber: "733126023RT0001", // Different GST number
+      quotePrefix: "MAX", // DES1234-A format
+      etransfer:"finance@maxoneplus.ca"
+    }
+  };
+  const [selectedCompany, setSelectedCompany] = useState('dotlighting');
+  const [currentCompanyConfig, setCurrentCompanyConfig] = useState(companyConfigs.dotlighting);
+  const updateCompanyInfo = (companyKey) => {
+    setCurrentCompanyConfig(companyConfigs[companyKey]);
+    // No recalculations - just updates the display information
+  };
   const totals = calculateTotal();
 
   if (isLoading) return <div className="text-center p-6">Loading...</div>;
@@ -472,15 +502,45 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Company Info */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-800 mb-3">From: Dot Lighting (Canada) Inc.</h3>
-              <div className="space-y-1 text-gray-600">
-                <p>35 Riviera Dr, Unit 16</p>
-                <p>Markham, ON L3R 8N4</p>
-                <p>905-604-8832</p>
-                <p>info@dotlighting.ca</p>
-              </div>
-            </div>
+            <div>
+      {/* Company Selection Dropdown */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">Select Company</label>
+        <select 
+          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all duration-200 hover:border-gray-300"
+          value={selectedCompany}
+          onChange={(e) => {
+            setSelectedCompany(e.target.value);
+            updateCompanyInfo(e.target.value);
+          }}
+        >
+          <option value="dotlighting">Dot Lighting (Canada) Inc.</option>
+          <option value="MaxOnePlus">Max One Plus Inc.</option>
+        </select>
+      </div>
+
+      {/* Dynamic Company Display */}
+      <div className="bg-gray-50 rounded-lg p-4">
+        <h3 className="font-semibold text-gray-800 mb-3">
+          From: {currentCompanyConfig.name}
+        </h3>
+        <div className="space-y-1 text-gray-600">
+          <p>{currentCompanyConfig.address}</p>
+          <p>{currentCompanyConfig.city}</p>
+          <p>{currentCompanyConfig.phone}</p>
+          <p>{currentCompanyConfig.email}</p>
+          <p className="text-indigo-600 text-sm">{currentCompanyConfig.website}</p>
+        </div>
+        
+        {/* Additional Info Preview */}
+        <div className="mt-3 pt-3 border-t border-gray-200">
+          <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
+            <p><strong>Quote Prefix:</strong> {currentCompanyConfig.quotePrefix}</p>
+            <p><strong>GST/HST:</strong> {currentCompanyConfig.gstNumber}</p>
+          </div>
+        </div>
+      </div>
+    </div>
 
             {/* Customer Info Inputs */}
             <div>
@@ -954,21 +1014,25 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
             {/* HEADER - always shown */}
             <div className="print-header mb-4">
               <div className="flex items-center justify-between mb-6">
-                <img src="/logo.png" alt="Dot Lighting Logo" className="h-12" />
+              <img 
+                src={currentCompanyConfig.logo} 
+                alt={`${currentCompanyConfig.name} Logo`} 
+                className="h-12" 
+              />
                 <h5 className="text-4xl font-semibold ml-auto">Quotation</h5>
               </div>
 
               <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h2 className="text-lg font-bold">Dot Lighting (Canada) Inc.</h2>
-                  <p>35 Riviera Dr, Unit 16</p>
-                  <p>Markham, ON L3R 8N4</p>
-                  <p>905-604-8832 info@dotlighting.ca</p>
-                </div>
+              <div>
+                <h2 className="text-lg font-bold">{currentCompanyConfig.name}</h2>
+                <p>{currentCompanyConfig.address}</p>
+                <p>{currentCompanyConfig.city}</p>
+                <p>{currentCompanyConfig.phone} {currentCompanyConfig.email}</p>
+              </div>
                 <div className="text-right">
-                  <p><strong>Quote No:</strong> DOT{generateQuotationCode(caseId)}-{quoteSuffix}</p>
+                  <p><strong>Quote No:</strong> {currentCompanyConfig.quotePrefix}{generateQuotationCode(caseId)}-{quoteSuffix}</p>
                   <p><strong>Date:</strong> {format(new Date(), "yyyy-MM-dd")}</p>
-                  <p><strong>GST/HST No.:</strong> 770796126</p>
+                  <p><strong>GST/HST No.:</strong> {currentCompanyConfig.gstNumber}</p>
                 </div>
               </div>
 
@@ -1106,10 +1170,9 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                 <div className="col-span-1 border-r border-black p-3 text-xs leading-relaxed">
                   <ol className="list-decimal ml-5 space-y-1">
                     <li>Quotation valid for 15 days.</li>
-                    <li>5 Years Product Warranty; 1 Year Installation Warranty</li>
-                    <li>30% downpayment with signed quotation</li>
-                    <li>Customer agrees to pass min. 60% of incentives</li>
-                    <li>Prices include rebate for commercial projects</li>
+                    <li>Products are covered by a <strong>10-year limited warranty or 50,000 hours of operation</strong>, whichever occurs first. Warranty applies to manufacturing defects only. Damage from misuse, incorrect installation, or external factors is not covered.</li>
+                    <li>Payment terms: <strong>50%</strong> down payment with signed quotation, <strong>40%</strong> due before installation begins, and the remaining <strong>10%</strong> due upon job completion.</li>
+                    <li>Prices include applicable rebates for eligible commercial projects under the IESO energy efficiency program, subject to approval.</li>
                   </ol>
                 </div>
                 <div className="col-span-1 p-4">
@@ -1133,15 +1196,16 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
               </div>
 
               <div className="flex justify-between mb-2">
-                <p>Signature: ____________________________</p>
-                <p>Date: ____________________________</p>
+                <p>Signature: ______________________</p>
+                <p>Name: ______________________</p>
+                <p>Date: ______________________</p>
               </div>
 
               <p className="text-xs text-gray-600 italic">
                 <li>By signing, customer agrees to listed products, prices, and approved drawings.</li>
                 <li>Review all shop drawings and confirm voltage before signing.</li>
                 <br />
-                E-Transfer: philip@dotlighting.ca
+                E-Transfer: {currentCompanyConfig.etransfer}
               </p>
             </div>
           </div>

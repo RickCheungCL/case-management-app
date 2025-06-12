@@ -430,8 +430,8 @@ export default function EnergySummaryPage() {
                 <div className="grid grid-cols-2 gap-6 bg-white bg-opacity-95 rounded-lg p-4 backdrop-blur-sm">
                   {/* CO2 Reduction */}
                   <div className="flex flex-col items-center text-center">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-3">
-                      <span className="text-3xl">🏭</span>
+                    <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                      <span className="text-3xl">🏭CO2</span>
                     </div>
                     <p className="text-3xl font-bold text-gray-900 mb-2">
                       -{Math.abs((Number(summary.savings_kWh) * 0.39) / 1000).toFixed(1)}
@@ -441,7 +441,7 @@ export default function EnergySummaryPage() {
                   
                   {/* Trees Equivalent */}
                   <div className="flex flex-col items-center text-center">
-                    <div className="w-40 h-16 bg-green-100 rounded-xl flex flex-col items-center justify-center py-1">
+                    <div className="w-25 h-25 bg-green-100 rounded-xl flex flex-col items-center justify-center py-1">
                       {(() => {
                         const totalTrees = Math.round((Number(summary.savings_kWh) * 0.39) / 21.8);
                         const displayTrees = Math.min(totalTrees, 11); // Max 11 trees to fit nicely (6+5)
@@ -457,7 +457,7 @@ export default function EnergySummaryPage() {
                           const isSmall = i < Math.ceil(displayTrees * 0.3); // First 30% are saplings
                           row1Trees.push(
                             <span key={`row1-${i}`} className={isSmall ? "text-sm" : "text-base"}>
-                              {isSmall ? "🌱" : "🌲"}
+                              {isSmall ? "🌲" : "🌲"}
                             </span>
                           );
                         }
@@ -469,7 +469,7 @@ export default function EnergySummaryPage() {
                           const isSmall = totalIndex < Math.ceil(displayTrees * 0.3);
                           row2Trees.push(
                             <span key={`row2-${i}`} className={isSmall ? "text-sm" : "text-base"}>
-                              {isSmall ? "🌱" : "🌲"}
+                              {isSmall ? "🌲" : "🌲"}
                             </span>
                           );
                         }
@@ -478,14 +478,14 @@ export default function EnergySummaryPage() {
                           <>
                             {/* Row 1 - Top */}
                             <div className="flex gap-0.5 mb-0.5">
-                              {row1Trees}
+                            🌲🌲🌲🌲🌲
                             </div>
                             {/* Row 2 - Bottom */}
-                            {row2Count > 0 && (
+                            
                               <div className="flex gap-0.5">
-                                {row2Trees}
+                              🌲🌲🌲🌲
                               </div>
-                            )}
+                            
                           </>
                         );
                       })()}
@@ -513,7 +513,7 @@ export default function EnergySummaryPage() {
                 </svg>
                 </div>
                 <div>
-                <h2 className="text-2xl font-bold text-gray-900">Investment Payback Calculator</h2>
+                <h2 className="text-2xl font-bold text-gray-900"></h2>
                 <p className="text-gray-600 mt-1">Calculate your period based on energy savings</p>
                 </div>
             </div>
@@ -537,7 +537,20 @@ export default function EnergySummaryPage() {
                     </p>
                     </div>
                 </div>
-
+                <div className="bg-gradient-to-br from-emerald-50 to-green-100 rounded-lg p-6 border border-emerald-200">
+                    <div className="text-center">
+                    <p className="text-sm font-medium text-emerald-800 mb-2">Monthly Cost Savings</p>
+                    <p className="text-3xl font-bold text-emerald-900">
+                        {Number(summary.savings_cost/12) > 0 ? '$' : '+$'}{Math.abs(Number(summary.savings_cost/12)).toFixed(2)}
+                    </p>
+                    <p className="text-sm text-emerald-700 mt-1">
+                        {Number(summary.savings_cost/12) > 0 
+                        ? `${Number(summary.savings_kWh/12).toFixed(2)} kWh saved Monthly`
+                        : `${Math.abs(Number(summary.savings_kWh/12)).toFixed(2)} kWh additional usage Monthly`
+                        }
+                    </p>
+                    </div>
+                </div>        
                 <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg p-6 border border-blue-200">
                     <div className="text-center">
                     <p className="text-sm font-medium text-blue-800 mb-2">Energy Reduction</p>
@@ -552,7 +565,7 @@ export default function EnergySummaryPage() {
 
                 
                 </div>
-
+                
                 {/* Payback Calculator Input */}
                 <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-gray-900">Payback Calculator</h3>
@@ -663,7 +676,7 @@ export default function EnergySummaryPage() {
                   <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 uppercase tracking-wider">Optimized kWh</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold uppercase tracking-wider">
                     <span className={Number(summary.savings_cost) > 0 ? 'text-emerald-700' : 'text-red-700'}>
-                      {Number(summary.savings_cost) > 0 ? 'Savings' : 'Additional Cost'}
+                      {Number(summary.savings_cost) > 0 ? 'Savings/Month' : 'Additional Cost/Month'}
                     </span>
                   </th>
                 </tr>
@@ -698,14 +711,14 @@ export default function EnergySummaryPage() {
                             ? 'bg-emerald-100 text-emerald-800' 
                             : 'bg-red-100 text-red-800'
                         }`}>
-                          {Number(room.savings_kWh) > 0 ? '' : '+'}{Math.abs(Number(room.savings_kWh)).toFixed(2)} kWh
+                          {Number(room.savings_kWh) > 0 ? '' : '+'}{Math.abs(Number(room.savings_kWh/12)).toFixed(2)} kWh
                         </div>
                         <div className={`text-sm font-bold ${
                           Number(room.savings_cost) > 0 ? 'text-emerald-700' : 'text-red-700'
                         }`}>
-                          {Number(room.savings_cost) > 0 ? '$' : '+$'}{Math.abs(Number(room.savings_cost)).toFixed(2)}
+                          {Number(room.savings_cost) > 0 ? '$' : '+$'}{Math.abs(Number(room.savings_cost)/12).toFixed(2)}
                           <div className="text-xs text-gray-500 italic">
-                                (${Math.abs(Number(room.savings_cost_per_fixture)).toFixed(2)} / fixture)
+                                (${Math.abs(Number(room.savings_cost_per_fixture/12)).toFixed(2)} / fixture)
                             </div>
                         </div>
                       </div>
