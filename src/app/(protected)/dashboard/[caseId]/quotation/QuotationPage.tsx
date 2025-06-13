@@ -175,7 +175,7 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
       const prod = updated[index];
       if (prod.discounts.length === 0) {
         prod.discounts = [
-          { name: "", type: "percentage", value: 0 }
+          { name: "IESO Program Rebate", type: "percentage", value: 0 }
         ];
       }
       updated[index] = prod;
@@ -697,7 +697,7 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                         <tr key={`d-${prod.id || i}-${j}`} className="bg-red-50">
                           <td colSpan={2} className="border-b border-gray-100 px-4 py-3">
                             <input 
-                              value={d.name} 
+                              value={"IESO Program Rebate" } 
                               className="w-full px-3 py-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none text-sm bg-white" 
                               placeholder="Discount description" 
                               onChange={(e) => updateDiscount(i, j, "name", e.target.value)} 

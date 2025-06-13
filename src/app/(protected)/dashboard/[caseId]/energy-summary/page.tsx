@@ -422,9 +422,7 @@ export default function EnergySummaryPage() {
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-semibold text-gray-700">Environmental Impact</h3>
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-3xl">🌲</span>
-                  </div>
+                  
                 </div>
                 
                 <div className="grid grid-cols-2 gap-6 bg-white bg-opacity-95 rounded-lg p-4 backdrop-blur-sm">
