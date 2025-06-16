@@ -1122,10 +1122,10 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                             <tr className="bg-gray-50 no-break">
                               <td className="border-r"></td>
                               <td className="p-1 border-r italic text-gray-600">Discount: {discount.name}</td>
-                              <td className="border-r"></td>
-                              <td className="border-r"></td>
+                              <td className="border-r text-center">{prod.quantity}</td>
+                              <td className="border-r text-center">-${(discountAmt/prod.quantity).toFixed(2)}</td>
                               <td className="border-r p-1 text-right text-gray-500">
-                                -${discountAmt.toFixed(2)} / {discount.type === "percentage" ? `${discount.value}%` : `${discount.value} per unit`}
+                                -${discountAmt.toFixed(2)}
                               </td>
                             </tr>
                           )}
@@ -1135,10 +1135,10 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                               <tr key={`install-${pageIndex}-${i}-${j}`} className="bg-gray-50 no-break">
                                 <td className="border-r"></td>
                                 <td className="border-r p-1 italic text-gray-600">Installation: {install.name}</td>
-                                <td className="border-r"></td>
-                                <td className="border-r"></td>
+                                <td className="border-r text-center">{prod.quantity}</td>
+                                <td className="border-r text-center">${(installAmt/prod.quantity).toFixed(2)}</td>
                                 <td className="border-r p-1 text-right text-gray-600">
-                                  +${installAmt.toFixed(2)}
+                                  ${installAmt.toFixed(2)}
                                 </td>
                               </tr>
                             );
@@ -1176,10 +1176,10 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                               <tr className="bg-gray-50 no-break">
                                 <td className="border-r"></td>
                                 <td className="p-1 border-r italic text-gray-600">Discount: {discount.name}</td>
-                                <td className="border-r"></td>
-                                <td className="border-r"></td>
+                                <td className="border-r text-center">{prod.quantity}</td>
+                                <td className="border-r text-center">-${(discountAmt/prod.quantity).toFixed(2)}</td>
                                 <td className="border-r p-1 text-right text-gray-500">
-                                  -${discountAmt.toFixed(2)} / {discount.type === "percentage" ? `${discount.value}%` : `${discount.value} per unit`}
+                                  -${discountAmt.toFixed(2)} 
                                 </td>
                               </tr>
                             )}
@@ -1209,9 +1209,9 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                               <tr key={`install-${pageIndex}-${i}-${j}`} className="bg-gray-50 no-break">
                                 <td className="p-1 border-r text-center text-gray-700">{prod.sku}</td>
                                 <td className="p-1 border-r text-left text-gray-700">{prod.name} - Installation  {install.name}</td>
-                                <td className="border-r"></td>
-                                <td className="border-r"></td>
-                                <td className="p-1 border-r text-right text-gray-700">+${installAmt.toFixed(2)}</td>
+                                <td className="border-r text-center">{prod.quantity}</td>
+                                <td className="border-r text-center">${(installAmt/prod.quantity).toFixed(2)}</td>
+                                <td className="p-1 border-r text-right text-gray-700">${installAmt.toFixed(2)}</td>
                               </tr>
                             );
                           });
@@ -1240,15 +1240,15 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                           {allAdjustments.map((adj, j) => {
                             const isDiscount = adj.category === 'discount';
                             const amount = adj.type === "percentage" ? base * adj.value / 100 : adj.value * prod.quantity;
-                            const sign = isDiscount ? '-' : '+';
+                            const sign = isDiscount ? '-' : '';
                             const prefix = isDiscount ? 'Discount' : 'Installation';
                             
                             return (
                               <tr key={`adj-${pageIndex}-${i}-${j}`} className="bg-gray-50 no-break">
-                                <td className="border-r"></td>
+                                <td className="border-r text-center"></td>
                                 <td className="border-r p-1 italic text-gray-600">{prefix}: {adj.name}</td>
-                                <td className="border-r"></td>
-                                <td className="border-r"></td>
+                                <td className="border-r text-center">{prod.quantity}</td>
+                                <td className="border-r text-center">{sign}${(amount/prod.quantity).toFixed(2)}</td>
                                 <td className="border-r p-1 text-right text-gray-600">
                                   {sign}${amount.toFixed(2)}
                                 </td>
