@@ -246,7 +246,7 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
       return updated;
     });
   };
-
+  
   const calculateTotal = () => {
     const subtotal = labourDetail.amount + products.reduce((sum, prod) => {
       const base = prod.quantity * prod.unitPrice;
@@ -300,6 +300,8 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
   };
   const [selectedCompany, setSelectedCompany] = useState('dotlighting');
   const [currentCompanyConfig, setCurrentCompanyConfig] = useState(companyConfigs.dotlighting);
+  const [previewMode, setPreviewMode] = useState<'separate' | 'merged' | 'interleaved'>('interleaved');
+
   const updateCompanyInfo = (companyKey) => {
     setCurrentCompanyConfig(companyConfigs[companyKey]);
     // No recalculations - just updates the display information
@@ -611,7 +613,18 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
             </div>
           </div>
         </div>
-
+        <div className="mb-4 no-printing">
+          <label className="text-sm font-medium text-gray-700 mr-2">Preview Mode:</label>
+          <select
+            className="border px-3 py-1 rounded"
+            value={previewMode}
+            onChange={(e) => setPreviewMode(e.target.value as 'separate' | 'merged' | 'interleaved')}
+          >
+            <option value="interleaved">Interleaved (Product → Discount → Installation)</option>
+            <option value="separate">Separate (Products+Discounts | Installations)</option>
+            <option value="merged">Merged (Product → Mixed Adjustments)</option>
+          </select>
+        </div>          
         {/* Products Table */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -1084,80 +1097,179 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {page.map((prod, i) => {
-                    const base = prod.quantity * prod.unitPrice;
-                    const discount = prod.discounts?.[0];
-                    const discountAmt = discount?.type === "percentage" ? base * (discount.value / 100) : (discount?.value * prod.quantity) || 0;
-                    const installationAmt = prod.installations?.reduce((sum, install) => {
-                      return sum + (install.type === "percentage" ? base * (install.value / 100) : install.value * prod.quantity);
-                    }, 0) || 0;
-                    const final = base - discountAmt+installationAmt;
-                    const hasAdjustments = (prod.discounts && prod.discounts.length > 0) || (prod.installations && prod.installations.length > 0);
-                    return (
-                      <React.Fragment key={`prod-${pageIndex}-${i}`}>
-                        <tr className="no-break">
-                          <td className="p-1 border-r  text-center">{prod.sku}</td>
-                          <td className="p-1 border-r  text-left">{prod.name}</td>
-                          <td className="p-1 border-r  text-center">{prod.quantity}</td>
-                          <td className="p-1 border-r  text-center">${prod.unitPrice.toFixed(2)}</td>
-                          <td className="p-1 border-r  text-right">${base.toFixed(2)}</td>
-                        </tr>
-                        {discount && (
-                          <tr className="bg-gray-50 no-break ">
-                            <td className="border-r"></td>
-                            <td className="p-1 border-r  italic text-gray-600">Discount: {discount.name}</td>
-                            
-                            <td className="border-r"></td>
-                            <td className="border-r"></td>
-                            
-                            <td className="border-r p-1 text-right text-grey-500">
-                              -${discountAmt.toFixed(2)} / {discount.type === "percentage" ? `${discount.value}%` : `$${discount.value} per unit`}
-                            </td>
-                            
+                  {previewMode === 'interleaved' ? (
+                    // Your existing original code (keep exactly as is)
+                    page.map((prod, i) => {
+                      const base = prod.quantity * prod.unitPrice;
+                      const discount = prod.discounts?.[0];
+                      const discountAmt = discount?.type === "percentage" ? base * (discount.value / 100) : (discount?.value * prod.quantity) || 0;
+                      const installationAmt = prod.installations?.reduce((sum, install) => {
+                        return sum + (install.type === "percentage" ? base * (install.value / 100) : install.value * prod.quantity);
+                      }, 0) || 0;
+                      const final = base - discountAmt + installationAmt;
+                      const hasAdjustments = (prod.discounts && prod.discounts.length > 0) || (prod.installations && prod.installations.length > 0);
+                      
+                      return (
+                        <React.Fragment key={`prod-${pageIndex}-${i}`}>
+                          <tr className="no-break">
+                            <td className="p-1 border-r text-center">{prod.sku}</td>
+                            <td className="p-1 border-r text-left">{prod.name}</td>
+                            <td className="p-1 border-r text-center">{prod.quantity}</td>
+                            <td className="p-1 border-r text-center">${prod.unitPrice.toFixed(2)}</td>
+                            <td className="p-1 border-r text-right">${base.toFixed(2)}</td>
                           </tr>
-                        )}
-                        {prod.installations?.map((install, j) => {
-                          const installAmt =
-                            install.type === "percentage" ? base * (install.value / 100) : install.value * prod.quantity;
-                          return (
-                            <tr key={`install-${pageIndex}-${i}-${j}`} className="bg-grey-50 no-break">
+                          {discount && (
+                            <tr className="bg-gray-50 no-break">
                               <td className="border-r"></td>
-                              <td className="border-r p-1 italic text-gray-600">
-                                Installation: {install.name}
-                              </td>
+                              <td className="p-1 border-r italic text-gray-600">Discount: {discount.name}</td>
                               <td className="border-r"></td>
                               <td className="border-r"></td>
-                              <td className="border-r p-1 text-right text-gray-600">
-                                ${installAmt.toFixed(2)} 
+                              <td className="border-r p-1 text-right text-gray-500">
+                                -${discountAmt.toFixed(2)} / {discount.type === "percentage" ? `${discount.value}%` : `${discount.value} per unit`}
                               </td>
                             </tr>
-                          );
-                        })}
-                      {hasAdjustments && (
+                          )}
+                          {prod.installations?.map((install, j) => {
+                            const installAmt = install.type === "percentage" ? base * (install.value / 100) : install.value * prod.quantity;
+                            return (
+                              <tr key={`install-${pageIndex}-${i}-${j}`} className="bg-gray-50 no-break">
+                                <td className="border-r"></td>
+                                <td className="border-r p-1 italic text-gray-600">Installation: {install.name}</td>
+                                <td className="border-r"></td>
+                                <td className="border-r"></td>
+                                <td className="border-r p-1 text-right text-gray-600">
+                                  +${installAmt.toFixed(2)}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                          {hasAdjustments && (
+                            <tr className="bg-gray-50 no-break italic font-semibold">
+                              <td className="border-r"></td>
+                              <td className="border-r p-1 text-gray-600 text-left">Subtotal</td>
+                              <td className="border-r"></td>
+                              <td className="border-r"></td>
+                              <td className="border-r p-1 text-right">${final.toFixed(2)}</td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      );
+                    })
+                  ) : previewMode === 'separate' ? (
+                    // Separate mode: Products with discounts first, then installations
+                    <>
+                      {page.map((prod, i) => {
+                        const base = prod.quantity * prod.unitPrice;
+                        const discount = prod.discounts?.[0];
+                        const discountAmt = discount?.type === "percentage" ? base * (discount.value / 100) : (discount?.value * prod.quantity) || 0;
                         
-                        <tr className="bg-grey-50 no-break italic font-semibold">
-                          <td className="border-r"></td>
-                          <td  className="border-r  p-1 text-gray-600   text-left">Subtotal</td>
-                          <td className="border-r"></td>
-                          <td className="border-r"></td>
-                          <td className="border-r p-1 text-right ">
-                            ${(final).toFixed(2)}
+                        return (
+                          <React.Fragment key={`prod-sep-${pageIndex}-${i}`}>
+                            <tr className="no-break">
+                              <td className="p-1 border-r text-center">{prod.sku}</td>
+                              <td className="p-1 border-r text-left">{prod.name}</td>
+                              <td className="p-1 border-r text-center">{prod.quantity}</td>
+                              <td className="p-1 border-r text-center">${prod.unitPrice.toFixed(2)}</td>
+                              <td className="p-1 border-r text-right">${base.toFixed(2)}</td>
+                            </tr>
+                            {discount && (
+                              <tr className="bg-gray-50 no-break">
+                                <td className="border-r"></td>
+                                <td className="p-1 border-r italic text-gray-600">Discount: {discount.name}</td>
+                                <td className="border-r"></td>
+                                <td className="border-r"></td>
+                                <td className="border-r p-1 text-right text-gray-500">
+                                  -${discountAmt.toFixed(2)} / {discount.type === "percentage" ? `${discount.value}%` : `${discount.value} per unit`}
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                      
+                      {/* Installation Services Section */}
+                      {page.some(prod => prod.installations && prod.installations.length > 0) && (
+                        <>
+                        <tr className="bg-gray-100">
+                        <td className="border-r"></td>
+                          <td  className="p-1 border-r font-bold text-gray-800 text-center">
+                            Installation Services
                           </td>
+                          <td className="border-r"></td>
+                          <td className="border-r"></td>
+                          <td className="border-r"></td>
                         </tr>
+                        {page.map((prod, i) => {
+                          if (!prod.installations || prod.installations.length === 0) return null;
+                          const base = prod.quantity * prod.unitPrice;
+                          
+                          return prod.installations.map((install, j) => {
+                            const installAmt = install.type === "percentage" ? base * (install.value / 100) : install.value * prod.quantity;
+                            return (
+                              <tr key={`install-${pageIndex}-${i}-${j}`} className="bg-gray-50 no-break">
+                                <td className="p-1 border-r text-center text-gray-700">{prod.sku}</td>
+                                <td className="p-1 border-r text-left text-gray-700">{prod.name} - Installation  {install.name}</td>
+                                <td className="border-r"></td>
+                                <td className="border-r"></td>
+                                <td className="p-1 border-r text-right text-gray-700">+${installAmt.toFixed(2)}</td>
+                              </tr>
+                            );
+                          });
+                        }).flat()}
+                      </>
                       )}
-                      </React.Fragment>
-                    );
-                  })}
+                    </>
+                  ) : (
+                    // Merged mode: All adjustments mixed together
+                    page.map((prod, i) => {
+                      const base = prod.quantity * prod.unitPrice;
+                      const allAdjustments = [
+                        ...prod.discounts.map(d => ({ ...d, category: 'discount' as const })),
+                        ...(prod.installations || []).map(inst => ({ ...inst, category: 'installation' as const }))
+                      ];
+                      
+                      return (
+                        <React.Fragment key={`prod-merged-${pageIndex}-${i}`}>
+                          <tr className="no-break">
+                            <td className="p-1 border-r text-center">{prod.sku}</td>
+                            <td className="p-1 border-r text-left">{prod.name}</td>
+                            <td className="p-1 border-r text-center">{prod.quantity}</td>
+                            <td className="p-1 border-r text-center">${prod.unitPrice.toFixed(2)}</td>
+                            <td className="p-1 border-r text-right">${base.toFixed(2)}</td>
+                          </tr>
+                          {allAdjustments.map((adj, j) => {
+                            const isDiscount = adj.category === 'discount';
+                            const amount = adj.type === "percentage" ? base * adj.value / 100 : adj.value * prod.quantity;
+                            const sign = isDiscount ? '-' : '+';
+                            const prefix = isDiscount ? 'Discount' : 'Installation';
+                            
+                            return (
+                              <tr key={`adj-${pageIndex}-${i}-${j}`} className="bg-gray-50 no-break">
+                                <td className="border-r"></td>
+                                <td className="border-r p-1 italic text-gray-600">{prefix}: {adj.name}</td>
+                                <td className="border-r"></td>
+                                <td className="border-r"></td>
+                                <td className="border-r p-1 text-right text-gray-600">
+                                  {sign}${amount.toFixed(2)}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </React.Fragment>
+                      );
+                    })
+                  )}
+                  
                   {pageIndex === paginated.length - 1 && (
-                  <tr className="no-break">
-                    <td colSpan={4} className="border p-1 font-semibold text-left whitespace-pre-wrap">
-                       {labourDetail.description || ''}
-                    </td>
-                    <td className="border p-1 text-right">
-                      ${labourDetail.amount.toFixed(2)}
-                    </td>
-                  </tr>
-                )}
+                    <tr className="no-break">
+                      <td colSpan={4} className="border p-1 font-semibold text-left whitespace-pre-wrap">
+                        {labourDetail.description || ''}
+                      </td>
+                      <td className="border p-1 text-right">
+                        ${labourDetail.amount.toFixed(2)}
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
