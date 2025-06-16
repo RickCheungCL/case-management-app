@@ -129,8 +129,9 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
     })),
     existingLights: room.existingLights.map((light: any) => ({
       productId: light.productId,
-      qty: light.quantity?? 1,
+      qty: light.quantity,
       wattage: light.product?.wattage || 0,
+      category: light.product?.category,
       bypassBallast: light.bypassBallast ?? false,
     })),
   })) || [];
@@ -372,10 +373,10 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
     setIsUploading(false);
     setUploadProgress(null);
   };
-  const updateRoom = useCallback(async (updated: Partial<RoomData>) => {
+  const updateRoom = useCallback( (updated: Partial<RoomData>) => {
     if (!selectedRoom) return;
   
-    await mutate(
+     mutate(
       `/api/onsitevisit/form/init?caseId=${caseId}`,
       (data) => ({
         ...data,
@@ -864,50 +865,83 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                             value={prod.productId}
                             onChange={(e) => {
                               const prods = [...selectedRoom.existingLights];
-                              prods[idx].productId = e.target.value;
+                              const selectedId = e.target.value;
+                              prods[idx].productId = selectedId;
+
+                              const selectedProduct = existingProducts.find(p => p.id === selectedId);
+                              if (selectedProduct) {
+                                prods[idx].wattage = selectedProduct.wattage || 0;
+                              }
+
                               updateRoom({ existingLights: prods });
                               updateExistingProductsInDB(prods);
                             }}
                             className="w-full border rounded p-2 text-sm"
                           >
                             <option value="">Select Product</option>
-                            {existingProducts.map((p) => (
-                              <option key={p.id} value={p.id}>
-                                {p.name} ({p.wattage}W)
-                              </option>
-                            ))}
+                            {Object.entries(
+                              existingProducts.reduce((groups, product) => {
+                                const category = product.category || 'Uncategorized';
+                                if (!groups[category]) {
+                                  groups[category] = [];
+                                }
+                                groups[category].push(product);
+                                return groups;
+                              }, {} as Record<string, typeof existingProducts>)
+                            )
+                              .sort(([a], [b]) => {
+                                const priorityOrder = ['Highbay', 'Troffer', 'Panel'];
+                                const aIsPriority = priorityOrder.includes(a);
+                                const bIsPriority = priorityOrder.includes(b);
+                                if (aIsPriority && bIsPriority) return priorityOrder.indexOf(a) - priorityOrder.indexOf(b);
+                                if (aIsPriority) return -1;
+                                if (bIsPriority) return 1;
+                                return a.localeCompare(b);
+                              })
+                              .map(([category, products]) => (
+                                <optgroup key={category} label={category.replace(/_/g, ' ')}>
+                                  {products
+                                    .sort((a, b) => a.name.localeCompare(b.name))
+                                    .map((p) => (
+                                      <option key={p.id} value={p.id}>
+                                        {p.name} ({p.wattage}W)
+                                      </option>
+                                    ))}
+                                </optgroup>
+                              ))}
                           </select>
+
                           <div className="flex gap-2">
                             <div className="flex-1">
                               <label className="block text-xs text-gray-600">Qty</label>
                               <input
-                                type="text"
-                                inputMode="numeric"
-                                pattern="[0-9]*"
-                                value={prod.qty}
-                                onChange={(e) => {
-                                  const value = e.target.value;
-                                  // Allow empty string and numbers during typing
-                                  if (value === '' || /^\d*$/.test(value)) {
-                                    const prods = [...selectedRoom.existingLights];
-                                    prods[idx].qty = value === '' ? '' : parseInt(value) || 1;
-                                    updateRoom({ existingLights: prods });
-                                  }
-                                }}
-                                onBlur={(e) => {
-                                  // Convert to number on blur and apply min value of 1
-                                  const numValue = parseInt(e.target.value) || 1;
-                                  const finalValue = Math.max(1, numValue);
-                                  const prods = [...selectedRoom.existingLights];
-                                  prods[idx].qty = finalValue;
-                                  updateRoom({ existingLights: prods });
-                                  updateExistingProductsInDB(prods);
-                                }}
-                                className="w-full border rounded p-2 text-sm text-center"
-                              />
+  type="number"
+  inputMode="numeric"
+  min="1"
+  value={prod.qty}
+  onChange={(e) => {
+    const value = e.target.value;
+    const num = parseInt(value);
+    if (!isNaN(num)) {
+      const prods = [...selectedRoom.existingLights];
+      prods[idx].qty = value === '' ? '' : parseInt(value) || 1;
+      updateRoom({ existingLights: prods });
+    }
+  }}
+  onBlur={(e) => {
+    const value = parseInt(e.target.value);
+    const finalValue = isNaN(value) || value < 1 ? 1 : value;
+    const prods = [...selectedRoom.existingLights];
+    prods[idx].qty = finalValue;
+    updateRoom({ existingLights: prods });
+    updateExistingProductsInDB(prods);
+  }}
+  className="w-full border rounded p-2 text-sm text-center"
+/>
+
                             </div>
-                            
                           </div>
+
                           <div>
                             <label className="block text-xs text-gray-600">Ballast</label>
                             <select
@@ -924,6 +958,7 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                               <option value="Yes">Yes</option>
                             </select>
                           </div>
+
                           <button
                             onClick={() => {
                               const prods = selectedRoom.existingLights.filter((_, i) => i !== idx);
@@ -937,12 +972,13 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                         </div>
                       </div>
                     ))}
+
                     <button
                       onClick={() =>
                         updateRoom({
                           existingLights: [
                             ...selectedRoom.existingLights,
-                            { productId: '', qty: 1, wattage: 0, bypassBallast: false },
+                            { productId: '', qty: 1, bypassBallast: false },
                           ],
                         })
                       }
@@ -950,8 +986,8 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                     >
                       + Add Existing Product
                     </button>
-
                   </div>
+
 
                   {/* Suggested Lighting */}
                   <div className="bg-green-50 p-4 rounded-lg border border-green-200">

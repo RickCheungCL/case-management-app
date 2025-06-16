@@ -4,8 +4,8 @@ import type { RouteContext } from 'next';
 
 const prisma = new PrismaClient();
 
-export async function PUT(req: NextRequest, { params }: { params: { roomId: string } }) {
-  const { roomId } = params;
+export async function PUT(req: NextRequest, context: { params: { roomId: string } }) {
+  const { roomId } = context.params;
 
   try {
     const body = await req.json();
@@ -25,7 +25,7 @@ export async function PUT(req: NextRequest, { params }: { params: { roomId: stri
       data: existingLights.map((item: any) => ({
         roomId,
         productId: item.productId,
-        quantity: item.qty,
+        quantity: item.quantity ?? item.qty ?? 1,
         bypassBallast: item.bypassBallast ?? false,
       })),
     });
