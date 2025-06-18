@@ -65,6 +65,7 @@ export async function GET(
               ? baseWattage + ballastDraw
               : baseWattage ;
               console.log({
+                name: room.location,
                 room: room.locationTag?.name,
                 light: light.product?.name,
                 bypassBallast: light.bypassBallast,
@@ -100,7 +101,9 @@ export async function GET(
       totalCostSavings += savings_cost;
 
       detailedRooms.push({
-        roomName: room.locationTag?.name||'(Unnamed Room)',
+        roomName: room.location || room.locationTag?.name
+  ? `${room.location || ''}-${room.locationTag?.name || ''}`.replace(/^-|-$/g, '') // remove trailing dash
+  : '(Unnamed Room)',
         existingWattage,
         suggestedWattage,
         operationHoursPerDay,
