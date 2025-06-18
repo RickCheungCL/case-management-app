@@ -1083,6 +1083,56 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                 </div>
               </div>
             </div>
+            <div className="mb-4 border border-gray-400 bg-gray-50">
+              <div className="bg-gray-200 border-b border-gray-400 px-3 py-2">
+                <h3 className="text-sm font-semibold text-gray-700">Service Features & Benefits</h3>
+              </div>
+              
+              <div className="p-3">
+                <table className="w-full text-xs">
+                  <tbody>
+                    
+                    
+                    <tr className="border-b border-gray-300">
+                      <td className="py-2 pr-3 align-top w-4">
+                        <span className="inline-block w-2 h-2 bg-gray-500 rounded-full mt-1"></span>
+                      </td>
+                      <td className="py-2 align-top">
+                        <span className="font-semibold text-gray-800">Up to 10-Year Product Warranty:</span>
+                        <span className="text-gray-600 ml-1">Full product replacement at no additional cost for defects or malfunctions.</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 pr-3 align-top w-4">
+                        <span className="inline-block w-2 h-2 bg-gray-500 rounded-full mt-1"></span>
+                      </td>
+                      <td className="py-2 align-top">
+                        <span className="font-semibold text-gray-800">Comprehensive 5-Year Full-Service Plan:</span>
+                        <span className="text-gray-600 ml-1">Complete product and labor coverage, including delivery and responsible disposal.</span>
+                      </td>
+                    </tr>
+                    <tr className="border-b border-gray-300">
+                      <td className="py-2 pr-3 align-top w-4">
+                        <span className="inline-block w-2 h-2 bg-gray-500 rounded-full mt-1"></span>
+                      </td>
+                      <td className="py-2 align-top">
+                        <span className="font-semibold text-gray-800">Certified Local Installation Services:</span>
+                        <span className="text-gray-600 ml-1">Professional, licensed electricians with WSIB clearance and working-at-heights certification for safe, compliant installations.</span>
+                      </td>
+                    </tr>
+                    <tr className="border-b border-gray-300">
+                      <td className="py-2 pr-3 align-top w-4">
+                        <span className="inline-block w-2 h-2 bg-gray-500 rounded-full mt-1"></span>
+                      </td>
+                      <td className="py-2 align-top">
+                        <span className="font-semibold text-gray-800">$5 Million Electrician Liability Insurance:</span>
+                        <span className="text-gray-600 ml-1">Complete protection for your safety and property with comprehensive coverage.</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
             {/* BODY TABLE - current page’s chunk */}
             <div className="flex-grow">
