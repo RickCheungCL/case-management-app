@@ -33,7 +33,7 @@ export default function PostLoginPage() {
             onClick={() => router.push('/estimate')}
             className="bg-orange-600 text-white py-2 px-4 rounded hover:bg-red-700"
           >
-            Go to Delivery Planer
+            Go to Delivery Planner
           </button>
           <button
             onClick={() => router.push('/profile')}
