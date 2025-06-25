@@ -436,7 +436,7 @@ function TripDropZone({ trip, onAddToTrip }: { trip: Trip; onAddToTrip: (tripId:
       </div>
       
       <div className="mt-2 pt-2 border-t text-xs text-gray-600">
-        {trip.totalSkids} skids • {trip.estimatedHours}h
+        {trip.totalSkids} skids • {formatTime(trip.estimatedHours)}
       </div>
     </div>
   );
