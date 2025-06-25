@@ -30,6 +30,12 @@ export default function PostLoginPage() {
             Go to Dashboard
           </button>
           <button
+            onClick={() => router.push('/estimate')}
+            className="bg-orange-600 text-white py-2 px-4 rounded hover:bg-red-700"
+          >
+            Go to Delivery Planer
+          </button>
+          <button
             onClick={() => router.push('/profile')}
             className="bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700"
           >
