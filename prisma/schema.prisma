@@ -94,6 +94,7 @@ model LightFixtureType {
   SKU           String?
   fixtureCounts CaseFixtureCount[]
   wattage       Int?
+  imageUrl      String?
 }
 
 model CaseFixtureCount {
