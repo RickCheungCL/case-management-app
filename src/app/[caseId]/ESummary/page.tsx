@@ -277,7 +277,7 @@ export default function EnergySummaryPage() {
           <div className="text-lg text-gray-500 text-center">
             This page was generated based on the case created on{" "}
             <span className="font-medium text-gray-700">
-                {format(addDays(new Date(data.caseCreatedDate), 3), 'PPP')}
+                {format(addDays(new Date(data.caseCreatedDate), 1), 'PPP')}
             </span>
             </div>
           <p className="text-gray-600 text-lg">Comprehensive analysis of your electricity consumption and savings potential</p>
@@ -782,7 +782,10 @@ export default function EnergySummaryPage() {
             💡 This analysis shows potential energy savings through optimized lighting and equipment usage.
           </p>
           <p className="text-sm text-gray-500 italic text-left">
-            Disclaimer: The projected energy savings provided in this analysis are based on standard assumptions, general usage patterns, and industry-average performance metrics. Actual results may vary significantly due to factors such as facility-specific operating conditions, equipment installation quality, occupancy behavior, environmental influences, and maintenance practices. This report is intended for informational purposes only and should not be interpreted as a guarantee of future performance or financial return. We recommend consulting with a certified energy auditor or lighting professional for a comprehensive on-site assessment tailored to your facility.
+            ⚠️ Disclaimer & Confidentiality Notice
+This report is the exclusive property of DOT Lighting (Canada) and is intended for internal use only. Unauthorized distribution, reproduction, or disclosure is strictly prohibited.
+The projected energy savings outlined in this analysis are based on standard assumptions, general usage patterns, and industry-average performance metrics. Actual outcomes may vary significantly due to site-specific operating conditions, installation quality, occupant behavior, environmental factors, and maintenance practices.
+This document is provided for informational purposes only and does not constitute a guarantee of future energy performance or financial savings.
         </p>
         </div>
       </div>
