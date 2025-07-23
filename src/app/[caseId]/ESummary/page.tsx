@@ -50,6 +50,33 @@ export default function EnergySummaryPage() {
   const { caseId } = useParams() as { caseId: string };
   const [data, setData] = useState<SummaryResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [initialCost, setInitialCost] = useState<number>(0);
+
+    useEffect(() => {
+    const fetchInitialCost = async () => {
+        try {
+        const res = await fetch(`/api/payback/${caseId}`);
+        if (res.ok) {
+            const data = await res.json();
+            if (data?.value) {
+            setInitialCost(data.value);
+
+            // Manually simulate input to trigger payback display
+            const event = new Event("input", { bubbles: true });
+            const input = document.getElementById("investment-cost");
+            if (input) {
+                (input as HTMLInputElement).value = String(data.value);
+                input.dispatchEvent(event);
+            }
+            }
+        }
+        } catch (err) {
+        console.error("Failed to load payback cost", err);
+        }
+    };
+
+    fetchInitialCost();
+    }, [caseId]);
 
   useEffect(() => {
     const fetchSummary = async () => {
@@ -62,6 +89,7 @@ export default function EnergySummaryPage() {
         }
         const data = await res.json();
         setData(data);
+
       } catch (err) {
         setError('Failed to load summary');
         console.error(err);
@@ -70,6 +98,30 @@ export default function EnergySummaryPage() {
 
     fetchSummary();
   }, [caseId]);
+    useEffect(() => {
+    const loadSavedCost = async () => {
+        try {
+        const res = await fetch(`/api/payback/${caseId}`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+        if (data?.value) {
+            const input = document.getElementById("investment-cost") as HTMLInputElement;
+            if (input) {
+            input.value = data.value.toString();
+
+            // Manually dispatch 'input' to trigger your payback logic
+            const event = new Event("input", { bubbles: true });
+            input.dispatchEvent(event);
+            }
+        }
+        } catch (err) {
+        console.error("Failed to load saved initial cost:", err);
+        }
+    };
+
+    loadSavedCost();
+    }, [caseId]);
 
   if (error) {
     return (
@@ -269,9 +321,15 @@ export default function EnergySummaryPage() {
         {/* Header */}
         <div className="summary-section">
         <div className="text-center mb-12">
+            
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">
             Energy Efficiency Report
           </h1>
+          <img
+                src="/logo.png"
+                alt="Company Logo"
+                className="mx-auto mb-1 w-100 h-auto"
+            />
           <p className="text-gray-600 text-lg">{schoolInfo.schoolName} </p>
           <p className="text-gray-600 text-lg">{schoolInfo.schoolAddress}</p>
           <div className="text-lg text-gray-500 text-center">
@@ -623,13 +681,17 @@ export default function EnergySummaryPage() {
                     step="100"
                     placeholder="Enter total cost..."
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-lg font-semibold"
-                    onInput={(e) => {
+                    onInput={async (e) => {
                         const target = e.target as HTMLInputElement;
                         const cost = parseFloat(target.value) || 0;
                         const annualSavings = Math.abs(Number(summary.savings_cost));
                         const paybackYears = annualSavings > 0 ? cost / annualSavings : 0;
                         const paybackMonths = paybackYears * 12;
-                        
+                        await fetch(`/api/payback/${caseId}`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ value: cost }),
+                        });
                         const resultDiv = document.getElementById('payback-result');
                         if (resultDiv) {
                         if (cost > 0 && annualSavings > 0) {
