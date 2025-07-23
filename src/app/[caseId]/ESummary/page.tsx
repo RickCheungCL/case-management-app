@@ -321,15 +321,15 @@ export default function EnergySummaryPage() {
         {/* Header */}
         <div className="summary-section">
         <div className="text-center mb-12">
-            
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">
-            Energy Efficiency Report
-          </h1>
-          <img
+           <img
                 src="/logo.png"
                 alt="Company Logo"
                 className="mx-auto mb-1 w-100 h-auto"
-            />
+            /> 
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">
+            Energy Efficiency Report
+          </h1>
+          
           <p className="text-gray-600 text-lg">{schoolInfo.schoolName} </p>
           <p className="text-gray-600 text-lg">{schoolInfo.schoolAddress}</p>
           <div className="text-lg text-gray-500 text-center">
