@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "LightFixtureType" ALTER COLUMN "wattage" SET DATA TYPE DOUBLE PRECISION;

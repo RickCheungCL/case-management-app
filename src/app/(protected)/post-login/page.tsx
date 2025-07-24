@@ -36,6 +36,12 @@ export default function PostLoginPage() {
             Go to Delivery Planner
           </button>
           <button
+            onClick={() => router.push('/financeCalculator')}
+            className="bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700"
+          >
+            Go to Finance Calculator
+          </button>
+          <button
             onClick={() => router.push('/profile')}
             className="bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700"
           >
