@@ -93,7 +93,7 @@ model LightFixtureType {
   createdAt     DateTime           @default(now())
   SKU           String?
   fixtureCounts CaseFixtureCount[]
-  wattage       Int?
+  wattage       float?
   imageUrl      String?
 }
 
