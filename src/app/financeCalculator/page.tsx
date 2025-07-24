@@ -77,20 +77,7 @@ export default function FinanceCalculator() {
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium">Term Length (Months)</label>
-          <input
-            type="number"
-            min="1"
-            value={term}
-            onChange={(e) => {
-              const newTerm = parseInt(e.target.value);
-              setTerm(newTerm);
-              setFinanceAmount(unitPrice * quantity * newTerm);
-            }}
-            className="mt-1 w-full border px-4 py-2 rounded-md"
-          />
-        </div>
+
 
         <div>
           <label className="block text-sm font-medium">Down Payment ($)</label>
