@@ -263,17 +263,17 @@ export default function EnergySummaryPage() {
           
           /* Text size optimizations */
           .text-4xl, .text-5xl {
-            font-size: 1rem !important;
+            font-size: 1.3rem !important;
             line-height: 1.2 !important;
           }
           
           .text-3xl {
-            font-size: 1rem !important;
+            font-size: 1.2rem !important;
             line-height: 1.2 !important;
           }
           
           .text-2xl {
-            font-size: 1rem !important;
+            font-size: 1.15rem !important;
             line-height: 1.2 !important;
           }
           
@@ -324,18 +324,18 @@ export default function EnergySummaryPage() {
            <img
                 src="/logo.png"
                 alt="Company Logo"
-                className="mx-auto mb-1 w-75 h-auto"
+                className="mx-auto mb-1 w-75 h-auto print:w-64 print:max-w-[240px]"
             /> 
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">
             Energy Efficiency Report
           </h1>
           
-          <p className="text-gray-600 text-2xl font-bold">{schoolInfo.schoolName} </p>
+          <p className="text-gray-600 text-2xl font-bold ">{schoolInfo.schoolName} </p>
           <p className="text-gray-600 text-lg">{schoolInfo.schoolAddress}</p>
           <div className="text-lg text-gray-500 text-center">
             This page was generated based on the case created on{" "}
             <span className="font-medium text-gray-700">
-                {format(addDays(new Date(data.caseCreatedDate), 1), 'PPP')}
+                {format(addDays(new Date(data.caseCreatedDate), 0), 'PPP')}
             </span>
             </div>
           <p className="text-gray-600 text-lg">Comprehensive analysis of your electricity consumption and savings potential</p>
