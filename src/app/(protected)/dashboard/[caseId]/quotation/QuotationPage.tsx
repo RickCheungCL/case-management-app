@@ -1107,7 +1107,7 @@ export default function QuotationPage({ caseId }: { caseId: string }) {
                         <span className="inline-block w-2 h-2 bg-gray-500 rounded-full mt-1"></span>
                       </td>
                       <td className="py-2 align-top">
-                        <span className="font-semibold text-gray-800">Comprehensive 5-Year Full-Service Plan:</span>
+                        <span className="font-semibold text-gray-800">Optional Comprehensive 5-Year Full-Service Plan:</span>
                         <span className="text-gray-600 ml-1">Complete product and labor coverage, including delivery and responsible disposal.</span>
                       </td>
                     </tr>
