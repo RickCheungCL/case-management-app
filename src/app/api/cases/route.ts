@@ -1,19 +1,38 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/authOptions'; // adjust path if needed
-import { Session } from 'inspector/promises';
+import { authOptions } from '../auth/authOptions';
 
 const prisma = new PrismaClient();
 
-// Handle GET (fetch all cases)
-export async function GET() {
-  const session = await getServerSession(authOptions);
+// Replace with your own secret key stored in .env
+const ADMIN_TOKEN = process.env.API_SECRET_KEY;
 
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+async function getAuth(request: Request) {
+  const authHeader = request.headers.get('authorization');
+  const token = authHeader?.replace('Bearer ', '');
+  let isAdmin = false;
+  let userId: string | undefined = undefined;
+
+  if (token && token === ADMIN_TOKEN) {
+    isAdmin = true;
+    userId = undefined; // optional
+  } else {
+    const session = await getServerSession(authOptions);
+    if (!session) return null;
+    isAdmin = session.user.role === 'ADMIN';
+    userId = session.user.id;
   }
-  const isAdmin = session.user.role === 'ADMIN';
+
+  return { isAdmin, userId };
+}
+
+// Handle GET (fetch all cases)
+export async function GET(request: Request) {
+  const auth = await getAuth(request);
+  if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const { isAdmin, userId } = auth;
 
   try {
     const selectFields = {
@@ -34,19 +53,11 @@ export async function GET() {
       },
     };
 
-    let cases;
-    if (isAdmin) {
-      cases = await prisma.case.findMany({
-        orderBy: { createdAt: 'desc' },
-        select: selectFields,
-      });
-    } else {
-      cases = await prisma.case.findMany({
-        where: { userId: session.user.id },
-        orderBy: { createdAt: 'desc' },
-        select: selectFields,
-      });
-    }
+    const cases = await prisma.case.findMany({
+      where: isAdmin ? {} : { userId },
+      orderBy: { createdAt: 'desc' },
+      select: selectFields,
+    });
 
     return NextResponse.json(cases);
   } catch (error) {
@@ -57,18 +68,16 @@ export async function GET() {
 
 // Handle POST (create a new case)
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
+  const auth = await getAuth(request);
+  if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const { userId } = auth;
 
   try {
     const body = await request.json();
     const {
       customerName,
       projectDetails,
-      // Additional fields from expanded schema
       schoolName = '',
       contactPerson = '',
       emailAddress = '',
@@ -91,18 +100,15 @@ export async function POST(request: Request) {
         customerName,
         projectDetails,
         status: 'New',
-        // Organization information
-        userId: session.user.id!,
+        userId: userId!, // safe because auth passed
         schoolName,
         contactPerson,
         emailAddress,
         phoneNumber,
         schoolAddress,
-        // Lighting specifications
         lightingPurpose,
         facilitiesUsedIn,
         installationService,
-        // Light fixture counts remain at default 0
       },
     });
 
@@ -116,8 +122,5 @@ export async function POST(request: Request) {
       },
       { status: 500 },
     );
-  } finally {
-    // Optional: Disconnect from Prisma to prevent connection pool issues
-    // await prisma.$disconnect();
   }
 }
