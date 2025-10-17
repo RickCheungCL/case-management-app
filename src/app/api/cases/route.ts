@@ -8,6 +8,23 @@ const prisma = new PrismaClient();
 // Replace with your own secret key stored in .env
 const ADMIN_TOKEN = process.env.API_SECRET_KEY;
 
+
+function corsHeaders(origin?: string) {
+  // dev: allow all. In prod, set to your web app origin, e.g. https://your-app.example
+  return {
+    'Access-Control-Allow-Origin': origin ?? '*',
+    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Vary': 'Origin',
+  };
+}
+export async function OPTIONS(request: Request) {
+  return new Response(null, {
+    status: 204,
+    headers: corsHeaders(request.headers.get('origin') ?? '*'),
+  });
+}
+
 async function getAuth(request: Request) {
   const authHeader = request.headers.get('authorization');
   const token = authHeader?.replace('Bearer ', '');
