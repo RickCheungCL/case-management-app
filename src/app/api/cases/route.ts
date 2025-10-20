@@ -9,19 +9,22 @@ const prisma = new PrismaClient();
 const ADMIN_TOKEN = process.env.API_SECRET_KEY;
 
 
-function corsHeaders(origin?: string) {
-  // dev: allow all. In prod, set to your web app origin, e.g. https://your-app.example
+function cors(origin?: string) {
+  const o = origin ?? '*'; // dev: '*' ; in prod set to your web app origin
   return {
-    'Access-Control-Allow-Origin': origin ?? '*',
+    'Access-Control-Allow-Origin': o,
     'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Vary': 'Origin',
   };
 }
+
+
+
 export async function OPTIONS(request: Request) {
   return new Response(null, {
     status: 204,
-    headers: corsHeaders(request.headers.get('origin') ?? '*'),
+    headers: cors(request.headers.get('origin') ?? '*'),
   });
 }
 
@@ -46,8 +49,10 @@ async function getAuth(request: Request) {
 
 // Handle GET (fetch all cases)
 export async function GET(request: Request) {
+   const origin = request.headers.get('origin') ?? '*';
   const auth = await getAuth(request);
-  if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: cors(origin) });
+
 
   const { isAdmin, userId } = auth;
 
@@ -76,7 +81,7 @@ export async function GET(request: Request) {
       select: selectFields,
     });
 
-    return NextResponse.json(cases);
+    return NextResponse.json(cases, { headers: cors(origin) });
   } catch (error) {
     console.error('Error fetching cases:', error);
     return NextResponse.json({ error: 'Error fetching cases' }, { status: 500 });
