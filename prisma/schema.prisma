@@ -155,6 +155,7 @@ model Product {
   name             String
   wattage          Float
   description      String?
+  description2     String?
   category         String?
   existingProducts OnSiteExistingProduct[]
 }

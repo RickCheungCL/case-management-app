@@ -67,7 +67,7 @@ export async function GET(
 
         const existingWattage = room.existingLights.reduce((sum, light) => {
             const baseWattage = light.product?.wattage ?? 0;
-            const ballastDraw = Number(light.product?.description) || 0;
+            const ballastDraw = Number(light.product?.description2) || 0;
           
             const totalWattagePerFixture = light.bypassBallast
               ? baseWattage + ballastDraw
