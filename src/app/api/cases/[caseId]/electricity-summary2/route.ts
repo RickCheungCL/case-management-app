@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
-const ELECTRICITY_COST_PER_KWH = 0.158;
+const ELECTRICITY_COST_PER_KWH = 0.203;
 
 export async function GET(
   req: NextRequest,
