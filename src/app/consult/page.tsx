@@ -225,7 +225,11 @@ export default function EnergyCalculator() {
               New Calculation
             </button>
           </div>
-
+              <img
+                src="/logo.png"
+                alt="Company Logo"
+                className="mx-auto mb-1 w-75 h-auto print:w-64 print:max-w-[240px]"
+            /> 
           {/* Report Content */}
           <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12">
             {/* Header */}
