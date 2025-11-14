@@ -145,7 +145,7 @@ export default function EnergyCalculator() {
     return 0;
   };
 
-  const calculateSavings = (fixtureCount = 1, hoursPerDay = 12, daysPerYear = 365, costPerKwh = 0.12) => {
+  const calculateSavings = (fixtureCount = 1, hoursPerDay = 12, daysPerYear = 260, costPerKwh = 0.208) => {
     const existingPower = getFixturePower();
     const replacementPower = REPLACEMENT_PRODUCT_SPECS[formData.replacementProduct]?.power || 0;
     
@@ -380,7 +380,7 @@ export default function EnergyCalculator() {
               
               <div className="mt-6 bg-gray-50 rounded-lg p-4 border border-gray-300">
                 <p className="text-sm text-gray-700">
-                  <span className="font-semibold">Calculation Assumptions:</span> 12 hours/day operation, 365 days/year, $0.12 per kWh electricity rate, 0.39 kg CO₂ per kWh
+                  <span className="font-semibold">Calculation Assumptions:</span> 12 hours/day operation, 260 days/year, $0.208 per kWh electricity rate, 0.39 kg CO₂ per kWh
                 </p>
               </div>
             </div>
