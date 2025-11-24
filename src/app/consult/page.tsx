@@ -41,13 +41,6 @@ const existingProducts = [
     tubesPerFixture:1,
     image: 'data:image/jpeg;base64,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'
   },
-  { 
-    id: 4, 
-    name: 'Incandescent Bulbs',
-    power: 60,
-    tubesPerFixture:1,
-    image: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBhUIBwgWFRMVEhUYFRcTFxcSHBcdGBoeHhoaGRgfHSgsJBslGx0WIjEtJS0tOjUuIyszODMsNygtLisBCgoKDg0OGxAQGi8mHyYxMC01Ky0tNTYtLTArLTItMCstLS02LS0tLS0rLTUuLS0tLS0tLS0tLS0tLS0tLS0tK//AABEIALcBEwMBEQACEQEDEQH/xAAcAAEAAgIDAQAAAAAAAAAAAAAABgcDBQIECAH/xAA8EAEAAgAEAgYHBAgHAAAAAAAAAQIDBAURITEGBxJBUbETFCJhcZHBMoGhwggVUlVlstHhIyQlNUJjkv/EABoBAQACAwEAAAAAAAAAAAAAAAAEBQECAwb/xAAxEQEAAgIAAwQIBQUAAAAAAAAAAQIDEQQSQSEiMXEFI1FhgZGxwTIzodHxE0Jy4fD/2gAMAwEAAhEDEQA/ALxAAAAAAAAAAAAAAAAAAAAAAABX/Wlb0er6RifxXBj/ANcAWAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACv+t32Y0zG2+zrGV/N/QFgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAr7rl4aVkreGqZWf5gWCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACvuub/Zspt+88r+YFggAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAr3rkn/IZCn7WrZWPwuCwgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAV51x8Mtp0/xfK+VwWGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACvOubb1HT9/3vlfK4LDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABXfXLatctp3btt/q+Wnj4RF95BYgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPPf6RGb9a6U4GQ5RhZabbzymcS08vupDEsrh6us7Of6DZPMWid/VsOs7980jszP37bssJGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACHdYfTzB6GYNKxkrY2LiRM0rE9isRHObW2nx7olra0Q2iu1KdItRx+mmrxq+p4VKT6OuHWtLRtFazM9/GZ3tbig5uIv0SKYoTHo71i5notpuFpmZ0+uLg4dezFqWiLxWPdymY+5nDxVp7LQxfDHRcuSzOHncpTNYP2b0reu8bcLRvHD4SnozMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACpP0hcKf1Pl8es8e3evzis/RpdvRUmlTPooj0itzz2pVGfOVtbHrFcTvjmxgnfiWeq8vg0y+BXBw44VrFY+ERtC2QmQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFU/pBzH6gy9f8Aut/K55PB0x+KntMp7Ee0rs09qVWGXUI7No9r6NcJZ6wwrRfCi0d8RK3QXIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFH9fur4uLqWDpNaR2KV7czPGZm/0iIj5uOSejrjhBdO0vFxcKLRk7298VtP0VeXNqfxJdae591PJerRtiYE191omv4SYssz1LVeh+r/WcTXOiuFnMem14jsW25TNOG8fHhK3pbddoN41OkibtQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEO6W6bkMHUK6pi4FbYlto9qN52rH/ABnu7uSu4+k2iIjqncHbW/qwZTK4eay0ZmuLO08o42ny5b8Hm8no6fHmWM8TMTrTDj4UVxZylpibWjh2/bjaZ2+zy+cpnCcHak9tu1pfNFq+HYl+i6Zl9IyPquVworXtTbavCIm07ztHg9Njry10pr25rbd9u0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQnpxi2vmowq8dqxG0++d5/KqePyavrfgs+Cp3NmDXEpgTh4e8djDjlMxx38VVbJMamXeYjce9p9Q9Yrm4ve8zy2njySceRvyLGyGP6zk6Y3jWJn49/4r7FfnpFlLkry3mrsOjQAAAAAAAAAAAAAAAAAAAAAAAAAAAAABD8aK5zpLFbxvHpI4T7v7Vh5rNb+rxkVnw5tfL+F1T1fC7jx19f5SWuUw4vNtuczvG0LavBY+fm/TXvVU5baavpNlcKulduKx7M183DjuHrTDE16ahK4LJM5dT1ZuiuL6TS4pM/ZtMfX6u/o6/Ni17J/2046usu/bDcp6GAAAAAAAAAAAAAAAAAAAAAAAAAAAAA+XtFazae6GJnUbZiN9iD6TidvX62t+39P7vLYZ3xNJn2r7PGsEx7k13/xdvdL0u/WRHn9lD0azpNx0q0R4wiekZ9V8UrgvzWt6G43t3wt+cRaPKfOEb0XbvWr/AN2JPpGvZWyUrlVgAAAAAAAAAAAAAAAAAAAAAAAAAAAAOpq2L6HTcTE8KW8nLN+XbydMMbyV80C0THmdcpPjePxs83SIjNT/ACj6wvM3bht5T9Fhb74n3PRb9YoejVdKbWpp0TSOd48p+uyJ6Sj1cef2lK4P8c+TQdFMxtq9aWjabVtHy4+cInBd3NHxj7pvGd7DPwTpeqYAAAAAAAAAAAAAAAAAAAAAAAAAAAAB09Yy9s1peJgU5zSdvj3OeWOakw6Yrct4lB8jl8PKa9h4tK7YVrx2LTy235b+MTwUmXFFctbf27if1WtbzbDaOupT7fe81nw/quZnczX3KjXZtpul2N6PTImkxv248p24IvHW7sRHt+0pXB13ad+xqOiGQxLZuMfEp9ibcfHeu23z3c+FwzzxaY8HXisvdmsdU2WiuAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAR/V9Izc1mdMxI7Nrdq2Hblv3zSe6Z7+SLmw2mJivhPT9knDlrExN/GOv7tVgzrGHFsPNTO/GLU8YnvrO081dyXpbVt6nomTOK0d3Xm2+Dpls3EYuY7XwtPL5fes6Yq+OvmhXzTHZE/Jt8nlcPKYPo8OHeI04TO2dlgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABxtStp3tWJ25Mag25MgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//Z'
-  }
 ];
 
 const replacementProducts = [
@@ -113,11 +106,105 @@ export default function EnergyCalculator() {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleSubmit = () => {
-    // Here you would call your API to save to Google Sheets and send email
-    // For now, we'll just show the report
+ const handleSubmit = async () => {
+  try {
+    const savings1 = calculateSavings(1);
+    const savings50 = calculateSavings(50);
+    const savings100 = calculateSavings(100);
+    const currentDate = new Date().toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+    
+    const reportData = {
+      timestamp: new Date().toISOString(),
+      name: formData.name,
+      email: formData.email,
+      reportDate: currentDate,
+      existingProduct: formData.existingProduct === 'Other' 
+        ? `${formData.existingProductOther} (${formData.existingProductOtherWattage}W)`
+        : formData.existingProduct,
+      replacementProduct: formData.replacementProduct,
+      tubesPerFixture: formData.tubesPerFixture,
+      existingPowerPerFixture: savings1.existingPower,
+      replacementPowerPerFixture: savings1.replacementPower,
+      savingsPerFixture: savings1.savingsPerFixture,
+      percentReduction: savings1.percentReduction.toFixed(1),
+      annualSavings1Fixture: savings1.savingsCostPerYear.toFixed(2),
+      annualSavings50Fixtures: savings50.savingsCostPerYear.toFixed(2),
+      annualSavings100Fixtures: savings100.savingsCostPerYear.toFixed(2),
+      co2Reduction100Fixtures: savings100.co2ReductionTonnes.toFixed(2)
+    };
+
+    // ========================================
+    // 1. SAVE TO GOOGLE SHEETS (Server-side)
+    // ========================================
+    const sheetResponse = await fetch('/api/send-report', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(reportData)
+    });
+
+    if (!sheetResponse.ok) {
+      console.error('Failed to save to Google Sheets');
+    }
+
+    // ========================================
+    // 2. SEND EMAIL (Client-side with EmailJS)
+    // ========================================
+    const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
+    const EMAILJS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
+    const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
+
+    if (EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_ID && EMAILJS_PUBLIC_KEY) {
+      console.log('📧 Sending email via EmailJS (client-side)...');
+      
+      const emailResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          service_id: EMAILJS_SERVICE_ID,
+          template_id: EMAILJS_TEMPLATE_ID,
+          user_id: EMAILJS_PUBLIC_KEY,
+          template_params: {
+            to_email: reportData.email,
+            to_name: reportData.name,
+            report_date: reportData.reportDate,
+            existing_product: reportData.existingProduct,
+            replacement_product: reportData.replacementProduct,
+            savings_per_fixture: reportData.savingsPerFixture,
+            percent_reduction: reportData.percentReduction,
+            annual_savings_1: reportData.annualSavings1Fixture,
+            annual_savings_50: reportData.annualSavings50Fixtures,
+            annual_savings_100: reportData.annualSavings100Fixtures,
+            co2_reduction: reportData.co2Reduction100Fixtures,
+            existing_power: reportData.existingPowerPerFixture,
+            replacement_power: reportData.replacementPowerPerFixture
+          }
+        })
+      });
+
+      if (emailResponse.ok) {
+        console.log('✅ Email sent successfully');
+      } else {
+        const errorText = await emailResponse.text();
+        console.error('❌ Email failed:', errorText);
+      }
+    }
+
+    // Show the report (regardless of email success)
     setShowReport(true);
-  };
+    
+  } catch (error) {
+    console.error('Error submitting form:', error);
+    alert('There was an error generating your report. Please try again.');
+  }
+};
 
   const canProceed = () => {
     if (step === 1) {
@@ -237,7 +324,7 @@ export default function EnergyCalculator() {
               <div className="flex items-center justify-center mb-4">
                 <Zap className="w-20 h-20 text-emerald-600" />
               </div>
-              <h1 className="text-5xl font-bold text-gray-900 mb-4">Energy Savings Analysis Report</h1>
+              <h1 className="text-5xl font-bold text-gray-900 mb-4">Energy Savings Report</h1>
               <p className="text-xl text-gray-600 mb-6">Fixture-by-Fixture Comparison & ROI Projection</p>
               <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-6 inline-block border-2 border-emerald-200">
                 <div className="grid md:grid-cols-2 gap-6 text-left">
