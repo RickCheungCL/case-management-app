@@ -71,6 +71,7 @@ const replacementProducts = [
 ];
 
 export default function EnergyCalculator() {
+  const [approxFixtures, setApproxFixtures] = useState('');
   const [step, setStep] = useState(1);
   const [showReport, setShowReport] = useState(false);
   const [formData, setFormData] = useState({
@@ -80,7 +81,8 @@ export default function EnergyCalculator() {
     tubesPerFixture: 2,
     replacementProduct: '',
     name: '',
-    email: ''
+    email: '',
+    approxFixtures: '',
   });
 
   const handleProductSelect = (field, value) => {
@@ -134,7 +136,8 @@ export default function EnergyCalculator() {
       annualSavings1Fixture: savings1.savingsCostPerYear.toFixed(2),
       annualSavings50Fixtures: savings50.savingsCostPerYear.toFixed(2),
       annualSavings100Fixtures: savings100.savingsCostPerYear.toFixed(2),
-      co2Reduction100Fixtures: savings100.co2ReductionTonnes.toFixed(2)
+      co2Reduction100Fixtures: savings100.co2ReductionTonnes.toFixed(2),
+      approxFixtures: formData.approxFixtures,
     };
 
     // ========================================
@@ -626,69 +629,83 @@ export default function EnergyCalculator() {
 
         <div className="space-y-6">
           {step === 1 && (
-            <div className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-800">What is your existing lighting product?</h2>
-              <p className="text-gray-600">Select the lighting product currently used in your company.</p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {existingProducts.map((product) => (
+              <div className="space-y-4">
+                <h2 className="text-2xl font-semibold text-gray-800">What is your existing lighting product?</h2>
+                <p className="text-gray-600">Select the lighting product currently used in your company.</p>
+                
+                <div className="grid grid-cols-1 md-grid-cols-3 gap-4">
+                  {existingProducts.map((product) => (
+                    <button
+                      key={product.id}
+                      onClick={() => handleProductSelect('existingProduct', product.name)}
+                      className={`p-4 rounded-lg border-2 transition hover:shadow-lg ${
+                        formData.existingProduct === product.name
+                          ? 'border-emerald-600 bg-emerald-50'
+                          : 'border-gray-300 hover:border-emerald-400'
+                      }`}
+                    >
+                      <img 
+                        src={product.image} 
+                        alt={product.name}
+                        className="w-full h-32 object-cover rounded-lg mb-3"
+                      />
+                      <p className="font-semibold text-gray-800">{product.name}</p>
+                    </button>
+                  ))}
+                  
                   <button
-                    key={product.id}
-                    onClick={() => handleProductSelect('existingProduct', product.name)}
-                    className={`p-4 rounded-lg border-2 transition hover:shadow-lg ${
-                      formData.existingProduct === product.name
+                    onClick={() => handleProductSelect('existingProduct', 'Other')}
+                    className={`p-4 rounded-lg border-2 transition hover:shadow-lg flex items-center justify-center ${
+                      formData.existingProduct === 'Other'
                         ? 'border-emerald-600 bg-emerald-50'
                         : 'border-gray-300 hover:border-emerald-400'
                     }`}
                   >
-                    <img 
-                      src={product.image} 
-                      alt={product.name}
-                      className="w-full h-32 object-cover rounded-lg mb-3"
-                    />
-                    <p className="font-semibold text-gray-800">{product.name}</p>
-                  </button>
-                ))}
-                
-                <button
-                  onClick={() => handleProductSelect('existingProduct', 'Other')}
-                  className={`p-4 rounded-lg border-2 transition hover:shadow-lg flex items-center justify-center ${
-                    formData.existingProduct === 'Other'
-                      ? 'border-emerald-600 bg-emerald-50'
-                      : 'border-gray-300 hover:border-emerald-400'
-                  }`}
-                >
-                  <div className="text-center">
-                    <div className="w-full h-32 flex items-center justify-center bg-gray-100 rounded-lg mb-3">
-                      <span className="text-4xl text-gray-400">+</span>
+                    <div className="text-center">
+                      <div className="w-full h-32 flex items-center justify-center bg-gray-100 rounded-lg mb-3">
+                        <span className="text-4xl text-gray-400">+</span>
+                      </div>
+                      <p className="font-semibold text-gray-800">Other</p>
                     </div>
-                    <p className="font-semibold text-gray-800">Other</p>
-                  </div>
-                </button>
-              </div>
+                  </button>
+                </div>
 
-              {formData.existingProduct === 'Other' && (
-                <div className="mt-4 space-y-3">
-                  <input
-                    type="text"
-                    value={formData.existingProductOther}
-                    onChange={(e) => handleInputChange('existingProductOther', e.target.value)}
-                    placeholder="Please specify your existing product"
-                    className="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none"
-                  />
+                {/* NEW FIELD — Approx number of fixtures */}
+                <div className="mt-6">
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Approx. Number of Fixtures
+                  </label>
                   <input
                     type="number"
-                    value={formData.existingProductOtherWattage}
-                    onChange={(e) => handleInputChange('existingProductOtherWattage', e.target.value)}
-                    placeholder="Total wattage per fixture (W)"
+                    min="0"
+                    value={formData.approxFixtures || ''}
+                    onChange={(e) => handleInputChange('approxFixtures', e.target.value)}
+                    placeholder="e.g. 150"
                     className="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
-              )}
 
+                {formData.existingProduct === 'Other' && (
+                  <div className="mt-4 space-y-3">
+                    <input
+                      type="text"
+                      value={formData.existingProductOther}
+                      onChange={(e) => handleInputChange('existingProductOther', e.target.value)}
+                      placeholder="Please specify your existing product"
+                      className="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none"
+                    />
+                    <input
+                      type="number"
+                      value={formData.existingProductOtherWattage}
+                      onChange={(e) => handleInputChange('existingProductOtherWattage', e.target.value)}
+                      placeholder="Total wattage per fixture (W)"
+                      className="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
 
-            </div>
-          )}
 
           {step === 2 && (
             <div className="space-y-4">
