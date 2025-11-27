@@ -2,14 +2,7 @@
 import React, { useState } from 'react';
 import { Mail, Zap, ArrowRight, CheckCircle, Lightbulb, TrendingDown, Send } from 'lucide-react';
 
-// Product specifications for existing products
-const EXISTING_PRODUCT_SPECS = {
-  'Fluorescent Tubes': { power: 18, unit: 'W' },
-  'Metal Halide Highbay': { power: 150, unit: 'W' },
-  'Halogen Downlights': { power: 50, unit: 'W' },
-  'HPS Street Lights': { power: 250, unit: 'W' },
-  'Incandescent Bulbs': { power: 60, unit: 'W' }
-};
+
 
 // Product specifications for replacement products
 const REPLACEMENT_PRODUCT_SPECS = {
@@ -18,7 +11,13 @@ const REPLACEMENT_PRODUCT_SPECS = {
   'Linear Highbay': { power: 80, unit: 'W' },
   'UFO': { power: 100, unit: 'W' }
 };
-
+// Product specifications for existing products
+const EXISTING_PRODUCT_SPECS = {
+  'Fluorescent Panels': { power: 18, unit: 'W',ballastPower :12 },
+  'Fluorescent Strip Light': { power: 200, unit: 'W' ,ballastPower : 0},
+  'HID Highbay': { power: 55, unit: 'W' ,ballastPower : 18},
+  'Ceiling Light': { power: 32, unit: 'W' ,ballastPower :12 }
+};
 const existingProducts = [
   { 
     id: 1, 
@@ -237,7 +236,7 @@ export default function EnergyCalculator() {
       return parseFloat(formData.existingProductOtherWattage) || 0;
     } else if (selectedExisting) {
       const spec = EXISTING_PRODUCT_SPECS[formData.existingProduct];
-      const ballast = spec.ballastPower || 0;  
+      const ballast = spec.ballastPower  || 0;  
       return (spec.power * formData.tubesPerFixture) + ballast;
     }
     return 0;
