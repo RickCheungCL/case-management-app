@@ -22,25 +22,33 @@ const REPLACEMENT_PRODUCT_SPECS = {
 const existingProducts = [
   { 
     id: 1, 
-    name: 'Fluorescent Tubes',
+    name: 'Fluorescent Panels',
     power: 18,
-    tubesPerFixture: 2,
-    image: 'https://media.istockphoto.com/id/1140615978/photo/white-fluorescent-lamp-isolated-on-white-background-fluorescent-tube.jpg?s=612x612&w=0&k=20&c=1ZQ8YoPX3pg2eDfL58WcQnE61-YWBKv-Req1l0MCPqE='
+    tubesPerFixture: 4,
+    image: 'https://images.homedepot.ca/productimages/p_1001654157.jpg?product-images=l'
   },
   { 
     id: 2, 
-    name: 'Metal Halide Highbay',
+    name: 'Fluorescent Strip Light',
     power: 200,
     tubesPerFixture:1,
-    image: 'data:image/jpeg;base64,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'
+    image: 'https://images.thdstatic.com/productImages/b1b80268-7203-4903-9a25-35846d22b855/svn/white-envirolite-strip-light-fixtures-st704t1840-64_600.jpg'
   },
   { 
     id: 3, 
-    name: 'Halogen Downlights',
-    power: 50,
+    name: 'HID Highbay',
+    power: 55,
     tubesPerFixture:1,
-    image: 'data:image/jpeg;base64,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'
+    image: 'data:image/jpeg;base64,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'
   },
+  { 
+    id: 4, 
+    name: 'Ceiling Light',
+    power: 32,
+    tubesPerFixture:1,
+    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYlGdGGNiGUtk-YtzNSy-scnpFE4jhcBbRRg&s'
+  },
+
 ];
 
 const replacementProducts = [
@@ -600,25 +608,27 @@ export default function EnergyCalculator() {
   }
 
   // Form Steps
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-4xl w-full">
-        <div className="flex items-center justify-center mb-8">
-          <Zap className="w-10 h-10 text-emerald-600 mr-3" />
-          <h1 className="text-3xl font-bold text-gray-800">Energy Calculator</h1>
+   return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center p-3 sm:p-4 md:p-6">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 max-w-4xl w-full">
+        {/* Header */}
+        <div className="flex items-center justify-center mb-6 sm:mb-8">
+          <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-600 mr-2 sm:mr-3" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Energy Calculator</h1>
         </div>
 
-        <div className="mb-8">
+        {/* Progress Steps */}
+        <div className="mb-6 sm:mb-8">
           <div className="flex justify-between items-center">
             {[1, 2, 3].map((num) => (
               <div key={num} className="flex items-center flex-1">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-semibold text-sm sm:text-base ${
                   step >= num ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-500'
                 }`}>
                   {num}
                 </div>
                 {num < 3 && (
-                  <div className={`flex-1 h-1 mx-2 ${
+                  <div className={`flex-1 h-1 mx-1 sm:mx-2 ${
                     step > num ? 'bg-emerald-600' : 'bg-gray-200'
                   }`} />
                 )}
@@ -627,97 +637,97 @@ export default function EnergyCalculator() {
           </div>
         </div>
 
-        <div className="space-y-6">
+        {/* Form Content */}
+        <div className="space-y-4 sm:space-y-6">
           {step === 1 && (
-              <div className="space-y-4">
-                <h2 className="text-2xl font-semibold text-gray-800">What is your existing lighting product?</h2>
-                <p className="text-gray-600">Select the lighting product currently used in your company.</p>
-                
-                <div className="grid grid-cols-1 md-grid-cols-3 gap-4">
-                  {existingProducts.map((product) => (
-                    <button
-                      key={product.id}
-                      onClick={() => handleProductSelect('existingProduct', product.name)}
-                      className={`p-4 rounded-lg border-2 transition hover:shadow-lg ${
-                        formData.existingProduct === product.name
-                          ? 'border-emerald-600 bg-emerald-50'
-                          : 'border-gray-300 hover:border-emerald-400'
-                      }`}
-                    >
-                      <img 
-                        src={product.image} 
-                        alt={product.name}
-                        className="w-full h-32 object-cover rounded-lg mb-3"
-                      />
-                      <p className="font-semibold text-gray-800">{product.name}</p>
-                    </button>
-                  ))}
-                  
+            <div className="space-y-4">
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">What is your existing lighting product?</h2>
+              <p className="text-sm sm:text-base text-gray-600">Select the lighting product currently used in your company.</p>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                {existingProducts.map((product) => (
                   <button
-                    onClick={() => handleProductSelect('existingProduct', 'Other')}
-                    className={`p-4 rounded-lg border-2 transition hover:shadow-lg flex items-center justify-center ${
-                      formData.existingProduct === 'Other'
+                    key={product.id}
+                    onClick={() => handleProductSelect('existingProduct', product.name)}
+                    className={`p-3 sm:p-4 rounded-lg border-2 transition hover:shadow-lg ${
+                      formData.existingProduct === product.name
                         ? 'border-emerald-600 bg-emerald-50'
                         : 'border-gray-300 hover:border-emerald-400'
                     }`}
                   >
-                    <div className="text-center">
-                      <div className="w-full h-32 flex items-center justify-center bg-gray-100 rounded-lg mb-3">
-                        <span className="text-4xl text-gray-400">+</span>
-                      </div>
-                      <p className="font-semibold text-gray-800">Other</p>
-                    </div>
+                    <img 
+                      src={product.image} 
+                      alt={product.name}
+                      className="w-full h-24 sm:h-32 object-cover rounded-lg mb-2 sm:mb-3"
+                    />
+                    <p className="font-semibold text-gray-800 text-xs sm:text-base">{product.name}</p>
                   </button>
-                </div>
+                ))}
+                
+                <button
+                  onClick={() => handleProductSelect('existingProduct', 'Other')}
+                  className={`p-3 sm:p-4 rounded-lg border-2 transition hover:shadow-lg flex items-center justify-center ${
+                    formData.existingProduct === 'Other'
+                      ? 'border-emerald-600 bg-emerald-50'
+                      : 'border-gray-300 hover:border-emerald-400'
+                  }`}
+                >
+                  <div className="text-center">
+                    <div className="w-full h-24 sm:h-32 flex items-center justify-center bg-gray-100 rounded-lg mb-2 sm:mb-3">
+                      <span className="text-3xl sm:text-4xl text-gray-400">+</span>
+                    </div>
+                    <p className="font-semibold text-gray-800 text-xs sm:text-base">Other</p>
+                  </div>
+                </button>
+              </div>
 
-                {/* NEW FIELD — Approx number of fixtures */}
-                <div className="mt-6">
-                  <label className="block text-gray-700 font-medium mb-2">
-                    Approx. Number of Fixtures
-                  </label>
+              {/* Approx number of fixtures */}
+              <div className="mt-4 sm:mt-6">
+                <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
+                  Approx. Number of Fixtures
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.approxFixtures || ''}
+                  onChange={(e) => handleInputChange('approxFixtures', e.target.value)}
+                  placeholder="e.g. 150"
+                  className="w-full p-3 sm:p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-sm sm:text-base"
+                />
+              </div>
+
+              {formData.existingProduct === 'Other' && (
+                <div className="mt-4 space-y-3">
+                  <input
+                    type="text"
+                    value={formData.existingProductOther}
+                    onChange={(e) => handleInputChange('existingProductOther', e.target.value)}
+                    placeholder="Please specify your existing product"
+                    className="w-full p-3 sm:p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-sm sm:text-base"
+                  />
                   <input
                     type="number"
-                    min="0"
-                    value={formData.approxFixtures || ''}
-                    onChange={(e) => handleInputChange('approxFixtures', e.target.value)}
-                    placeholder="e.g. 150"
-                    className="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none"
+                    value={formData.existingProductOtherWattage}
+                    onChange={(e) => handleInputChange('existingProductOtherWattage', e.target.value)}
+                    placeholder="Total wattage per fixture (W)"
+                    className="w-full p-3 sm:p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-sm sm:text-base"
                   />
                 </div>
-
-                {formData.existingProduct === 'Other' && (
-                  <div className="mt-4 space-y-3">
-                    <input
-                      type="text"
-                      value={formData.existingProductOther}
-                      onChange={(e) => handleInputChange('existingProductOther', e.target.value)}
-                      placeholder="Please specify your existing product"
-                      className="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none"
-                    />
-                    <input
-                      type="number"
-                      value={formData.existingProductOtherWattage}
-                      onChange={(e) => handleInputChange('existingProductOtherWattage', e.target.value)}
-                      placeholder="Total wattage per fixture (W)"
-                      className="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none"
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-
+              )}
+            </div>
+          )}
 
           {step === 2 && (
             <div className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-800">Which LED product would you like to replace with?</h2>
-              <p className="text-gray-600">Select the energy-efficient LED alternative you're considering.</p>
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">Which LED product would you like to replace with?</h2>
+              <p className="text-sm sm:text-base text-gray-600">Select the energy-efficient LED alternative you're considering.</p>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 {replacementProducts.map((product) => (
                   <button
                     key={product.id}
                     onClick={() => handleProductSelect('replacementProduct', product.id)}
-                    className={`p-4 rounded-lg border-2 transition hover:shadow-lg ${
+                    className={`p-3 sm:p-4 rounded-lg border-2 transition hover:shadow-lg ${
                       formData.replacementProduct === product.id
                         ? 'border-emerald-600 bg-emerald-50'
                         : 'border-gray-300 hover:border-emerald-400'
@@ -726,20 +736,19 @@ export default function EnergyCalculator() {
                     <img 
                       src={product.image} 
                       alt={product.name}
-                      className="w-full h-40 object-cover rounded-lg mb-3"
+                      className="w-full h-32 sm:h-40 object-cover rounded-lg mb-2 sm:mb-3"
                     />
-                    <p className="font-semibold text-gray-800 text-lg">{product.name}</p>
+                    <p className="font-semibold text-gray-800 text-base sm:text-lg">{product.name}</p>
                   </button>
                 ))}
               </div>
-
             </div>
           )}
 
           {step === 3 && (
             <div className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-800">Your Contact Information</h2>
-              <p className="text-gray-600">We'll send you a detailed energy calculation report shortly.</p>
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">Your Contact Information</h2>
+              <p className="text-sm sm:text-base text-gray-600">We'll send you a detailed energy calculation report shortly.</p>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
                 <input
@@ -747,7 +756,7 @@ export default function EnergyCalculator() {
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   placeholder="John Doe"
-                  className="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none"
+                  className="w-full p-3 sm:p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-sm sm:text-base"
                 />
               </div>
               <div>
@@ -757,19 +766,18 @@ export default function EnergyCalculator() {
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   placeholder="john@company.com"
-                  className="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none"
+                  className="w-full p-3 sm:p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-sm sm:text-base"
                 />
               </div>
-
-
             </div>
           )}
 
-          <div className="flex justify-between pt-6">
+          {/* Navigation Buttons */}
+          <div className="flex justify-between pt-4 sm:pt-6 gap-3">
             {step > 1 && (
               <button
                 onClick={handleBack}
-                className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
+                className="px-4 sm:px-6 py-2.5 sm:py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium text-sm sm:text-base"
               >
                 Back
               </button>
@@ -779,25 +787,25 @@ export default function EnergyCalculator() {
               <button
                 onClick={handleNext}
                 disabled={!canProceed()}
-                className={`ml-auto px-6 py-3 rounded-lg font-medium flex items-center transition ${
+                className={`ml-auto px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-medium flex items-center transition text-sm sm:text-base ${
                   canProceed()
                     ? 'bg-emerald-600 text-white hover:bg-emerald-700'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
               >
-                Next <ArrowRight className="ml-2 w-5 h-5" />
+                Next <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             ) : (
               <button
                 onClick={handleSubmit}
                 disabled={!canProceed()}
-                className={`ml-auto px-6 py-3 rounded-lg font-medium flex items-center transition ${
+                className={`ml-auto px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-medium flex items-center transition text-sm sm:text-base ${
                   canProceed()
                     ? 'bg-emerald-600 text-white hover:bg-emerald-700'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
               >
-                <Mail className="mr-2 w-5 h-5" /> Generate Report
+                <Mail className="mr-2 w-4 h-4 sm:w-5 sm:h-5" /> Generate Report
               </button>
             )}
           </div>
@@ -805,4 +813,5 @@ export default function EnergyCalculator() {
       </div>
     </div>
   );
+
 }
