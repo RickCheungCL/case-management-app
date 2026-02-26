@@ -1,15 +1,13 @@
 import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
-// Hourly rates for the 24h day
+// New electricity rates for 24h/day
 const HOURS_1 = 5;
-const HOURS_2 = 8;
-const HOURS_3 = 11;
-
 const RATE_1 = 0.203; // $ per kWh
+const HOURS_2 = 8;
 const RATE_2 = 0.098;
+const HOURS_3 = 11;
 const RATE_3 = 0.157;
-
 const DAYS_PER_YEAR = 365;
 
 export async function GET(
@@ -66,6 +64,8 @@ export async function GET(
 
     let totalExistingWattage = 0;
     let totalSuggestedWattage = 0;
+    let totalExistingAnnualCost = 0;
+    let totalSuggestedAnnualCost = 0;
     let totalCostSavings = 0;
     let totalLightCount = 0;
     const caseCreatedDate = caseData?.createdAt;
@@ -73,12 +73,12 @@ export async function GET(
     for (const room of rooms) {
       const firstPhotoUrl = room.photos?.[0]?.url || null;
 
-      // Calculate existing wattage
+      // Existing wattage calculation
       const existingWattage = room.existingLights.reduce((sum, light) => {
         const baseWattage = Number(light.product?.wattage) || 0;
         const ballastDraw = Number(light.product?.description) || 0;
 
-        // Correct ballast logic: bypassBallast means ballast is ignored
+        // Correct bypassBallast logic
         const totalWattagePerFixture = light.bypassBallast
           ? baseWattage
           : baseWattage + ballastDraw;
@@ -86,14 +86,14 @@ export async function GET(
         return sum + light.quantity * totalWattagePerFixture;
       }, 0);
 
-      // Calculate suggested wattage
+      // Suggested wattage calculation
       const suggestedWattage = room.suggestedLights.reduce((sum, light) => {
         const fixture = fixtureMap.get(light.productId);
-        const wattage = fixture?.wattage ?? 0; // fallback to 0 if missing
+        const wattage = fixture?.wattage ?? 0;
         return sum + light.quantity * wattage;
       }, 0);
 
-      // Annual cost calculation using fixed hourly rates
+      // Annual electricity cost using fixed hourly rates
       const existingAnnualCost =
         existingWattage > 0
           ? (existingWattage / 1000) *
@@ -110,6 +110,7 @@ export async function GET(
 
       const savingsCost = existingAnnualCost - suggestedAnnualCost;
 
+      // Count suggested lights
       const totalSuggestedQuantity = room.suggestedLights.reduce(
         (sum, light) => sum + light.quantity,
         0
@@ -119,8 +120,11 @@ export async function GET(
       const savingsCostPerFixture =
         totalSuggestedQuantity > 0 ? savingsCost / totalSuggestedQuantity : 0;
 
+      // Accumulate totals
       totalExistingWattage += existingWattage;
       totalSuggestedWattage += suggestedWattage;
+      totalExistingAnnualCost += existingAnnualCost;
+      totalSuggestedAnnualCost += suggestedAnnualCost;
       totalCostSavings += savingsCost;
 
       detailedRooms.push({
@@ -144,7 +148,9 @@ export async function GET(
       summary: {
         totalExistingWattage,
         totalSuggestedWattage,
-        totalCostSavings: Number(totalCostSavings.toFixed(2)),
+        totalExistingAnnualCost: Number(totalExistingAnnualCost.toFixed(2)),
+        totalSuggestedAnnualCost: Number(totalSuggestedAnnualCost.toFixed(2)),
+        totalSavingsCost: Number(totalCostSavings.toFixed(2)),
         totalLightCount,
       },
       rooms: detailedRooms,
