@@ -323,7 +323,7 @@ export default function EnergyCalculator() {
             </button>
           </div>
               <img
-                src="/logo.png"
+                src="/logo2.png"
                 alt="Company Logo"
                 className="mx-auto mb-1 w-75 h-auto print:w-64 print:max-w-[240px]"
             /> 
@@ -608,209 +608,280 @@ export default function EnergyCalculator() {
 
   // Form Steps
    return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center p-3 sm:p-4 md:p-6">
-      <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 max-w-4xl w-full">
-        {/* Header */}
-        <div className="flex items-center justify-center mb-6 sm:mb-8">
-          <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-600 mr-2 sm:mr-3" />
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Energy Calculator</h1>
-        </div>
+  <div className="min-h-screen bg-gradient-to-br from-[#2F7FBE]/10 to-[#FFFFFF] flex items-center justify-center p-3 sm:p-4 md:p-6">
+    <div className="bg-white rounded-xl sm:rounded-2xl shadow-[0_10px_30px_rgba(27,114,185,0.15)] p-4 sm:p-6 md:p-8 max-w-4xl w-full">
+      
+      {/* Header */}
+      <div className="flex items-center justify-center mb-6 sm:mb-8">
+        <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-[#1B72B9] mr-2 sm:mr-3" />
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#222222]">
+          Energy Calculator
+        </h1>
+      </div>
 
-        {/* Progress Steps */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex justify-between items-center">
-            {[1, 2, 3].map((num) => (
-              <div key={num} className="flex items-center flex-1">
-                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-semibold text-sm sm:text-base ${
-                  step >= num ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-500'
-                }`}>
-                  {num}
-                </div>
-                {num < 3 && (
-                  <div className={`flex-1 h-1 mx-1 sm:mx-2 ${
-                    step > num ? 'bg-emerald-600' : 'bg-gray-200'
-                  }`} />
-                )}
+      {/* Progress Steps */}
+      <div className="mb-6 sm:mb-8">
+        <div className="flex justify-between items-center">
+          {[1, 2, 3].map((num) => (
+            <div key={num} className="flex items-center flex-1">
+              <div
+                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-semibold text-sm sm:text-base ${
+                  step >= num
+                    ? "bg-[#1B72B9] text-white"
+                    : "bg-gray-200 text-gray-500"
+                }`}
+              >
+                {num}
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Form Content */}
-        <div className="space-y-4 sm:space-y-6">
-          {step === 1 && (
-            <div className="space-y-4">
-              <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">What is your existing lighting product?</h2>
-              <p className="text-sm sm:text-base text-gray-600">Select the lighting product currently used in your company.</p>
-              
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-                {existingProducts.map((product) => (
-                  <button
-                    key={product.id}
-                    onClick={() => handleProductSelect('existingProduct', product.name)}
-                    className={`p-3 sm:p-4 rounded-lg border-2 transition hover:shadow-lg ${
-                      formData.existingProduct === product.name
-                        ? 'border-emerald-600 bg-emerald-50'
-                        : 'border-gray-300 hover:border-emerald-400'
-                    }`}
-                  >
-                    <img 
-                      src={product.image} 
-                      alt={product.name}
-                      className="w-full h-24 sm:h-32 object-cover rounded-lg mb-2 sm:mb-3"
-                    />
-                    <p className="font-semibold text-gray-800 text-xs sm:text-base">{product.name}</p>
-                  </button>
-                ))}
-                
-                <button
-                  onClick={() => handleProductSelect('existingProduct', 'Other')}
-                  className={`p-3 sm:p-4 rounded-lg border-2 transition hover:shadow-lg flex items-center justify-center ${
-                    formData.existingProduct === 'Other'
-                      ? 'border-emerald-600 bg-emerald-50'
-                      : 'border-gray-300 hover:border-emerald-400'
+              {num < 3 && (
+                <div
+                  className={`flex-1 h-1 mx-1 sm:mx-2 ${
+                    step > num ? "bg-[#1B72B9]" : "bg-gray-200"
                   }`}
-                >
-                  <div className="text-center">
-                    <div className="w-full h-24 sm:h-32 flex items-center justify-center bg-gray-100 rounded-lg mb-2 sm:mb-3">
-                      <span className="text-3xl sm:text-4xl text-gray-400">+</span>
-                    </div>
-                    <p className="font-semibold text-gray-800 text-xs sm:text-base">Other</p>
-                  </div>
-                </button>
-              </div>
-
-              {/* Approx number of fixtures */}
-              <div className="mt-4 sm:mt-6">
-                <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
-                  Approx. Number of Fixtures
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.approxFixtures || ''}
-                  onChange={(e) => handleInputChange('approxFixtures', e.target.value)}
-                  placeholder="e.g. 150"
-                  className="w-full p-3 sm:p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-sm sm:text-base"
                 />
-              </div>
-
-              {formData.existingProduct === 'Other' && (
-                <div className="mt-4 space-y-3">
-                  <input
-                    type="text"
-                    value={formData.existingProductOther}
-                    onChange={(e) => handleInputChange('existingProductOther', e.target.value)}
-                    placeholder="Please specify your existing product"
-                    className="w-full p-3 sm:p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-sm sm:text-base"
-                  />
-                  <input
-                    type="number"
-                    value={formData.existingProductOtherWattage}
-                    onChange={(e) => handleInputChange('existingProductOtherWattage', e.target.value)}
-                    placeholder="Total wattage per fixture (W)"
-                    className="w-full p-3 sm:p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-sm sm:text-base"
-                  />
-                </div>
               )}
             </div>
-          )}
+          ))}
+        </div>
+      </div>
 
-          {step === 2 && (
-            <div className="space-y-4">
-              <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">Which LED product would you like to replace with?</h2>
-              <p className="text-sm sm:text-base text-gray-600">Select the energy-efficient LED alternative you're considering.</p>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                {replacementProducts.map((product) => (
-                  <button
-                    key={product.id}
-                    onClick={() => handleProductSelect('replacementProduct', product.id)}
-                    className={`p-3 sm:p-4 rounded-lg border-2 transition hover:shadow-lg ${
-                      formData.replacementProduct === product.id
-                        ? 'border-emerald-600 bg-emerald-50'
-                        : 'border-gray-300 hover:border-emerald-400'
-                    }`}
-                  >
-                    <img 
-                      src={product.image} 
-                      alt={product.name}
-                      className="w-full h-32 sm:h-40 object-cover rounded-lg mb-2 sm:mb-3"
-                    />
-                    <p className="font-semibold text-gray-800 text-base sm:text-lg">{product.name}</p>
-                  </button>
-                ))}
-              </div>
+      {/* Form Content */}
+      <div className="space-y-4 sm:space-y-6">
+
+        {step === 1 && (
+          <div className="space-y-4">
+            <h2 className="text-xl sm:text-2xl font-semibold text-[#222222]">
+              What is your existing lighting product?
+            </h2>
+
+            <p className="text-sm sm:text-base text-[#222222]/70">
+              Select the lighting product currently used in your company.
+            </p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+              {existingProducts.map((product) => (
+                <button
+                  key={product.id}
+                  onClick={() =>
+                    handleProductSelect("existingProduct", product.name)
+                  }
+                  className={`p-3 sm:p-4 rounded-lg border-2 transition hover:shadow-lg ${
+                    formData.existingProduct === product.name
+                      ? "border-[#1B72B9] bg-[#2F7FBE]/10"
+                      : "border-gray-300 hover:border-[#2F7FBE]"
+                  }`}
+                >
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-24 sm:h-32 object-cover rounded-lg mb-2 sm:mb-3"
+                  />
+                  <p className="font-semibold text-[#222222] text-xs sm:text-base">
+                    {product.name}
+                  </p>
+                </button>
+              ))}
+
+              <button
+                onClick={() =>
+                  handleProductSelect("existingProduct", "Other")
+                }
+                className={`p-3 sm:p-4 rounded-lg border-2 transition hover:shadow-lg flex items-center justify-center ${
+                  formData.existingProduct === "Other"
+                    ? "border-[#1B72B9] bg-[#2F7FBE]/10"
+                    : "border-gray-300 hover:border-[#2F7FBE]"
+                }`}
+              >
+                <div className="text-center">
+                  <div className="w-full h-24 sm:h-32 flex items-center justify-center bg-[#2F7FBE]/10 rounded-lg mb-2 sm:mb-3">
+                    <span className="text-3xl sm:text-4xl text-gray-400">
+                      +
+                    </span>
+                  </div>
+                  <p className="font-semibold text-[#222222] text-xs sm:text-base">
+                    Other
+                  </p>
+                </div>
+              </button>
             </div>
-          )}
 
-          {step === 3 && (
-            <div className="space-y-4">
-              <h2 className="text-xl sm:text-2xl font-semibold text-gray-800">Your Contact Information</h2>
-              <p className="text-sm sm:text-base text-gray-600">We'll send you a detailed energy calculation report shortly.</p>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+            {/* Fixtures */}
+            <div className="mt-4 sm:mt-6">
+              <label className="block text-[#222222] font-medium mb-2 text-sm sm:text-base">
+                Approx. Number of Fixtures
+              </label>
+
+              <input
+                type="number"
+                min="0"
+                value={formData.approxFixtures || ""}
+                onChange={(e) =>
+                  handleInputChange("approxFixtures", e.target.value)
+                }
+                placeholder="e.g. 150"
+                className="w-full p-3 sm:p-4 border-2 border-gray-300 rounded-lg focus:border-[#1B72B9] focus:outline-none text-sm sm:text-base"
+              />
+            </div>
+
+            {formData.existingProduct === "Other" && (
+              <div className="mt-4 space-y-3">
                 <input
                   type="text"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  placeholder="John Doe"
-                  className="w-full p-3 sm:p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-sm sm:text-base"
+                  value={formData.existingProductOther}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "existingProductOther",
+                      e.target.value
+                    )
+                  }
+                  placeholder="Please specify your existing product"
+                  className="w-full p-3 sm:p-4 border-2 border-gray-300 rounded-lg focus:border-[#1B72B9] focus:outline-none text-sm sm:text-base"
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder="john@company.com"
-                  className="w-full p-3 sm:p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none text-sm sm:text-base"
-                />
-              </div>
-            </div>
-          )}
 
-          {/* Navigation Buttons */}
-          <div className="flex justify-between pt-4 sm:pt-6 gap-3">
-            {step > 1 && (
-              <button
-                onClick={handleBack}
-                className="px-4 sm:px-6 py-2.5 sm:py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium text-sm sm:text-base"
-              >
-                Back
-              </button>
-            )}
-            
-            {step < 3 ? (
-              <button
-                onClick={handleNext}
-                disabled={!canProceed()}
-                className={`ml-auto px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-medium flex items-center transition text-sm sm:text-base ${
-                  canProceed()
-                    ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                Next <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            ) : (
-              <button
-                onClick={handleSubmit}
-                disabled={!canProceed()}
-                className={`ml-auto px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-medium flex items-center transition text-sm sm:text-base ${
-                  canProceed()
-                    ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                <Mail className="mr-2 w-4 h-4 sm:w-5 sm:h-5" /> Generate Report
-              </button>
+                <input
+                  type="number"
+                  value={formData.existingProductOtherWattage}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "existingProductOtherWattage",
+                      e.target.value
+                    )
+                  }
+                  placeholder="Total wattage per fixture (W)"
+                  className="w-full p-3 sm:p-4 border-2 border-gray-300 rounded-lg focus:border-[#1B72B9] focus:outline-none text-sm sm:text-base"
+                />
+              </div>
             )}
           </div>
+        )}
+
+        {step === 2 && (
+          <div className="space-y-4">
+            <h2 className="text-xl sm:text-2xl font-semibold text-[#222222]">
+              Which LED product would you like to replace with?
+            </h2>
+
+            <p className="text-sm sm:text-base text-[#222222]/70">
+              Select the energy-efficient LED alternative you're considering.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              {replacementProducts.map((product) => (
+                <button
+                  key={product.id}
+                  onClick={() =>
+                    handleProductSelect(
+                      "replacementProduct",
+                      product.id
+                    )
+                  }
+                  className={`p-3 sm:p-4 rounded-lg border-2 transition hover:shadow-lg ${
+                    formData.replacementProduct === product.id
+                      ? "border-[#1B72B9] bg-[#2F7FBE]/10"
+                      : "border-gray-300 hover:border-[#2F7FBE]"
+                  }`}
+                >
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-32 sm:h-40 object-cover rounded-lg mb-2 sm:mb-3"
+                  />
+                  <p className="font-semibold text-[#222222] text-base sm:text-lg">
+                    {product.name}
+                  </p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className="space-y-4">
+            <h2 className="text-xl sm:text-2xl font-semibold text-[#222222]">
+              Your Contact Information
+            </h2>
+
+            <p className="text-sm sm:text-base text-[#222222]/70">
+              We'll send you a detailed energy calculation report shortly.
+            </p>
+
+            <div>
+              <label className="block text-sm font-medium text-[#222222] mb-2">
+                Name
+              </label>
+
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) =>
+                  handleInputChange("name", e.target.value)
+                }
+                placeholder="John Doe"
+                className="w-full p-3 sm:p-4 border-2 border-gray-300 rounded-lg focus:border-[#1B72B9] focus:outline-none text-sm sm:text-base"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[#222222] mb-2">
+                Email Address
+              </label>
+
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) =>
+                  handleInputChange("email", e.target.value)
+                }
+                placeholder="john@company.com"
+                className="w-full p-3 sm:p-4 border-2 border-gray-300 rounded-lg focus:border-[#1B72B9] focus:outline-none text-sm sm:text-base"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Navigation Buttons */}
+        <div className="flex justify-between pt-4 sm:pt-6 gap-3">
+          {step > 1 && (
+            <button
+              onClick={handleBack}
+              className="px-4 sm:px-6 py-2.5 sm:py-3 border-2 border-[#1F5F3B] text-[#1F5F3B] rounded-lg hover:bg-[#1F5F3B]/10 transition font-medium text-sm sm:text-base"
+            >
+              Back
+            </button>
+          )}
+
+          {step < 3 ? (
+            <button
+              onClick={handleNext}
+              disabled={!canProceed()}
+              className={`ml-auto px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-medium flex items-center transition text-sm sm:text-base ${
+                canProceed()
+                  ? "bg-[#1B72B9] text-white hover:bg-[#2F7FBE]"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
+            >
+              Next
+              <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+          ) : (
+            <button
+              onClick={handleSubmit}
+              disabled={!canProceed()}
+              className={`ml-auto px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg font-medium flex items-center transition text-sm sm:text-base ${
+                canProceed()
+                  ? "bg-[#1B72B9] text-white hover:bg-[#2F7FBE]"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
+            >
+              <Mail className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
+              Generate Report
+            </button>
+          )}
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 
 }
