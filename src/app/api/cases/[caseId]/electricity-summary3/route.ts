@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
-// Hourly rates and hours per rate
+// Hourly rates for the 24h day
 const HOURS_1 = 5;
 const HOURS_2 = 8;
 const HOURS_3 = 11;
@@ -75,10 +75,10 @@ export async function GET(
 
       // Calculate existing wattage
       const existingWattage = room.existingLights.reduce((sum, light) => {
-        const baseWattage = light.product?.wattage ?? 0;
+        const baseWattage = Number(light.product?.wattage) || 0;
         const ballastDraw = Number(light.product?.description) || 0;
 
-        // Fixed formula: bypassBallast means ballast is removed
+        // Correct ballast logic: bypassBallast means ballast is ignored
         const totalWattagePerFixture = light.bypassBallast
           ? baseWattage
           : baseWattage + ballastDraw;
@@ -89,19 +89,24 @@ export async function GET(
       // Calculate suggested wattage
       const suggestedWattage = room.suggestedLights.reduce((sum, light) => {
         const fixture = fixtureMap.get(light.productId);
-        return sum + light.quantity * (fixture?.wattage ?? 0);
+        const wattage = fixture?.wattage ?? 0; // fallback to 0 if missing
+        return sum + light.quantity * wattage;
       }, 0);
 
       // Annual cost calculation using fixed hourly rates
       const existingAnnualCost =
-        (existingWattage / 1000) *
-        (HOURS_1 * RATE_1 + HOURS_2 * RATE_2 + HOURS_3 * RATE_3) *
-        DAYS_PER_YEAR;
+        existingWattage > 0
+          ? (existingWattage / 1000) *
+            (HOURS_1 * RATE_1 + HOURS_2 * RATE_2 + HOURS_3 * RATE_3) *
+            DAYS_PER_YEAR
+          : 0;
 
       const suggestedAnnualCost =
-        (suggestedWattage / 1000) *
-        (HOURS_1 * RATE_1 + HOURS_2 * RATE_2 + HOURS_3 * RATE_3) *
-        DAYS_PER_YEAR;
+        suggestedWattage > 0
+          ? (suggestedWattage / 1000) *
+            (HOURS_1 * RATE_1 + HOURS_2 * RATE_2 + HOURS_3 * RATE_3) *
+            DAYS_PER_YEAR
+          : 0;
 
       const savingsCost = existingAnnualCost - suggestedAnnualCost;
 
