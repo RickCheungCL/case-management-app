@@ -72,12 +72,15 @@ export async function GET(
     for (const room of rooms) {
       const firstPhotoUrl = room.photos?.[0]?.url || null;
 
+      // Corrected wattage calculation to match old 24h/365 logic
       const existingWattage = room.existingLights.reduce((sum, light) => {
         const baseWattage = light.product?.wattage ?? 0;
         const ballastDraw = Number(light.product?.description) || 0;
+
+        // ✅ Correction: add ballast only if bypassBallast is true (matches old code)
         const totalWattagePerFixture = light.bypassBallast
-          ? baseWattage
-          : baseWattage + ballastDraw;
+          ? baseWattage + ballastDraw
+          : baseWattage;
 
         return sum + light.quantity * totalWattagePerFixture;
       }, 0);
