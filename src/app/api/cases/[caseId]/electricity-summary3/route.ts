@@ -1,7 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
 
-// New electricity rates for 24h/day
 const HOURS_1 = 5;
 const RATE_1 = 0.203;
 const HOURS_2 = 8;
@@ -73,11 +72,9 @@ export async function GET(
     for (const room of rooms) {
       const firstPhotoUrl = room.photos?.[0]?.url || null;
 
-      // Calculate existing wattage
       const existingWattage = room.existingLights.reduce((sum, light) => {
-        const baseWattage = Number(light.product?.wattage) || 0;
+        const baseWattage = light.product?.wattage ?? 0;
         const ballastDraw = Number(light.product?.description) || 0;
-
         const totalWattagePerFixture = light.bypassBallast
           ? baseWattage
           : baseWattage + ballastDraw;
@@ -85,38 +82,32 @@ export async function GET(
         return sum + light.quantity * totalWattagePerFixture;
       }, 0);
 
-      // Calculate suggested wattage
       const suggestedWattage = room.suggestedLights.reduce((sum, light) => {
         const fixture = fixtureMap.get(light.productId);
-        const wattage = fixture?.wattage ?? 0;
-        return sum + light.quantity * wattage;
+        return sum + light.quantity * (fixture?.wattage ?? 0);
       }, 0);
 
-      // Annual energy calculation based on 24h and multi-rate
-      const existingEnergy_kWh = existingWattage / 1000; // in kW
-      const suggestedEnergy_kWh = suggestedWattage / 1000;
+      // Energy in kWh for 24 hours/day, 365 days/year
+      const existingEnergy_kWh = Number(((existingWattage / 1000) * 24 * DAYS_PER_YEAR).toFixed(2));
+      const suggestedEnergy_kWh = Number(((suggestedWattage / 1000) * 24 * DAYS_PER_YEAR).toFixed(2));
+      const savings_kWh = existingEnergy_kWh - suggestedEnergy_kWh;
 
-      const existingAnnualCost =
-        existingEnergy_kWh * (HOURS_1 * RATE_1 + HOURS_2 * RATE_2 + HOURS_3 * RATE_3) * DAYS_PER_YEAR;
-      const suggestedAnnualCost =
-        suggestedEnergy_kWh * (HOURS_1 * RATE_1 + HOURS_2 * RATE_2 + HOURS_3 * RATE_3) * DAYS_PER_YEAR;
+      // Cost using multi-rate formula
+      const existingCost =
+        (existingWattage / 1000) * (HOURS_1 * RATE_1 + HOURS_2 * RATE_2 + HOURS_3 * RATE_3) * DAYS_PER_YEAR;
+      const suggestedCost =
+        (suggestedWattage / 1000) * (HOURS_1 * RATE_1 + HOURS_2 * RATE_2 + HOURS_3 * RATE_3) * DAYS_PER_YEAR;
+      const savings_cost = Number((existingCost - suggestedCost).toFixed(2));
 
-      const savingsCost = existingAnnualCost - suggestedAnnualCost;
-
-      const totalSuggestedQuantity = room.suggestedLights.reduce(
-        (sum, light) => sum + light.quantity,
-        0
-      );
+      const totalSuggestedQuantity = room.suggestedLights.reduce((sum, light) => sum + light.quantity, 0);
       totalLightCount += totalSuggestedQuantity;
-
-      const savingsCostPerFixture =
-        totalSuggestedQuantity > 0 ? savingsCost / totalSuggestedQuantity : 0;
+      const savings_cost_per_fixture = totalSuggestedQuantity > 0 ? savings_cost / totalSuggestedQuantity : 0;
 
       totalExistingWattage += existingWattage;
       totalSuggestedWattage += suggestedWattage;
-      totalEnergyExisting_kWh += existingEnergy_kWh * 24 * DAYS_PER_YEAR;
-      totalEnergySuggested_kWh += suggestedEnergy_kWh * 24 * DAYS_PER_YEAR;
-      totalCostSavings += savingsCost;
+      totalEnergyExisting_kWh += existingEnergy_kWh;
+      totalEnergySuggested_kWh += suggestedEnergy_kWh;
+      totalCostSavings += savings_cost;
 
       detailedRooms.push({
         roomName: room.location || room.locationTag?.name
@@ -128,11 +119,11 @@ export async function GET(
         suggestedWattage,
         operationHoursPerDay: 24,
         operationDaysPerYear: DAYS_PER_YEAR,
-        existingEnergy_kWh: Number((existingEnergy_kWh * 24 * DAYS_PER_YEAR).toFixed(2)),
-        suggestedEnergy_kWh: Number((suggestedEnergy_kWh * 24 * DAYS_PER_YEAR).toFixed(2)),
-        savings_kWh: Number(((existingEnergy_kWh - suggestedEnergy_kWh) * 24 * DAYS_PER_YEAR).toFixed(2)),
-        savings_cost: Number(savingsCost.toFixed(2)),
-        savings_cost_per_fixture: Number(savingsCostPerFixture.toFixed(2)),
+        existingEnergy_kWh: Number(existingEnergy_kWh.toFixed(2)),
+        suggestedEnergy_kWh: Number(suggestedEnergy_kWh.toFixed(2)),
+        savings_kWh: Number(savings_kWh.toFixed(2)),
+        savings_cost: Number(savings_cost.toFixed(2)),
+        savings_cost_per_fixture: Number(savings_cost_per_fixture.toFixed(2)),
         photoUrl: firstPhotoUrl,
       });
     }
