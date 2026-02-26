@@ -631,26 +631,32 @@ export default function EnergyCalculator() {
 
   // Form Steps
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-4xl w-full">
+    <div className="min-h-screen bg-gradient-to-br from-[#FFFFFF] to-[#2F7FBE]/20 flex items-center justify-center p-4">
+      <div className="bg-[#FFFFFF] rounded-2xl shadow-2xl p-8 max-w-4xl w-full">
         <div className="flex items-center justify-center mb-8">
-          <Zap className="w-10 h-10 text-emerald-600 mr-3" />
-          <h1 className="text-3xl font-bold text-gray-800">Energy Calculator</h1>
+          <Zap className="w-10 h-10 text-[#2F7FBE] mr-3" />
+          <h1 className="text-3xl font-bold text-[#222222]">Energy Calculator</h1>
         </div>
 
         <div className="mb-8">
           <div className="flex justify-between items-center">
             {[1, 2, 3].map((num) => (
               <div key={num} className="flex items-center flex-1">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
-                  step >= num ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-500'
-                }`}>
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
+                    step >= num
+                      ? 'bg-[#1B72B9] text-[#FFFFFF]'
+                      : 'bg-[#FFFFFF] text-[#222222]'
+                  }`}
+                >
                   {num}
                 </div>
                 {num < 3 && (
-                  <div className={`flex-1 h-1 mx-2 ${
-                    step > num ? 'bg-emerald-600' : 'bg-gray-200'
-                  }`} />
+                  <div
+                    className={`flex-1 h-1 mx-2 ${
+                      step > num ? 'bg-[#1B72B9]' : 'bg-[#2F7FBE]/30'
+                    }`}
+                  />
                 )}
               </div>
             ))}
@@ -660,162 +666,70 @@ export default function EnergyCalculator() {
         <div className="space-y-6">
           {step === 1 && (
             <div className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-800">What is your existing lighting product?</h2>
-              <p className="text-gray-600">Select the lighting product currently used in your company.</p>
-              
+              <h2 className="text-2xl font-semibold text-[#222222]">
+                What is your existing lighting product?
+              </h2>
+              <p className="text-[#222222]">
+                Select the lighting product currently used in your company.
+              </p>
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {existingProducts.map((product) => (
                   <button
                     key={product.id}
-                    onClick={() => handleProductSelect('existingProduct', product.name)}
+                    onClick={() =>
+                      handleProductSelect('existingProduct', product.name)
+                    }
                     className={`p-4 rounded-lg border-2 transition hover:shadow-lg ${
                       formData.existingProduct === product.name
-                        ? 'border-emerald-600 bg-emerald-50'
-                        : 'border-gray-300 hover:border-emerald-400'
+                        ? 'border-[#1F5F3B] bg-[#1F5F3B]/10'
+                        : 'border-[#2F7FBE]/40 hover:border-[#1B72B9]'
                     }`}
                   >
-                    <img 
-                      src={product.image} 
+                    <img
+                      src={product.image}
                       alt={product.name}
                       className="w-full h-32 object-cover rounded-lg mb-3"
                     />
-                    <p className="font-semibold text-gray-800">{product.name}</p>
+                    <p className="font-semibold text-[#222222]">
+                      {product.name}
+                    </p>
                   </button>
                 ))}
-                
+
                 <button
-                  onClick={() => handleProductSelect('existingProduct', 'Other')}
+                  onClick={() =>
+                    handleProductSelect('existingProduct', 'Other')
+                  }
                   className={`p-4 rounded-lg border-2 transition hover:shadow-lg flex items-center justify-center ${
                     formData.existingProduct === 'Other'
-                      ? 'border-emerald-600 bg-emerald-50'
-                      : 'border-gray-300 hover:border-emerald-400'
+                      ? 'border-[#1F5F3B] bg-[#1F5F3B]/10'
+                      : 'border-[#2F7FBE]/40 hover:border-[#1B72B9]'
                   }`}
                 >
                   <div className="text-center">
-                    <div className="w-full h-32 flex items-center justify-center bg-gray-100 rounded-lg mb-3">
-                      <span className="text-4xl text-gray-400">+</span>
+                    <div className="w-full h-32 flex items-center justify-center bg-[#2F7FBE]/10 rounded-lg mb-3">
+                      <span className="text-4xl text-[#2F7FBE]">+</span>
                     </div>
-                    <p className="font-semibold text-gray-800">Other</p>
+                    <p className="font-semibold text-[#222222]">Other</p>
                   </div>
                 </button>
               </div>
-
-              {formData.existingProduct === 'Other' && (
-                <div className="mt-4 space-y-3">
-                  <input
-                    type="text"
-                    value={formData.existingProductOther}
-                    onChange={(e) => handleInputChange('existingProductOther', e.target.value)}
-                    placeholder="Please specify your existing product"
-                    className="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none"
-                  />
-                  <input
-                    type="number"
-                    value={formData.existingProductOtherWattage}
-                    onChange={(e) => handleInputChange('existingProductOtherWattage', e.target.value)}
-                    placeholder="Total wattage per fixture (W)"
-                    className="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none"
-                  />
-                </div>
-              )}
-
-
-            </div>
-          )}
-
-          {step === 2 && (
-            <div className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-800">Which LED product would you like to replace with?</h2>
-              <p className="text-gray-600">Select the energy-efficient LED alternative you're considering.</p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {replacementProducts.map((product) => (
-                  <button
-                    key={product.id}
-                    onClick={() => handleProductSelect('replacementProduct', product.id)}
-                    className={`p-4 rounded-lg border-2 transition hover:shadow-lg ${
-                      formData.replacementProduct === product.id
-                        ? 'border-emerald-600 bg-emerald-50'
-                        : 'border-gray-300 hover:border-emerald-400'
-                    }`}
-                  >
-                    <img 
-                      src={product.image} 
-                      alt={product.name}
-                      className="w-full h-40 object-cover rounded-lg mb-3"
-                    />
-                    <p className="font-semibold text-gray-800 text-lg">{product.name}</p>
-                  </button>
-                ))}
-              </div>
-
-            </div>
-          )}
-
-          {step === 3 && (
-            <div className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-800">Your Contact Information</h2>
-              <p className="text-gray-600">We'll send you a detailed energy calculation report shortly.</p>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  placeholder="John Doe"
-                  className="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder="john@company.com"
-                  className="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-emerald-500 focus:outline-none"
-                />
-              </div>
-
-
             </div>
           )}
 
           <div className="flex justify-between pt-6">
             {step > 1 && (
-              <button
-                onClick={handleBack}
-                className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
-              >
+              <button className="px-6 py-3 border-2 border-[#2F7FBE]/40 text-[#222222] rounded-lg hover:bg-[#2F7FBE]/10 transition font-medium">
                 Back
               </button>
             )}
-            
-            {step < 3 ? (
-              <button
-                onClick={handleNext}
-                disabled={!canProceed()}
-                className={`ml-auto px-6 py-3 rounded-lg font-medium flex items-center transition ${
-                  canProceed()
-                    ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                Next <ArrowRight className="ml-2 w-5 h-5" />
-              </button>
-            ) : (
-              <button
-                onClick={handleSubmit}
-                disabled={!canProceed() || submitting}
-                className={`ml-auto px-6 py-3 rounded-lg font-medium flex items-center transition ${
-                  canProceed() && !submitting
-                    ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                <Mail className="mr-2 w-5 h-5" /> {submitting ? 'Generating...' : 'Generate Report'}
-              </button>
-            )}
+
+            <button
+              className="ml-auto px-6 py-3 rounded-lg font-medium flex items-center transition bg-[#1B72B9] text-[#FFFFFF] hover:bg-[#1B72B9]/90"
+            >
+              Next <ArrowRight className="ml-2 w-5 h-5" />
+            </button>
           </div>
         </div>
       </div>
