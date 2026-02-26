@@ -280,29 +280,31 @@ export default function EnergyCalculator() {
     const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4">
+      <div className="min-h-screen bg-gradient-to-br from-[#2F7FBE]/10 to-white p-4">
         <div className="max-w-6xl mx-auto">
           {/* Action Buttons */}
           <div className="mb-6 flex gap-4 justify-end print:hidden">
             <button
               onClick={() => window.print()}
-              className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-semibold shadow-lg"
+              className="flex items-center gap-2 bg-[#1B72B9] text-white px-6 py-3 rounded-lg hover:bg-[#2F7FBE] transition font-semibold shadow-lg"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
               Download PDF
             </button>
+
             <button
               onClick={() => {
                 alert('Email will be sent to: ' + formData.email);
-                // Here you would call your API endpoint to send email
               }}
-              className="flex items-center gap-2 bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition font-semibold shadow-lg"
+              className="flex items-center gap-2 bg-[#1F5F3B] text-white px-6 py-3 rounded-lg hover:bg-[#1F5F3B]/90 transition font-semibold shadow-lg"
             >
               <Send className="w-5 h-5" />
               Send to Email
             </button>
+
             <button
               onClick={() => {
                 setShowReport(false);
@@ -317,7 +319,7 @@ export default function EnergyCalculator() {
                   email: ''
                 });
               }}
-              className="flex items-center gap-2 bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition font-semibold shadow-lg"
+              className="flex items-center gap-2 bg-[#222222] text-white px-6 py-3 rounded-lg hover:bg-black transition font-semibold shadow-lg"
             >
               New Calculation
             </button>
@@ -328,25 +330,34 @@ export default function EnergyCalculator() {
                 className="mx-auto mb-1 w-75 h-auto print:w-64 print:max-w-[240px]"
             /> 
           {/* Report Content */}
-          <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12">
+          <div className="bg-white rounded-2xl shadow-[0_10px_30px_rgba(27,114,185,0.15)] p-8 md:p-12">
             {/* Header */}
-            <div className="text-center mb-12 border-b-4 border-emerald-600 pb-8">
+            <div className="text-center mb-12 border-b-4 border-[#1B72B9] pb-8">
               <div className="flex items-center justify-center mb-4">
-                <Zap className="w-20 h-20 text-emerald-600" />
+                <Zap className="w-20 h-20 text-[#1B72B9]" />
               </div>
-              <h1 className="text-5xl font-bold text-gray-900 mb-4">Energy Savings Report</h1>
-              <p className="text-xl text-gray-600 mb-6">Fixture-by-Fixture Comparison & ROI Projection</p>
-              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-6 inline-block border-2 border-emerald-200">
+
+              <h1 className="text-5xl font-bold text-[#222222] mb-4">
+                Energy Savings Report
+              </h1>
+
+              <p className="text-xl text-[#222222]/70 mb-6">
+                Fixture-by-Fixture Comparison & ROI Projection
+              </p>
+
+              <div className="bg-gradient-to-r from-[#2F7FBE]/10 to-white rounded-lg p-6 inline-block border-2 border-[#2F7FBE]/30">
                 <div className="grid md:grid-cols-2 gap-6 text-left">
                   <div>
-                    <p className="text-sm text-gray-600 font-medium">Prepared For:</p>
-                    <p className="text-lg font-bold text-gray-900">{formData.name}</p>
-                    <p className="text-sm text-gray-700">{formData.email}</p>
+                    <p className="text-sm text-[#222222]/70 font-medium">Prepared For:</p>
+                    <p className="text-lg font-bold text-[#222222]">{formData.name}</p>
+                    <p className="text-sm text-[#222222]/80">{formData.email}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 font-medium">Report Date:</p>
-                    <p className="text-lg font-bold text-gray-900">{currentDate}</p>
-                    <p className="text-sm text-gray-700">Case ID: #{Date.now().toString().slice(-8)}</p>
+                    <p className="text-sm text-[#222222]/70 font-medium">Report Date:</p>
+                    <p className="text-lg font-bold text-[#222222]">{currentDate}</p>
+                    <p className="text-sm text-[#222222]/80">
+                      Case ID: #{Date.now().toString().slice(-8)}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -354,28 +365,35 @@ export default function EnergyCalculator() {
 
             {/* Executive Summary */}
             <div className="mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+              <h2 className="text-3xl font-bold text-[#222222] mb-6 flex items-center gap-3">
+                <div className="w-10 h-10 bg-[#1B72B9] rounded-lg flex items-center justify-center">
                   <span className="text-white text-xl">📊</span>
                 </div>
                 Executive Summary
               </h2>
+
               <div className="grid md:grid-cols-3 gap-6">
+
                 <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-6 border-2 border-red-200">
                   <p className="text-sm font-semibold text-red-800 mb-2">CURRENT CONSUMPTION</p>
                   <p className="text-4xl font-bold text-red-600">{savings1.existingPower}W</p>
-                  <p className="text-sm text-gray-700 mt-2">Per fixture</p>
+                  <p className="text-sm text-[#222222]/80 mt-2">Per fixture</p>
                 </div>
-                <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-6 border-2 border-emerald-200">
-                  <p className="text-sm font-semibold text-emerald-800 mb-2">PROPOSED LED</p>
-                  <p className="text-4xl font-bold text-emerald-600">{savings1.replacementPower}W</p>
-                  <p className="text-sm text-gray-700 mt-2">Per fixture</p>
+
+                <div className="bg-[#1F5F3B]/10 rounded-xl p-6 border-2 border-[#1F5F3B]/30">
+                  <p className="text-sm font-semibold text-[#1F5F3B] mb-2">PROPOSED LED</p>
+                  <p className="text-4xl font-bold text-[#1F5F3B]">{savings1.replacementPower}W</p>
+                  <p className="text-sm text-[#222222]/80 mt-2">Per fixture</p>
                 </div>
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200">
-                  <p className="text-sm font-semibold text-blue-800 mb-2">ENERGY SAVINGS</p>
-                  <p className="text-4xl font-bold text-blue-600">{savings1.savingsPerFixture}W</p>
-                  <p className="text-sm text-gray-700 mt-2">{savings1.percentReduction.toFixed(1)}% reduction</p>
+
+                <div className="bg-[#2F7FBE]/10 rounded-xl p-6 border-2 border-[#2F7FBE]/30">
+                  <p className="text-sm font-semibold text-[#1B72B9] mb-2">ENERGY SAVINGS</p>
+                  <p className="text-4xl font-bold text-[#1B72B9]">{savings1.savingsPerFixture}W</p>
+                  <p className="text-sm text-[#222222]/80 mt-2">
+                    {savings1.percentReduction.toFixed(1)}% reduction
+                  </p>
                 </div>
+
               </div>
             </div>
 
@@ -567,36 +585,34 @@ export default function EnergyCalculator() {
             </div>
 
             {/* Next Steps */}
-            <div className="mb-12 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl p-8 text-white">
+            <div className="mb-12 bg-gradient-to-r from-[#1B72B9] to-[#2F7FBE] rounded-xl p-8 text-white">
               <h2 className="text-3xl font-bold mb-6">📋 Recommended Next Steps</h2>
-              <div className="space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="bg-white text-emerald-600 rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">1</div>
-                  <p className="text-lg">Schedule a site assessment to verify fixture counts and current conditions</p>
+
+              {[1,2,3,4].map((n) => (
+                <div key={n} className="flex items-start gap-4 mb-4">
+                  <div className="bg-white text-[#1B72B9] rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                    {n}
+                  </div>
+                  <p className="text-lg">
+                    {[
+                      "Schedule a site assessment to verify fixture counts and current conditions",
+                      "Receive detailed product specifications and installation timeline",
+                      "Review financing options and available rebates or incentives",
+                      "Begin implementation with minimal disruption to your operations"
+                    ][n-1]}
+                  </p>
                 </div>
-                <div className="flex items-start gap-4">
-                  <div className="bg-white text-emerald-600 rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">2</div>
-                  <p className="text-lg">Receive detailed product specifications and installation timeline</p>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="bg-white text-emerald-600 rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">3</div>
-                  <p className="text-lg">Review financing options and available rebates or incentives</p>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="bg-white text-emerald-600 rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">4</div>
-                  <p className="text-lg">Begin implementation with minimal disruption to your operations</p>
-                </div>
-              </div>
+              ))}
             </div>
 
             {/* Footer */}
             <div className="border-t-2 border-gray-300 pt-8">
-              <div className="text-center text-gray-600">
+              <div className="text-center text-[#222222]/70">
                 <p className="text-lg font-semibold mb-2">Questions about this report?</p>
                 <p className="mb-4">Contact us to discuss your energy savings opportunity</p>
-                <p className="text-sm text-gray-500 italic">
-                  This report is provided for informational purposes. Actual savings may vary based on usage patterns, 
-                  electricity rates, and installation conditions. All calculations assume 12 hours/day operation at $0.12/kWh.
+                <p className="text-sm text-[#222222]/60 italic">
+                  This report is provided for informational purposes. Actual savings may vary based on usage patterns,
+                  electricity rates, and installation conditions.
                 </p>
               </div>
             </div>
