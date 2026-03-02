@@ -165,7 +165,7 @@ export default function EnergyCalculator() {
     // ========================================
     // 2. SEND EMAIL (Client-side with EmailJS)
     // ========================================
-    const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
+    const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID2;
     const EMAILJS_TEMPLATE_ID = 'template_1r9p7ke';
     const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
 
