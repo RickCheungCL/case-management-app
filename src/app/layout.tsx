@@ -4,6 +4,7 @@ import './globals.css';
 import { Toaster } from 'react-hot-toast';
 import { SessionProvider } from 'next-auth/react';
 import Script from 'next/script';
+import { WMSProvider } from "../context/WMSContext";
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -53,7 +54,8 @@ export default function RootLayout({
             style={{ display: "none", visibility: "hidden" }}
           />
         </noscript>
-        {children}
+
+        <WMSProvider>{children}</WMSProvider>
         <Toaster position="top-center" reverseOrder={false} />
       </body>
     </html>
