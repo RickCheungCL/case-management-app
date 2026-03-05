@@ -8,11 +8,12 @@ interface Props {
   products: any[]; // Add this to receive the DB products
   onClose: () => void;
   onMoveTrigger?: (fromId: string) => void;
+  onUpdate: () => Promise<void>;
 }
 
 
 
-export function BinDetailModal({ bin, products, onClose, onMoveTrigger }: Props) {
+export function BinDetailModal({ bin, products, onClose, onMoveTrigger, onUpdate }: Props) {
   const { assignProduct, clearBin, adjustQuantity, bins, moveBin } = useWMS();
   const [tab, setTab] = useState<'info' | 'assign' | 'move'>('info');
   const [selectedSku, setSelectedSku] = useState('');
@@ -20,14 +21,16 @@ export function BinDetailModal({ bin, products, onClose, onMoveTrigger }: Props)
   const [moveToId, setMoveToId] = useState('');
   const [moveMsg, setMoveMsg] = useState('');
   const [delta, setDelta] = useState(0);
-
-
+  const [localQty, setLocalQty] = useState(bin?.quantity || 0);
+  useEffect(() => {
+    if (bin) setLocalQty(bin.quantity);
+  }, [bin]);
   if (!bin) return null;
-
+  const currentProduct = products.find(p => p.sku === bin.sku);
+  const displayProductName = currentProduct ? currentProduct.name : '—';
   const isEmpty = bin.status === 'empty';
   const layerLabel = LAYER_LABELS[bin.layer];
-  const fillPct = bin.maxCapacity > 0 ? Math.round((bin.quantity / bin.maxCapacity) * 100) : 0;
-
+  const fillPct = bin.maxCapacity > 0 ? Math.round((localQty / bin.maxCapacity) * 100) : 0;
   const handleAssign = async () => {
     if (!selectedSku || assignQty <= 0) return;
 
@@ -43,14 +46,18 @@ export function BinDetailModal({ bin, products, onClose, onMoveTrigger }: Props)
       });
 
       if (response.ok) {
-        // Option A: If you use a state manager, trigger a re-fetch here
-        // Option B: For now, call the local context to keep UI in sync
+
         assignProduct(bin.id, selectedSku, assignQty); 
-        onClose();
+        
+        // Update local state so the 'Info' tab has data IMMEDIATELY
+        setLocalQty(assignQty); 
+        
+        await onUpdate(); // Refresh global data
+        setTab('info');   // Switch back
       }
     } catch (error) {
       console.error("Failed to save to database", error);
-      alert("Error saving to database.");
+
     }
   };
 
@@ -75,30 +82,35 @@ export function BinDetailModal({ bin, products, onClose, onMoveTrigger }: Props)
 };
 
   const handleAdjust = async (d: number) => {
-  const newQty = Math.max(0, bin.quantity + d);
-  const max = bin.maxCapacity || 2000
-  const finalQty = Math.min(newQty, max);
+    if (!bin) return;
+    const max = bin.maxCapacity || 2000;
+    const newQty = Math.max(0, Math.min(localQty + d, max)); // Use localQty here
+    
+    if (newQty === localQty) return;
 
-  try {
-    const response = await fetch('/api/bins/update', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        binId: bin.id,
-        sku: bin.sku,    // Keep the same product
-        quantity: finalQty,
-      }),
-    });
+    // 1. Update UI Instantly
+    setLocalQty(newQty); 
+    adjustQuantity(bin.id, newQty - localQty); 
 
-    if (response.ok) {
-      // We call adjustQuantity to update the local UI immediately
-      adjustQuantity(bin.id, d); 
+    try {
+      const response = await fetch('/api/bins/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          binId: bin.id,
+          sku: bin.sku,
+          quantity: newQty,
+        }),
+      });
+
+      if (response.ok) {
+        await onUpdate(); // Syncs the parent database state
+      }
+    } catch (error) {
+      console.error("Adjustment failed", error);
+      setLocalQty(bin.quantity); // Rollback on failure
     }
-  } catch (error) {
-    console.error("Adjustment failed", error);
-  }
-};
-
+  };
   const handleMove = async () => {
   if (!moveToId) return;
   
@@ -214,8 +226,8 @@ export function BinDetailModal({ bin, products, onClose, onMoveTrigger }: Props)
                 <>
                   <div className="bg-gray-50 rounded-xl p-4 space-y-2">
                     <Row label="SKU" value={<span className="font-mono text-sm" style={{ fontWeight: 600 }}>{bin.sku}</span>} />
-                    <Row label="Product" value={bin.productName || '—'} />
-                    <Row label="Quantity" value={<span style={{ fontWeight: 600 }}>{bin.quantity} {bin.unit}</span>} />
+                    <Row label="Product" value={displayProductName} />
+                    <Row label="Quantity" value={<span style={{ fontWeight: 600 }}>{localQty} {bin.unit}</span>} />
                     <Row label="Max Capacity" value={`${bin.maxCapacity} ${bin.unit}`} />
                     <Row label="Last Updated" value={new Date(bin.lastUpdated).toLocaleString()} />
                   </div>
@@ -248,7 +260,7 @@ export function BinDetailModal({ bin, products, onClose, onMoveTrigger }: Props)
                         onClick={() => handleAdjust(-1)}
                         className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-sm hover:bg-red-100 transition-colors"
                       >-1</button>
-                      <span className="flex-1 text-center text-lg" style={{ fontWeight: 700 }}>{bin.quantity}</span>
+                      <span className="flex-1 text-center text-lg" style={{ fontWeight: 700 }}>{localQty}</span>
                       <button
                         onClick={() => handleAdjust(1)}
                         className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-sm hover:bg-blue-100 transition-colors"
@@ -335,7 +347,7 @@ export function BinDetailModal({ bin, products, onClose, onMoveTrigger }: Props)
                   <button
                     type="button"
                     onClick={() => {
-                      const max = bin.maxCapacity > 0 ? bin.maxCapacity : 100;
+                      const max = bin.maxCapacity > 0 ? bin.maxCapacity : 2000
                       setAssignQty(q => Math.min(max, q + 1));
                     }}
                     className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-gray-200 transition-colors"

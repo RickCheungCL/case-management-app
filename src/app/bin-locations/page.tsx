@@ -47,32 +47,39 @@ export default function BinLocationPage() {
       FETCH LOGIC
   ======================= */
   const fetchData = useCallback(async () => {
-  try {
-    setLoading(true);
-    const [binsRes, productsRes] = await Promise.all([
-      fetch('/api/bins'),
-      fetch('/api/bins/products')
-    ]);
+    try {
+      setLoading(true);
+      const [binsRes, productsRes] = await Promise.all([
+        fetch('/api/bins'),
+        fetch('/api/bins/products')
+      ]);
 
-    // Better error logging to see WHICH one is failing
-    if (!binsRes.ok) console.error("Bins API failed:", binsRes.status);
-    if (!productsRes.ok) console.error("Products API failed:", productsRes.status);
+      if (!binsRes.ok || !productsRes.ok) {
+         throw new Error(`Sync failed`);
+      }
 
-    if (!binsRes.ok || !productsRes.ok) {
-       throw new Error(`Sync failed: Bins(${binsRes.status}) Products(${productsRes.status})`);
+      const binsData = await binsRes.json();
+      const productsData = await productsRes.json();
+
+      setDbBins(binsData);
+      setDbProducts(productsData);
+
+      // --- THE FIX IS HERE ---
+      // If a user has a modal open (selectedBin is not null),
+      // find that specific bin in the NEW data and update the modal state.
+      setSelectedBin((currentOpenBin) => {
+        if (!currentOpenBin) return null;
+        const updatedBin = binsData.find((b: BinLocation) => b.id === currentOpenBin.id);
+        return updatedBin || currentOpenBin;
+      });
+      // ------------------------
+
+    } catch (err) {
+      console.error("Database sync error:", err);
+    } finally {
+      setLoading(false);
     }
-
-    const binsData = await binsRes.json();
-    const productsData = await productsRes.json();
-
-    setDbBins(binsData);
-    setDbProducts(productsData);
-  } catch (err) {
-    console.error("Database sync error:", err);
-  } finally {
-    setLoading(false);
-  }
-}, []);
+  }, []); // No dependencies needed here as it uses setter functions
 
   useEffect(() => {
   fetchData();
@@ -102,12 +109,18 @@ export default function BinLocationPage() {
 
   const matchesBin = (bin: BinLocation) => {
     if (filterStatus !== "all" && bin.status !== filterStatus) return false;
+    
     if (search.trim()) {
       const q = search.toLowerCase();
+      
+      // Look up the actual product name from your products list
+      const product = dbProducts.find(p => p.sku === bin.sku);
+      const productName = product?.name?.toLowerCase() || "";
+
       return (
         bin.id.toLowerCase().includes(q) ||
         bin.sku?.toLowerCase().includes(q) ||
-        bin.productName?.toLowerCase().includes(q)
+        productName.includes(q) // Now searching the actual name from the DB
       );
     }
     return true;
@@ -318,6 +331,7 @@ export default function BinLocationPage() {
             setSelectedBin(null);
             fetchData(); // Refresh everything when closed
             }}
+            onUpdate={fetchData}
         />
         )}
     </div>
