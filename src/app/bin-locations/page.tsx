@@ -225,102 +225,108 @@ export default function BinLocationPage() {
 
       {/* ===== 2. GRID LAYOUT ===== */}
       <div className="space-y-6">
-        {(filterRow === "all" ? ROWS : [filterRow]).map((rowName) => {
-          const isCollapsed = collapsedRows.has(rowName);
-          const rowBins = activeBins.filter(b => b.row === rowName);
-          const occupiedCount = rowBins.filter(b => b.status !== "empty").length;
+  {(filterRow === "all" ? ROWS : [filterRow]).map((rowName) => {
+    const isCollapsed = collapsedRows.has(rowName);
+    const rowBins = activeBins.filter(b => b.row === rowName);
+    const occupiedCount = rowBins.filter(b => b.status !== "empty").length;
 
-          return (
-            <div key={rowName} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-              <div 
-                className={`flex items-center gap-4 px-6 py-4 cursor-pointer text-white transition-colors ${ROW_THEME[rowName]}`}
-                onClick={() => toggleRow(rowName)}
-              >
-                <div className="w-10 h-10 flex items-center justify-center bg-white/20 rounded-lg font-bold text-xl">
-                  {rowName}
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg leading-tight">Row {rowName}</h3>
-                  <p className="text-white/80 text-xs">
-                    {ROW_LAYERS[rowName].length} layers · 25 positions · {occupiedCount}/{rowBins.length} occupied
-                  </p>
-                </div>
-                <div className="ml-auto">
-                  {isCollapsed ? <ChevronDown /> : <ChevronUp />}
+    return (
+      <div key={rowName} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        {/* Header: Responsive padding and font sizes */}
+        <div 
+          className={`flex items-center gap-3 md:gap-4 px-4 md:px-6 py-3 md:py-4 cursor-pointer text-white transition-colors ${ROW_THEME[rowName]}`}
+          onClick={() => toggleRow(rowName)}
+        >
+          <div className="w-8 h-8 md:w-10 md:h-10 flex-shrink-0 flex items-center justify-center bg-white/20 rounded-lg font-bold text-lg md:text-xl">
+            {rowName}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-base md:text-lg leading-tight truncate">Row {rowName}</h3>
+            <p className="text-white/80 text-[10px] md:text-xs">
+               {occupiedCount}/{rowBins.length} occupied
+            </p>
+          </div>
+          <div className="flex-shrink-0">
+            {isCollapsed ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
+          </div>
+        </div>
+
+        {!isCollapsed && (
+          /* Horizontal Scroll Container: 
+             - 'overflow-x-auto' allows scrolling on Laptop/Phone.
+             - 'p-4 md:p-8' adjusts spacing for screen size.
+          */
+          <div className="p-4 md:p-8 overflow-x-auto bg-slate-50/50">
+            
+            {/* The 'min-w-max' ensures the 25 bins stay in a line and don't squish */}
+            <div className="inline-block min-w-max pb-2"> 
+              
+              {/* 1. HEADER ROW (Numbers) */}
+              <div className="flex mb-3">
+                {/* Spacer matches the width of the GND/L1 labels */}
+                <div className="w-10 md:w-12 mr-3 md:mr-4 flex-shrink-0" /> 
+                <div className="flex gap-1 md:gap-1.5">
+                  {Array.from({ length: 25 }, (_, i) => (
+                    <div key={i} className="w-12 md:w-16 text-center text-[10px] md:text-[11px] font-bold text-slate-400 flex-shrink-0">
+                      {String(i + 1).padStart(2, "0")}
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {!isCollapsed && (
-                <div className="p-8 overflow-x-auto">
-                    {/* Use a fixed-width container to prevent shrinking */}
-                    <div className="min-w-[1200px]"> 
+              {/* 2. LAYERS (Bins) */}
+              <div className="space-y-1 md:space-y-1.5">
+                {[...ROW_LAYERS[rowName]].reverse().map((layer) => (
+                  <div key={layer} className="flex items-center">
                     
-                    {/* 1. HEADER ROW (Numbers) */}
-                    <div className="flex mb-3">
-                        {/* Empty spacer to match the "L1/GND" label width */}
-                        <div className="w-12 mr-4" /> 
+                    {/* Layer Label */}
+                    <div className="w-10 md:w-12 mr-3 md:mr-4 text-right text-[10px] md:text-xs font-bold text-slate-500 uppercase flex-shrink-0">
+                      {layer === 0 ? "GND" : `L${layer}`}
+                    </div>
+
+                    {/* The Row of Bins */}
+                    <div className="flex gap-1 md:gap-1.5">
+                      {Array.from({ length: 25 }, (_, i) => {
+                        const pos = String(i + 1).padStart(2, "0");
+                        const id = `${rowName}-${layer}-${pos}`;
+                        const bin = binsMap[id];
                         
-                        {/* Grid for Numbers */}
-                        <div className="grid grid-cols-25 gap-1.5 flex-1">
-                        {Array.from({ length: 25 }, (_, i) => (
-                            <div key={i} className="w-10 text-center text-[11px] font-bold text-slate-400">
-                            {String(i + 1).padStart(2, "0")}
-                            </div>
-                        ))}
-                        </div>
+                        if (!bin) return <div key={id} className="w-12 md:w-16 h-10 md:h-12 flex-shrink-0 opacity-20 bg-gray-200 rounded-lg" />;
+
+                        const isMatch = matchesBin(bin);
+                        const isHighlighted = highlightSku && bin.sku === highlightSku;
+                        const isSearching = search !== "" || filterStatus !== "all";
+
+                        return (
+                          <button
+                            key={id}
+                            onClick={() => setSelectedBin(bin)}
+                            className={`
+                              relative w-12 md:w-16 h-10 md:h-12 rounded-lg border-2 transition-all flex-shrink-0
+                              flex items-center justify-center text-[9px] md:text-[10px] font-bold
+                              ${STATUS_BG[bin.status]}
+                              ${isSearching && !isMatch ? "opacity-10 grayscale scale-95" : "opacity-100"}
+                              ${isHighlighted ? "ring-4 ring-yellow-400 border-yellow-500 z-10 scale-110 shadow-lg" : ""}
+                              hover:border-gray-400 active:scale-95
+                            `}
+                          >
+                            <span className="truncate px-0.5">
+                              {bin.sku?.split('-').pop() || ""}
+                            </span>
+                          </button>
+                        );
+                      })}
                     </div>
-
-                    {/* 2. LAYERS (Bins) */}
-                    <div className="space-y-1.5">
-                        {[...ROW_LAYERS[rowName]].reverse().map((layer) => (
-                        <div key={layer} className="flex items-center">
-                            
-                            {/* Layer Label (matches the spacer above) */}
-                            <div className="w-12 mr-4 text-right text-xs font-bold text-slate-500 uppercase">
-                            {layer === 0 ? "GND" : `L${layer}`}
-                            </div>
-
-                            {/* Grid for Bins - must match the numbers grid gap and count */}
-                            <div className="grid grid-cols-25 gap-1.5 flex-1">
-                            {Array.from({ length: 25 }, (_, i) => {
-                                const pos = String(i + 1).padStart(2, "0");
-                                const id = `${rowName}-${layer}-${pos}`;
-                                const bin = binsMap[id];
-                                
-                                if (!bin) return <div key={id} className="w-10 h-10" />;
-
-                                const isMatch = matchesBin(bin);
-                                const isHighlighted = highlightSku && bin.sku === highlightSku;
-                                const isSearching = search !== "" || filterStatus !== "all";
-
-                                return (
-                                <button
-                                    key={id}
-                                    onClick={() => setSelectedBin(bin)}
-                                    className={`
-                                    relative w-16 h-10 rounded-lg border-2 transition-all duration-200 text-[10px] font-bold
-                                    flex items-center justify-center
-                                    ${STATUS_BG[bin.status]}
-                                    ${isSearching && !isMatch ? "opacity-10 grayscale scale-90" : "opacity-100"}
-                                    ${isHighlighted ? "ring-4 ring-yellow-400 border-yellow-500 z-10 scale-110 shadow-lg" : ""}
-                                    hover:border-gray-400 hover:scale-105
-                                    `}
-                                >
-                                    {bin.sku?.split('-').pop() || ""}
-                                </button>
-                                );
-                            })}
-                            </div>
-                        </div>
-                        ))}
-                    </div>
-                    </div>
-                </div>
-                )}
+                  </div>
+                ))}
+              </div>
             </div>
-          );
-        })}
+          </div>
+        )}
       </div>
+    );
+  })}
+</div>
 
       {/* ===== 3. MODAL ===== */}
       {selectedBin && (
