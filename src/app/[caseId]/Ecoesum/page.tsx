@@ -322,7 +322,7 @@ export default function EnergySummaryPage() {
         <div className="summary-section">
         <div className="text-center mb-12">
            <img
-                src="/logo2png"
+                src="/logo2.png"
                 alt="Company Logo"
                 className="mx-auto mb-1 w-75 h-auto print:w-64 print:max-w-[240px]"
             /> 
