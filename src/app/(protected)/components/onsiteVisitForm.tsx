@@ -298,7 +298,7 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
         `/api/onsitevisit/form/init?caseId=${caseId}`,
         (data) => ({
           ...data,
-          rooms: [...(data?.rooms || []), {
+          rooms: [newRoom, ...(data?.rooms || []), {
             id: newRoom.id,
             location: newRoom.location,
             locationTagId: newRoom.locationTagId,
@@ -890,7 +890,7 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
                               }, {} as Record<string, typeof existingProducts>)
                             )
                               .sort(([a], [b]) => {
-                                const priorityOrder = ['Highbay', 'Troffer', 'Panel'];
+                                const priorityOrder = ['Other','T8-fluorescent', 'T12-fluorescent', 'T5-fluorescent'];
                                 const aIsPriority = priorityOrder.includes(a);
                                 const bIsPriority = priorityOrder.includes(b);
                                 if (aIsPriority && bIsPriority) return priorityOrder.indexOf(a) - priorityOrder.indexOf(b);
