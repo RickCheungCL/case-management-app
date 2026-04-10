@@ -298,7 +298,7 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
         `/api/onsitevisit/form/init?caseId=${caseId}`,
         (data) => ({
           ...data,
-          rooms: [newRoom, ...(data?.rooms || []), {
+          rooms: [...(data?.rooms || []), {
             id: newRoom.id,
             location: newRoom.location,
             locationTagId: newRoom.locationTagId,
