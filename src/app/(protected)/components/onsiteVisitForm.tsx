@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect,useCallback } from 'react';
+import { useState, useEffect,useCallback,useMemo } from 'react';
 import useSWR,{ mutate } from 'swr';
 import axios from 'axios';
 
@@ -103,7 +103,16 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
   );
 
   // Process rooms data from SWR
-  const rooms: RoomData[] = onSiteVisitData?.rooms?.map((room: any) => ({
+  const rooms: RoomData[] = useMemo(() => {
+  if (!onSiteVisitData?.rooms) return [];
+
+  // 2. Sort the raw data by a STABLE field (id or createdAt) 
+  // before mapping it into your interface
+  const stableRooms = [...onSiteVisitData.rooms].sort((a, b) => 
+    a.id.localeCompare(b.id)
+  );
+
+  return stableRooms.map((room: any) => ({
     id: room.id,
     location: room.location,
     locationTagId: room.locationTagId,
@@ -134,7 +143,9 @@ export default function OnSiteVisitForm({ caseId }: { caseId: string }) {
       category: light.product?.category,
       bypassBallast: light.bypassBallast ?? false,
     })),
-  })) || [];
+  }));
+  // 3. Add dependencies: re-calculate only if raw data or tags change
+}, [onSiteVisitData, photoTags]);
 
   const selectedRoom = rooms.find((r) => r.id === selectedRoomId);
 
