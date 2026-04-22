@@ -161,7 +161,7 @@ package.json       # Dependencies and scripts
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/case-management-app.git
+git clone https://github.com/RickCheungCL/case-management-app.git
 cd case-management-app
 ```
 
